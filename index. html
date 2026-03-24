@@ -2,25 +2,55 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تطبيق نورك - Nourk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nourk App</title>
+    
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // تفعيل الربط مع الشبكة (التيستنت)
+        Pi.init({ version: "2.0", sandbox: true });
+    </script>
+
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #f4f4f4; padding-top: 20px; }
-        .card { background: white; padding: 20px; margin: 20px auto; border-radius: 10px; width: 80%; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #15803d; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 50px; }
+        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        button { background-color: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; }
+        button:hover { background-color: #512da8; }
+        h1 { color: #673ab7; }
     </style>
 </head>
 <body>
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="logo.png" alt="Logo" style="max-width: 180px; height: auto;">
+
+    <div class="container">
+        <h1>مرحباً بك في تطبيق Nourk 💡</h1>
+        <p>اضغط تحت عشان تجرب عملية دفع وهمية بفلوس التيستنت</p>
+        
+        <button onclick="transferPi()">تجربة دفع (Test Pi)</button>
     </div>
-    <h1>نورك - Nourk</h1>
-    <div class="card">
-        <h2>أذكار الصباح</h2>
-        <p>أصبحنا وأصبح الملك لله والحمد لله.</p>
-    </div>
-    <div class="card">
-        <h2>آية اليوم</h2>
-        <p>أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ</p>
-    </div>
+
+    <script>
+        async function transferPi() {
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 0.1, // مبلغ التجربة
+                    memo: "تجربة دفع في تطبيق نورك", // وصف العملية
+                    metadata: { orderId: 123 }
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        console.log("العملية جاهزة للموافقة: ", paymentId);
+                        // هنا الخطوة اللي بتحتاج سيرفر بس حالياً بنجرب الواجهة
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        console.log("العملية تمت بنجاح! رقم المعاملة: ", txid);
+                    },
+                    onCancel: (paymentId) => { console.log("تم إلغاء العملية"); },
+                    onError: (error, payment) => { console.error("خطأ في الدفع: ", error); }
+                });
+            } catch (err) {
+                alert("لازم تفتح التطبيق من جوه Pi Browser عشان الدفع يشتغل!");
+            }
+        }
+    </script>
+
 </body>
 </html>

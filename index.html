@@ -3,37 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - Nourk App</title>
-    
+    <title>Nourk - نورك</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #f4f1ea;
+            color: #3e2723;
+            text-align: center;
             margin: 0;
+            padding: 20px;
         }
         .container {
+            max-width: 500px;
+            margin: auto;
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .logo {
-            font-size: 50px;
-            margin-bottom: 10px;
+        img.logo {
+            width: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
         }
-        h1 {
-            color: #673ab7;
-            margin-bottom: 15px;
+        h1 { color: #5d4037; }
+        .btn {
+            background-color: #6d4c41;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
         }
+        #status { margin-top: 15px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://i.ibb.co/XfXkY0k/Nourk-Logo.jpg" alt="Nourk Logo" class="logo">
+    
+    <h1>مرحباً بك في تطبيق نورك</h1>
+    <p>رحلتك نحو النور والمعرفة تبدأ من هنا.</p>
+
+    <div id="status">جاري الاتصال بشبكة باي...</div>
+    
+    <button class="btn" onclick="login()">تفعيل الربط النهائي</button>
+</div>
+
+<script>
+    const Pi = window.Pi;
+    Pi.init({ version: "2.0", sandbox: true }); // تفعيل الساند بوكس عشان الخطوة 6
+
+    async function login() {
+        try {
+            const scopes = ['username', 'payments'];
+            function onIncompletePaymentFound(payment) { /* معالجة المدفوعات لاحقاً */ }
+            
+            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            document.getElementById('status').innerText = "تم الربط بنجاح يا ياسمين! ✅";
+            alert("مبروك! التطبيق اتصل بحسابك، الخطوة 6 هتخضرّ دلوقتي.");
+        } catch (err) {
+            console.error(err);
+            document.getElementById('status').innerText = "حدث خطأ في الربط، تأكدي من فتح التطبيق داخل Pi Browser.";
+        }
+    }
+</script>
+
+</body>
+</html>
         p {
             color: #555;
             font-size: 18px;

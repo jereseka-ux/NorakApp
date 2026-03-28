@@ -3,7 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nourk Auth</title>
+    <title>Nourk <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+</head>
+<body style="text-align:center; padding-top:50px;">
+    <h1 style="color:#673ab7;">تطبيق نورك</h1>
+    <br><br>
+    <button onclick="connect()" style="background:#673ab7; color:white; padding:20px 40px; font-size:25px; border-radius:10px; border:none; width:90%;">
+        اضغطي هنا للربط
+    </button>
+
+    <script>
+        window.onload = function() {
+            if (window.Pi) { window.Pi.init({ version: "2.0", sandbox: true }); }
+        };
+
+        async function connect() {
+            if (window.Pi) {
+                try {
+                    const auth = await window.Pi.authenticate(['username'], function(p){});
+                    alert("تم الربط بنجاح يا ياسمين: " + auth.user.username);
+                } catch (e) {
+                    alert("فتحي من الساند بوكس");
+                }
+            } else {
+                alert("افتحي من باي براوزر");
+            }
+        }
+    </script>
+</body>
+</html>
+
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { margin: 0; padding: 20px; font-family: sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }

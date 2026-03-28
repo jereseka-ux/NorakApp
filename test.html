@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nourk Auth</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; font-family: sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .box { text-align: center; width: 100%; }
+        h1 { color: #673ab7; margin-bottom: 50px; }
+        .main-btn { background: #673ab7; color: white; border: none; padding: 30px; font-size: 24px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; display: block; -webkit-appearance: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>تطبيق نورك (الربط)</h1>
+        <button class="main-btn" onclick="connectPi()">اضغطي هنا للربط</button>
+    </div>
+    <script>
+        window.onload = function() {
+            if (window.Pi) { window.Pi.init({ version: "2.0", sandbox: true }); }
+        };
+        async function connectPi() {
+            if (window.Pi) {
+                try {
+                    const auth = await window.Pi.authenticate(['username', 'payments'], function(p){});
+                    alert("تم الربط بنجاح: " + auth.user.username);
+                } catch (e) {
+                    alert("افتحي من الساند بوكس");
+                }
+            } else {
+                alert("افتحي من Pi Browser");
+            }
+        }
+    </script>
+</body>
+</html>

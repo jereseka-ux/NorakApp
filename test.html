@@ -6,27 +6,84 @@
     <title>تطبيق نورك</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f4f4f4; }
-        .box { background: white; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .main-btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; margin-top: 20px; }
+        body { 
+            font-family: sans-serif; 
+            background-color: #f4f4f4; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .box { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            text-align: center; 
+            width: 90%; 
+            max-width: 400px;
+        }
+        .logo { 
+            width: 100px; 
+            height: auto; 
+            margin-bottom: 20px; 
+        }
+        h1 { color: #333; font-size: 22px; }
+        .main-btn { 
+            background-color: #673ab7; 
+            color: white; 
+            border: none; 
+            padding: 12px 25px; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            width: 100%;
+            transition: 0.3s;
+        }
+        .main-btn:hover { background-color: #512da8; }
+        #status { margin-top: 15px; color: #666; font-size: 14px; }
     </style>
 </head>
 <body>
+
     <div class="box">
+        <img src="logo.png" alt="Logo" class="logo">
         <h1>تطبيق نورك (الربط)</h1>
-        <button class="main-btn" onclick="connectPi()">اضغطي هنا للربط</button>
-        <div id="status" style="margin-top:15px; color: #555;"></div>
+        
+        <button class="main-btn" onclick="connectPi()">اضغطي للربط بالمحفظة</button>
+        
+        <div id="status">جاهز للاتصال...</div>
     </div>
+
     <script>
-        window.onload = function() { if (window.Pi) { window.Pi.init({ version: "2.0", sandbox: true }); } };
+        // تهيئة الـ SDK
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: true }); 
+
         async function connectPi() {
-            if (window.Pi) {
-                try {
-                    const auth = await window.Pi.authenticate(['payments', 'username'], function(p){});
-                    alert("تم الربط بنجاح يا " + auth.user.username);
-                } catch (e) { alert("خطأ: " + e.message); }
-            } else { alert("افتحي من Pi Browser"); }
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "جاري الاتصال...";
+            
+            try {
+                const scopes = ['username', 'payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                statusDiv.style.color = "green";
+                statusDiv.innerText = "تم الربط بنجاح يا " + auth.user.username;
+                alert("تم الربط بنجاح يا " + auth.user.username);
+                
+            } catch (e) {
+                statusDiv.style.color = "red";
+                statusDiv.innerText = "حصل خطأ في الربط";
+                alert("خطأ: افتحي التطبيق من Pi Browser");
+            }
         }
+
+        function onIncompletePaymentFound(payment) {
+            console.log("هناك مدفوعات غير مكتملة", payment);
+        };
     </script>
+
 </body>
 </html>

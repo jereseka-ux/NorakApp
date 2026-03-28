@@ -6,14 +6,14 @@
     <title>تطبيق نورك - Nourk</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; color: #333; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 15px; color: #333; }
         .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        img { width: 100%; max-width: 250px; border-radius: 10px; margin-bottom: 15px; }
-        h1 { color: #673ab7; }
-        p { font-size: 18px; line-height: 1.6; }
-        .btn { background-color: #673ab7; color: white; border: none; padding: 15px 25px; font-size: 18px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background-color: #512da8; }
-        #status { margin-top: 15px; color: green; font-weight: bold; }
+        img { width: 100%; max-width: 250px; border-radius: 10px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
+        h1 { color: #673ab7; font-size: 24px; }
+        p { font-size: 18px; line-height: 1.6; color: #555; }
+        .btn { background-color: #673ab7; color: white; border: none; padding: 15px 20px; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+        .btn-test { background-color: #444; margin-top: 15px; }
+        #status { margin-top: 20px; color: #2e7d32; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -24,39 +24,39 @@
     <h1>مرحباً بك في Nourk</h1>
     <p>رحلتك نحو النور والمعرفة تبدأ من هنا.</p>
 
-    <img src="IMG-20260327-WA0002.jpg" alt="Nourk App" style="max-width: 150px;">
+    <img src="IMG-20260327-WA0002.jpg" alt="Nourk Banner" style="max-width: 180px;">
 
     <div id="status">جاري الاتصال بشبكة باي...</div>
 
     <button class="btn" id="finalConnectBtn">تفعيل الربط النهائي</button>
     
-    <button class="btn" style="background-color: #444;" onclick="testPayment()">تجربة دفع (Test Pi)</button>
+    <button class="btn btn-test" onclick="testPayment()">تجربة دفع (Test Pi)</button>
 </div>
 
 <script>
-    // تهيئة الـ SDK الخاص بباي
+    // تهيئة الـ SDK مع إيقاف الـ Sandbox لضمان الاستجابة في Pi Browser
     const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true }); // sandbox للمراجعة والـ Test
+    Pi.init({ version: "2.0", sandbox: false });
 
-    // فانكشن الربط النهائي
+    // وظيفة الربط النهائي
     document.getElementById('finalConnectBtn').onclick = function() {
-        try {
-            Pi.authenticate(['payments', 'username', 'wallet_address']).then(function(auth) {
-                alert("تم إرسال إشارة الربط لشبكة باي بنجاح!\nمرحباً: " + auth.user.username);
-                document.getElementById('status').innerText = "تم الربط بنجاح مع: " + auth.user.username;
-            }).catch(function(error) {
-                alert("حدث خطأ أثناء الربط، تأكد من فتح التطبيق داخل Pi Browser");
+        Pi.authenticate(['username', 'payments', 'wallet_address'], onIncompletePaymentFound)
+          .then(function(auth) {
+                alert("تم الربط بنجاح!\nأهلاً بك يا: " + auth.user.username);
+                document.getElementById('status').innerText = "متصل الآن باسم: " + auth.user.username;
+          })
+          .catch(function(error) {
+                alert("تنبيه: الربط يحتاج لموافقة في Pi Developer Portal أو حاول مرة أخرى من داخل Pi Browser.");
                 console.error(error);
-            });
-        } catch (e) {
-            alert("خطأ تقني: " + e.message);
-        }
+          });
     };
 
-    // فانكشن تجربة الدفع
+    function onIncompletePaymentFound(payment) {
+        console.log("Incomplete payment found", payment);
+    };
+
     function testPayment() {
         alert("بدء تجربة دفع بقيمة 0.1 Pi...");
-        // هنا يتم إضافة كود Pi.createPayment لاحقاً عند تفعيل المطورين
     }
 </script>
 

@@ -6,13 +6,14 @@
     <title>تطبيق نورك - Nourk</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 400px; }
         .logo { font-size: 50px; margin-bottom: 10px; }
-        h1 { color: #673ab7; margin-bottom: 10px; }
-        p { color: #555; line-height: 1.6; margin-bottom: 25px; }
-        .btn { background-color: #673ab7; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; }
-        .btn:active { transform: scale(0.98); }
+        h1 { color: #673ab7; margin-bottom: 10px; font-size: 24px; }
+        p { color: #555; line-height: 1.6; margin-bottom: 20px; font-size: 16px; }
+        .btn { background-color: #673ab7; color: white; border: none; padding: 15px; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px; }
+        .btn-test { background-color: #4CAF50; font-size: 14px; padding: 10px; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -20,20 +21,44 @@
     <div class="container">
         <div class="logo">💡</div>
         <h1>تطبيق نورك (Nourk)</h1>
-        <p>اضغطي على الزرار تحت لتفعيل الربط النهائي مع شبكة باي.</p>
-        <button class="btn" onclick="transferPi()">تفعيل الربط النهائي</button>
+        <p>اضغطي على الزرار البنفسجي لتفعيل الربط الرسمي مع حسابك في باي.</p>
+        
+        <button class="btn" onclick="startPiAuth()">تفعيل الربط النهائي</button>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <button class="btn btn-test" onclick="alert('إشارة فحص 1: اللمس شغال')">فحص استجابة 1</button>
+        <button class="btn btn-test" onclick="alert('إشارة فحص 2: المتصفح مستجيب')">فحص استجابة 2</button>
     </div>
 
     <script>
-        // تهيئة الـ SDK أول ما الصفحة تحمل
-        window.onload = function () {
+        // تشغيل مكتبة باي فور تحميل الصفحة
+        window.onload = function() {
             if (window.Pi) {
                 window.Pi.init({ version: "2.0", sandbox: true });
-                console.log("Pi SDK Initialized");
             }
         };
 
-        // وظيفة الزرار
+        // الدالة الجديدة اللي بتطلب "إذن دخول" حقيقي من باي
+        async function startPiAuth() {
+            if (typeof window.Pi !== 'undefined') {
+                try {
+                    const scopes = ['username', 'payments'];
+                    function onIncompletePaymentFound(payment) { console.log("Payment found"); }
+
+                    // دي اللحظة اللي السيستم بيكلم فيها محفظتك
+                    const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+                    alert("تم الربط بنجاح يا ياسمين! الحساب: " + auth.user.username);
+                } catch (err) {
+                    alert("باي بروازر محتاج تفتحي اللينك من الـ Developer Portal (Sandbox)");
+                }
+            } else {
+                alert("يا ياسمين افتحي اللينك من جوه Pi Browser مش المتصفح العادي!");
+            }
+        }
+    </script>
+</body>
+</html>
         async function transferPi() {
             if (window.Pi) {
                 try {

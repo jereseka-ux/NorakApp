@@ -2,38 +2,41 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق نورك - Nourk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nourk App</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root {
-            --pi-purple: #673ab7;
-            --pi-gold: #ffc107;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 400px;
-        }
-        .logo {
-            width: 120px;
-            height: 120px;
-            background-color: var(--pi-purple);
-            border-radius: 50%;
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; width: 85%; max-width: 380px; }
+        .pi-btn { background: #673ab7; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-size: 18px; cursor: pointer; font-weight: bold; }
+        #status-msg { margin-top: 15px; font-weight: bold; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="https://cdn-icons-png.flaticon.com/512/702/702797.png" style="width:80px; margin-bottom:20px;">
+        <h1>تطبيق نورك</h1>
+        <button id="mainBtn" class="pi-btn">تفعيل الربط النهائي</button>
+        <div id="status-msg">جاهز للربط..</div>
+    </div>
+    <script>
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: true });
+        document.getElementById('mainBtn').onclick = () => {
+            document.getElementById('status-msg').innerText = "جاري فتح المحفظة...";
+            Pi.createPayment({
+                amount: 0.1,
+                memo: "تفعيل تطبيق نورك",
+                metadata: { orderId: "Nourk-1" }
+            }, {
+                onReadyForServerApproval: (id) => alert("طلبك جاهز في المحفظة!"),
+                onCancel: (id) => alert("تم الإلغاء"),
+                onError: (error) => alert("افتحي من Pi Browser")
+            });
+        };
+    </script>
+</body>
+</html>
             margin-bottom: 20px;
             display: inline-flex;
             align-items: center;

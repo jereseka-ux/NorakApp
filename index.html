@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق نورk - Nourk App</title>
+    <title>تطبيق نورك - Nourk</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root {
-            --pi-purple: #673AB7;
-            --pi-gold: #FFC107;
+            --pi-purple: #673ab7;
+            --pi-gold: #ffc107;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,22 +18,103 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            color: #333;
+            min-height: 100vh;
+            text-align: center;
         }
         .container {
-            text-align: center;
-            padding: 20px;
             background: white;
+            padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 90%;
             max-width: 400px;
         }
         .logo {
-            width: 100px;
-            height: 100px;
-            background: var(--pi-purple);
+            width: 120px;
+            height: 120px;
+            background-color: var(--pi-purple);
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid var(--pi-gold);
+        }
+        .logo img {
+            width: 70%;
+            height: auto;
+        }
+        h1 { color: var(--pi-purple); margin-bottom: 10px; }
+        p { color: #666; font-size: 16px; line-height: 1.5; }
+        .btn {
+            background-color: var(--pi-purple);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .btn:active { transform: scale(0.95); opacity: 0.9; }
+        #status { margin-top: 15px; font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/702/702797.png" alt="Nourk Logo">
+    </div>
+    
+    <h1>مرحباً بك في تطبيق نورك</h1>
+    <p>رحلتك نحو النور والمعرفة تبدأ من هنا.</p>
+    <p id="status" style="color: #666;">جاري فحص الاتصال بشبكة باي...</p>
+
+    <button class="btn" id="payBtn">تفعيل الربط النهائي</button>
+</div>
+
+<script>
+    // تفعيل مكتبة باي فور تحميل الصفحة
+    const Pi = window.Pi;
+    Pi.init({ version: "2.0", sandbox: true });
+
+    document.getElementById('payBtn').onclick = function() {
+        document.getElementById('status').innerText = "جاري تحضير المحفظة...";
+        document.getElementById('status').style.color = "orange";
+
+        // كود الربط الفعلي بالمحفظة
+        Pi.createPayment({
+            amount: 0.1,
+            memo: "تفعيل تطبيق نورك",
+            metadata: { orderId: "12345" }
+        }, {
+            onReadyForServerApproval: function(paymentId) {
+                document.getElementById('status').innerText = "العملية جاهزة للموافقة!";
+                document.getElementById('status').style.color = "green";
+                alert("تم إرسال الطلب لمحفظتك بنجاح!");
+            },
+            onReadyForServerConfirmation: function(paymentId) {
+                alert("تم التأكيد بنجاح!");
+            },
+            onCancel: function(paymentId) {
+                document.getElementById('status').innerText = "تم إلغاء العملية.";
+                document.getElementById('status').style.color = "red";
+            },
+            onError: function(error, paymentId) {
+                document.getElementById('status').innerText = "خطأ: تأكد من فتح التطبيق من Pi Browser";
+                document.getElementById('status').style.color = "red";
+                console.error(error);
+            }
+        });
+    };
+</script>
+
+</body>
+</html>
             color: white;
             border-radius: 50%;
             display: flex;

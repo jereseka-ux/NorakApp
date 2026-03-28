@@ -3,37 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nourk App</title>
+    <title>تطبيق نورك - Nourk</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
-        .card { background: white; padding: 40px; border-radius: 25px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 80%; }
-        .icon { font-size: 60px; margin-bottom: 20px; }
-        .btn { background: #673ab7; color: white; border: none; padding: 20px; border-radius: 15px; width: 100%; font-size: 20px; cursor: pointer; font-weight: bold; }
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
+        .logo { font-size: 50px; margin-bottom: 10px; }
+        h1 { color: #673ab7; margin-bottom: 10px; }
+        p { color: #555; line-height: 1.6; margin-bottom: 25px; }
+        .btn { background-color: #673ab7; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="icon">💡</div>
-        <h1>تطبيق نورك</h1>
-        <button id="btn" class="btn">اضغطي هنا للربط</button>
-        <p id="msg"></p>
+
+    <div class="container">
+        <div class="logo">💡</div>
+        <h1>تطبيق نورك (Nourk)</h1>
+        <p>اضغطي على الزرار تحت لتفعيل الربط النهائي مع شبكة باي.</p>
+        <button class="btn" onclick="transferPi()">تفعيل الربط النهائي</button>
     </div>
+
     <script>
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
-        document.getElementById('btn').onclick = function() {
-            alert("تم الضغط بنجاح! جاري الاتصال بالمحفظة...");
-            document.getElementById('msg').innerText = "انتظري ثواني...";
+        // تهيئة الـ SDK أول ما الصفحة تحمل
+        window.onload = function () {
+            if (window.Pi) {
+                window.Pi.init({ version: "2.0", sandbox: true });
+                console.log("Pi SDK Initialized");
+            }
         };
+
+        // وظيفة الزرار
+        async function transferPi() {
+            if (window.Pi) {
+                try {
+                    const payment = await window.Pi.createPayment({
+                        amount: 0.1,
+                        memo: "ربط تطبيق نورك النهائي",
+                        metadata: { internal_data: "nourk_auth" }
+                    }, {
+                        onReadyForServerApproval: function (paymentId) { console.log("Approved"); },
+                        onReadyForServerCompletion: function (paymentId, txid) { console.log("Completed"); },
+                        onCancel: function (paymentId) { alert("تم إلغاء العملية"); },
+                        onError: function (error, payment) { alert("خطأ: " + error.message); }
+                    });
+                } catch (err) {
+                    alert("المتصفح لا يدعم الربط المباشر حالياً");
+                }
+            } else {
+                alert("برجاء فتح اللينك من داخل Pi Browser");
+            }
+        }
     </script>
 </body>
 </html>
-
-    <button class="btn" id="payBtn">تفعيل الربط النهائي</button>
-</div>
-
-<script>
     // تفعيل مكتبة باي فور تحميل الصفحة
     const Pi = window.Pi;
     Pi.init({ version: "2.0", sandbox: true });

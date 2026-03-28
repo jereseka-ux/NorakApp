@@ -3,97 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - النسخة الكاملة</title>
+    <title>تطبيق نورك - النسخة النهائية</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root { --main-purple: #673ab7; --gold: #ffb300; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eceff1; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background: white; padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; }
-        .logo-frame { margin-bottom: 20px; }
-        .logo-frame img { width: 120px; border-radius: 50%; border: 4px solid var(--main-purple); padding: 5px; }
-        h1 { color: #333; margin-bottom: 5px; font-size: 24px; }
-        p { color: #777; margin-bottom: 30px; font-size: 14px; }
+        .logo-frame img { width: 120px; border-radius: 50%; border: 4px solid var(--main-purple); padding: 5px; margin-bottom: 20px; }
+        h1 { color: #333; font-size: 24px; margin-bottom: 5px; }
+        p { color: #777; font-size: 14px; margin-bottom: 30px; }
         .btn { border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-auth { background: var(--main-purple); color: white; }
         .btn-pay { background: var(--gold); color: #333; }
-        .btn:active { transform: scale(0.98); }
         #status-bar { padding: 10px; border-radius: 8px; background: #fdfdfd; border: 1px solid #eee; font-size: 13px; color: #555; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo-frame">
-        <img src="logo.png" alt="Norak Logo">
-    </div>
+    <div class="logo-frame"><img src="logo.png" alt="Logo"></div>
     <h1>تطبيق نورك</h1>
     <p>بوابة الربط والدفع الآمنة</p>
-
-    <button class="btn btn-auth" onclick="connectPi()">
-        <span>🔗</span> ربط محفظة Pi
-    </button>
-    
-    <button class="btn btn-pay" onclick="transferPi()">
-        <span>💎</span> دفع 1 Pi للمتابعة
-    </button>
-
-    <div id="status-bar">الحالة: في انتظار الاتصال...</div>
+    <button class="btn btn-auth" onclick="connectPi()">🔗 ربط محفظة Pi</button>
+    <button class="btn btn-pay" onclick="transferPi()">💎 دفع 1 Pi للمتابعة</button>
+    <div id="status-bar">الحالة: جاهز للاتصال</div>
 </div>
 
 <script>
     const Pi = window.Pi;
-    // هنا حطي الـ App ID بتاعك من الـ Developer Portal مكان الكلمة اللي تحت
-    Pi.init({ version: "2.0", sandbox: true }); 
-
-    const statusBar = document.getElementById('status-bar');
+    // تم وضع الـ App ID الخاص بك هنا
+    Pi.init({ version: "2.0", sandbox: true, appId: "norak-ce4d21c5dfa3eb3d" }); 
 
     async function connectPi() {
-        statusBar.innerText = "جاري الاتصال بالمحفظة...";
+        const status = document.getElementById('status-bar');
+        status.innerText = "جاري الاتصال...";
         try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            statusBar.style.color = "green";
-            statusBar.innerText = "أهلاً بك يا " + auth.user.username;
-            console.log("تمت المصادقة بنجاح");
+            const auth = await Pi.authenticate(['username', 'payments'], (payment) => {});
+            status.style.color = "green";
+            status.innerText = "أهلاً بك يا " + auth.user.username;
         } catch (e) {
-            statusBar.style.color = "red";
-            statusBar.innerText = "خطأ: يجب الفتح من Pi Browser";
+            status.style.color = "red";
+            status.innerText = "خطأ: افتحي من Pi Browser";
         }
     }
 
     async function transferPi() {
         try {
-            statusBar.innerText = "بدء عملية الدفع...";
             const payment = await Pi.createPayment({
                 amount: 1,
                 memo: "دفع رسوم تطبيق نورك",
-                metadata: { orderId: "norak_test_" + Date.now() }
+                metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (paymentId) => {
-                    statusBar.innerText = "في انتظار موافقة السيرفر...";
-                    console.log("ID العملية:", paymentId);
-                },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    statusBar.style.color = "green";
-                    statusBar.innerText = "تم الدفع بنجاح! رقم العملية: " + txid.substring(0,8) + "...";
-                },
-                onCancel: (paymentId) => {
-                    statusBar.innerText = "تم إلغاء عملية الدفع";
-                },
-                onError: (error, payment) => {
-                    statusBar.style.color = "red";
-                    statusBar.innerText = "حدث خطأ أثناء الدفع";
-                }
+                onReadyForServerApproval: (id) => { console.log("Approved:", id); },
+                onReadyForServerCompletion: (id, tx) => { document.getElementById('status-bar').innerText = "تم الدفع بنجاح!"; },
+                onCancel: (id) => { document.getElementById('status-bar').innerText = "تم إلغاء الدفع"; },
+                onError: (error) => { document.getElementById('status-bar').innerText = "حدث خطأ"; }
             });
         } catch (e) {
-            statusBar.innerText = "فشل بدء الدفع";
+            alert("فشل بدء العملية");
         }
     }
-
-    function onIncompletePaymentFound(payment) {
-        console.log("مدفوعات معلقة:", payment);
-    };
 </script>
-
 </body>
 </html>

@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق القرآن الكريم</title>
-
+    <title>تطبيق Norak للقرآن الكريم</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        /* --- CSS --- */
         :root {
             --primary-color: #2c3e50;
-            --secondary-color: #ecf0f1;
-            --accent-color: #3498db;
+            --secondary-color: #f4f7f6;
+            --accent-color: #27ae60;
             --font-color: #333;
-            --bg-color: #fff;
+            --bg-color: #ffffff;
+            --sidebar-bg: #ffffff;
         }
 
-       .dark-mode {
-            --primary-color: #ecf0f1;
+        .dark-mode {
+            --primary-color: #1a252f;
             --secondary-color: #2c3e50;
             --font-color: #ecf0f1;
             --bg-color: #34495e;
+            --sidebar-bg: #2c3e50;
         }
 
         * {
@@ -30,43 +31,77 @@
         }
 
         body {
-            background-color: var(--secondary-color);
+            background-color: var(--bg-color);
             color: var(--font-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: 0.3s;
+            overflow: hidden;
         }
 
         #app-container {
             display: flex;
             width: 100vw;
             height: 100vh;
-            overflow: hidden;
-        }
-
-        #main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            transition: margin-right 0.3s ease-in-out;
-            background-color: var(--bg-color);
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
+            padding: 15px;
             background-color: var(--primary-color);
             color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 10;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 100;
         }
 
-        header h1 {
-            font-size: 1.2em;
+        #side-menu {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            border-left: 1px solid #ddd;
+            position: fixed;
+            right: -250px;
+            top: 0;
+            height: 100%;
+            transition: 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+            padding-top: 60px;
         }
 
-        header button {
+        #side-menu.open {
+            right: 0;
+        }
+
+        .surah-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            color: var(--font-color);
+        }
+
+        .surah-item:hover {
+            background-color: var(--secondary-color);
+        }
+
+        #main-content {
+            flex-grow: 1;
+            padding: 80px 20px 20px;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .ayah {
+            font-size: 1.4em;
+            line-height: 2.2;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        button {
             background: none;
             border: none;
             color: white;
@@ -74,62 +109,92 @@
             cursor: pointer;
         }
 
-        #reading-area {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            font-size: 1.5em; /* Default font size */
-            line-height: 2;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            border-top: 1px solid var(--secondary-color);
-            background-color: var(--bg-color);
-        }
-
-        footer button {
-            padding: 10px 20px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        #side-menu {
-            width: 280px;
-            background-color: var(--bg-color);
-            border-left: 1px solid #bdc3c7;
+        .overlay {
+            display: none;
             position: fixed;
-            right: -280px;
             top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            transition: right 0.3s ease-in-out;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
+            background: rgba(0,0,0,0.5);
+            z-index: 500;
         }
 
-        #side-menu.open {
-            right: 0;
-        }
-
-        #side-menu h3 {
-            padding: 15px;
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        #index-content {
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        #index-content a {
+        .overlay.active {
             display: block;
-            padding: 12px 15px;
-            text-
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <div id="side-menu">
+            <div id="surah-list"></div>
+        </div>
+
+        <div class="overlay" id="overlay"></div>
+
+        <div id="main-content">
+            <header>
+                <button onclick="toggleMenu()">☰</button>
+                <h2>Norak</h2>
+                <button onclick="toggleTheme()">🌙</button>
+            </header>
+
+            <div id="reading-area">
+                <h3 id="surah-title">اختر سورة من القائمة</h3>
+                <div id="content-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تفعيل الـ Pi SDK
+        const Pi = window.Pi;
+        if (Pi) { Pi.init({ version: "2.0", sandbox: true }); }
+
+        const surahList = document.getElementById('surah-list');
+        const contentBody = document.getElementById('content-body');
+        const surahTitle = document.getElementById('surah-title');
+        const sideMenu = document.getElementById('side-menu');
+        const overlay = document.getElementById('overlay');
+
+        // جلب قائمة السور
+        async function getSurahs() {
+            const res = await fetch('https://api.alquran.cloud/v1/surah');
+            const data = await res.json();
+            surahList.innerHTML = data.data.map(s => `
+                <div class="surah-item" onclick="getAyahs(${s.number}, '${s.name}')">
+                    ${s.number}. ${s.name}
+                </div>
+            `).join('');
+        }
+
+        // جلب آيات السورة
+        async function getAyahs(num, name) {
+            toggleMenu();
+            surahTitle.innerText = name;
+            contentBody.innerHTML = "جاري التحميل...";
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
+            const data = await res.json();
+            contentBody.innerHTML = data.data.ayahs.map(a => `
+                <span class="ayah">${a.text} ﴿${a.numberInSurah}﴾</span>
+            `).join(' ');
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function toggleMenu() {
+            sideMenu.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        overlay.onclick = toggleMenu;
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        getSurahs();
+    </script>
+</body>
+</html>

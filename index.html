@@ -2,527 +2,134 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nourk</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { margin: 0; padding: 20px; font-family: sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .box { background: white; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 90%; }
-        h1 { color: #673ab7; margin-bottom: 30px; }
-        .main-btn { background: #673ab7; color: white; border: none; padding: 25px; font-size: 22px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; display: block; -webkit-appearance: none; }
-    </style>
-</head>
-<body>
-
-    <div class="box">
-        <h1>تطبيق نورك</h1>
-        <button class="main-btn" onclick="connect()">اضغطي هنا للربط النهائي</button>
-    </div>
-
-    <script>
-        window.onload = function() {
-            if (window.Pi) { window.Pi.init({ version: "2.0", sandbox: true }); }
-        };
-
-        async function connect() {
-            if (window.Pi) {
-                try {
-                    const auth = await window.Pi.authenticate(['username', 'payments'], function(p){});
-                    alert("مبروك يا ياسمين! تم الربط: " + auth.user.username);
-                } catch (e) {
-                    alert("فتحي من الساند بوكس في باي ديفلوب بروتال");
-                }
-            } else {
-                alert("استخدمي متصفح باي");
-            }
-        }
-    </script>
-</body>
-</html>
-            if (window.Pi) {
-                window.Pi.init({ version: "2.0", sandbox: true });
-            }
-        };
-
-        // الدالة الجديدة اللي بتطلب "إذن دخول" حقيقي من باي
-        async function startPiAuth() {
-            if (typeof window.Pi !== 'undefined') {
-                try {
-                    const scopes = ['username', 'payments'];
-                    function onIncompletePaymentFound(payment) { console.log("Payment found"); }
-
-                    // دي اللحظة اللي السيستم بيكلم فيها محفظتك
-                    const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
-                    alert("تم الربط بنجاح يا ياسمين! الحساب: " + auth.user.username);
-                } catch (err) {
-                    alert("باي بروازر محتاج تفتحي اللينك من الـ Developer Portal (Sandbox)");
-                }
-            } else {
-                alert("يا ياسمين افتحي اللينك من جوه Pi Browser مش المتصفح العادي!");
-            }
-        }
-    </script>
-</body>
-</html>
-        async function transferPi() {
-            if (window.Pi) {
-                try {
-                    const payment = await window.Pi.createPayment({
-                        amount: 0.1,
-                        memo: "ربط تطبيق نورك النهائي",
-                        metadata: { internal_data: "nourk_auth" }
-                    }, {
-                        onReadyForServerApproval: function (paymentId) { console.log("Approved"); },
-                        onReadyForServerCompletion: function (paymentId, txid) { console.log("Completed"); },
-                        onCancel: function (paymentId) { alert("تم إلغاء العملية"); },
-                        onError: function (error, payment) { alert("خطأ: " + error.message); }
-                    });
-                } catch (err) {
-                    alert("المتصفح لا يدعم الربط المباشر حالياً");
-                }
-            } else {
-                alert("برجاء فتح اللينك من داخل Pi Browser");
-            }
-        }
-    </script>
-</body>
-</html>
-    // تفعيل مكتبة باي فور تحميل الصفحة
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true });
-
-    document.getElementById('payBtn').onclick = function() {
-        document.getElementById('status').innerText = "جاري تحضير المحفظة...";
-        document.getElementById('status').style.color = "orange";
-
-        // كود الربط الفعلي بالمحفظة
-        Pi.createPayment({
-            amount: 0.1,
-            memo: "تفعيل تطبيق نورك",
-            metadata: { orderId: "12345" }
-        }, {
-            onReadyForServerApproval: function(paymentId) {
-                document.getElementById('status').innerText = "العملية جاهزة للموافقة!";
-                document.getElementById('status').style.color = "green";
-                alert("تم إرسال الطلب لمحفظتك بنجاح!");
-            },
-            onReadyForServerConfirmation: function(paymentId) {
-                alert("تم التأكيد بنجاح!");
-            },
-            onCancel: function(paymentId) {
-                document.getElementById('status').innerText = "تم إلغاء العملية.";
-                document.getElementById('status').style.color = "red";
-            },
-            onError: function(error, paymentId) {
-                document.getElementById('status').innerText = "خطأ: تأكد من فتح التطبيق من Pi Browser";
-                document.getElementById('status').style.color = "red";
-                console.error(error);
-            }
-        });
-    };
-</script>
-
-</body>
-</html>
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            border: 5px solid var(--pi-gold);
-        }
-        h1 { color: var(--pi-purple); margin-bottom: 10px; }
-        p { font-size: 16px; color: #666; }
-        .btn {
-            background-color: var(--pi-purple);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .btn:disabled { background-color: #ccc; }
-        #user-info { margin-top: 20px; font-weight: bold; color: #2ecc71; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="logo">N</div>
-    <h1>تطبيق نورk</h1>
-    <p>مرحباً بك في تطبيقك الخاص على شبكة باي</p>
-    
-    <div id="status">جاري الاتصال بشبكة باي...</div>
-    <div id="user-info"></div>
-
-    <button class="btn" id="btn-auth" onclick="authenticate()">بدء تسجيل الدخول</button>
-    <button class="btn" id="btn-pay" onclick="transferPi()" style="display:none; background-color: #FFC107; color: #000;">تجربة عملية دفع (Sandbox)</button>
-</div>
-
-<script>
-    // أهم سطر لشبكة باي عشان رقم 6 تخضر
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true }); // سطر الأمان Sandbox: True
-
-    async function authenticate() {
-        try {
-            const scopes = ['username', 'payments'];
-            function onIncompletePaymentFound(payment) {
-                console.log("هناك عملية معلقة:", payment);
-            };
-
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            
-            document.getElementById('status').innerText = "تم الاتصال بنجاح!";
-            document.getElementById('user-info').innerText = "أهلاً بك يا " + auth.user.username;
-            document.getElementById('btn-auth').style.display = 'none';
-            document.getElementById('btn-pay').style.display = 'block';
-            
-            console.log("User Authenticated: ", auth.user.username);
-        } catch (err) {
-            document.getElementById('status').innerText = "فشل الاتصال: " + err.message;
-            console.error(err);
-        }
-    }
-
-    async function transferPi() {
-        // هذه الوظيفة تجعل السيستم يتأكد أنك تدعم المدفوعات
-        alert("هذه عملية تجريبية في بيئة الساندبوكس بنجاح!");
-    }
-</script>
-
-</body>
-</html>
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            border: 4px solid var(--pi-gold);
-        }
-        h1 { color: var(--pi-purple); margin-bottom: 0.5rem; }
-        p { color: #666; line-height: 1.6; }
-        .btn {
-            background: var(--pi-purple);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: 1rem;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .btn:hover { background: #512da8; }
-        .footer { margin-top: 2rem; font-size: 0.8rem; color: #999; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="logo">💡</div>
-    <h1>تطبيق نورك</h1>
-    <h3>Nourk App</h3>
-    
-    <p id="status">جاري الاتصال بشبكة باي...</p>
-    
-    <div id="azkar-section" style="margin: 20px 0; padding: 15px; background: #fffde7; border-radius: 10px;">
-        <strong>ذكر اليوم:</strong>
-        <p id="zekr">سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته.</p>
-    </div>
-
-    <button class="btn" onclick="transferPi()">تفعيل الربط واختبار السحب (Test Pay)</button>
-    
-    <div class="footer">
-        طوّر بواسطة ياسمين مسعود <br>
-        v2.0 - Sandbox Enabled
-    </div>
-</div>
-
-<script>
-    // إعدادات الساندبوكس الحقيقية اللي طلبتيها
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true }); // تفعيل الساندبوكس الجديد
-
-    async function auth() {
-        try {
-            const scopes = ['payments', 'username'];
-            const user = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            document.getElementById('status').innerText = "أهلاً بك يا " + user.user.username;
-            console.log("تم تسجيل الدخول بنجاح!");
-        } catch (err) {
-            document.getElementById('status').innerText = "يرجى فتح التطبيق من Pi Browser";
-        }
-    }
-
-    async function transferPi() {
-        try {
-            const payment = await Pi.createPayment({
-                amount: 0.1,
-                memo: "تجربة ربط تطبيق نورك المطور",
-                metadata: { appId: "norak-ce4d21c5dfa3eb3d" } // استخدام الـ Slug الفعلي المطلوب
-            }, {
-                onReadyForServerApproval: (paymentId) => { console.log("Approval:", paymentId); },
-                onReadyForServerCompletion: (paymentId, txid) => { 
-                    alert("تم الربط بنجاح! رقم المعاملة: " + txid);
-                },
-                onCancel: (paymentId) => { console.log("Canceled"); },
-                onError: (error, payment) => { console.error("Error:", error); }
-            });
-        } catch (err) {
-            alert("لازم تفتحي من Pi Browser وتكون المحفظة جاهزة");
-        }
-    }
-
-    function onIncompletePaymentFound(payment) {
-        console.log("Incomplete payment found", payment);
-    }
-
-    auth();
-</script>
-
-</body>
-</html>
-            cursor: pointer;
-            font-size: 18px;
-            margin-top: 20px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        #status { margin-top: 15px; color: green; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <img src="https://i.ibb.co/XfXkY0k/Nourk-Logo.jpg" alt="Nourk Logo" class="logo">
-    
-    <h1>مرحباً بك في تطبيق نورك</h1>
-    <p>رحلتك نحو النور والمعرفة تبدأ من هنا.</p>
-
-    <div id="status">جاري الاتصال بشبكة باي...</div>
-    
-    <button class="btn" onclick="login()">تفعيل الربط النهائي</button>
-</div>
-
-<script>
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true }); // تفعيل الساند بوكس عشان الخطوة 6
-
-    async function login() {
-        try {
-            const scopes = ['username', 'payments'];
-            function onIncompletePaymentFound(payment) { /* معالجة المدفوعات لاحقاً */ }
-            
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            document.getElementById('status').innerText = "تم الربط بنجاح يا ياسمين! ✅";
-            alert("مبروك! التطبيق اتصل بحسابك، الخطوة 6 هتخضرّ دلوقتي.");
-        } catch (err) {
-            console.error(err);
-            document.getElementById('status').innerText = "حدث خطأ في الربط، تأكدي من فتح التطبيق داخل Pi Browser.";
-        }
-    }
-</script>
-
-</body>
-</html>
-        p {
-            color: #555;
-            font-size: 18px;
-            line-height: 1.6;
-        }
-        .btn {
-            background-color: #673ab7;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .btn:active {
-            transform: scale(0.98);
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="logo">💡</div>
-    <h1>تطبيق نورك (Nourk)</h1>
-    <p>اضغطي تحت عشان نجبر السيستم يحس بالربط وتخلصي الخطوة رقم 6.</p>
-    
-    <button class="btn" onclick="transferPi()">تفعيل الربط (تجربة دفع)</button>
-</div>
-
-<script>
-    // تهيئة الـ SDK أول ما الصفحة تحمل
-    window.onload = function() {
-        if (window.Pi) {
-            Pi.init({ version: "2.0", sandbox: true });
-            console.log("Pi SDK جاهز");
-        }
-    };
-
-    // وظيفة الدفع اللي هتخلي السيستم ينور أخضر
-    function transferPi() {
-        if (window.Pi) {
-            try {
-                Pi.createPayment({
-                    amount: 0.1,
-                    memo: "تفعيل تطبيق نورك",
-                    metadata: { step: "6" },
-                }, {
-                    onReadyForServerApproval: function(paymentId) { console.log("Approval ready"); },
-                    onReadyForServerCompletion: function(paymentId, txid) { console.log("Done"); },
-                    onCancel: function(paymentId) { console.log("Cancelled"); },
-                    onError: function(error, payment) { console.error(error); }
-                });
-                alert("لو فتحت شاشة دفع أو طلب دخول للمحفظة، يبقى كدة تمام!");
-            } catch (err) {
-                alert("جاري الاتصال بشبكة باي...");
-            }
-        } else {
-            alert("إنتي لسه مش جوه Pi Browser! افتحي اللينك من هناك.");
-        }
-    }
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - Nourk App</title>
-    
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <title>تطبيق القرآن الكريم</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        /* --- CSS --- */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #ecf0f1;
+            --accent-color: #3498db;
+            --font-color: #333;
+            --bg-color: #fff;
+        }
+
+       .dark-mode {
+            --primary-color: #ecf0f1;
+            --secondary-color: #2c3e50;
+            --font-color: #ecf0f1;
+            --bg-color: #34495e;
+        }
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--font-color);
+            transition: background-color 0.3s, color 0.3s;
         }
-        .logo {
-            font-size: 50px;
-            margin-bottom: 10px;
+
+        #app-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
-        h1 {
-            color: #673ab7;
-            margin-bottom: 20px;
+
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            transition: margin-right 0.3s ease-in-out;
+            background-color: var(--bg-color);
         }
-        p {
-            color: #555;
-            line-height: 1.6;
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 10;
         }
-        .btn {
-            background-color: #673ab7;
+
+        header h1 {
+            font-size: 1.2em;
+        }
+
+        header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        #reading-area {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 1.5em; /* Default font size */
+            line-height: 2;
+        }
+
+        footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 1px solid var(--secondary-color);
+            background-color: var(--bg-color);
+        }
+
+        footer button {
+            padding: 10px 20px;
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 15px 25px;
-            font-size: 18px;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            transition: 0.3s;
+            font-size: 1em;
         }
-        .btn:hover {
-            background-color: #5e35b1;
+
+        #side-menu {
+            width: 280px;
+            background-color: var(--bg-color);
+            border-left: 1px solid #bdc3c7;
+            position: fixed;
+            right: -280px;
+            top: 0;
+            height: 100%;
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
         }
-    </style>
-</head>
-<body>
 
-<div class="container">
-    <div class="logo">💡</div>
-    <h1>مرحباً بك في Nourk</h1>
-    <p>تطبيقك جاهز للاختبار على شبكة باي.<br>اضغط تحت لتفعيل الربط وتخطي الخطوة 6.</p>
-    
-    <button class="btn" onclick="transferPi()">تجربة دفع (Test Pi)</button>
-</div>
-
-<script>
-    // تهيئة الـ SDK فور تحميل الصفحة
-    window.onload = function() {
-        if (window.Pi) {
-            Pi.init({ version: "2.0", sandbox: true });
-            console.log("Pi SDK Initialized");
+        #side-menu.open {
+            right: 0;
         }
-    };
 
-    // وظيفة الدفع الوهمي لتنبيه السيستم
-    function transferPi() {
-        if (window.Pi) {
-            try {
-                const payment = Pi.createPayment({
-                    amount: 0.1,
-                    memo: "تجربة ربط تطبيق نورك",
-                    metadata: { test: "step6" },
-                }, {
-                    onReadyForServerApproval: function(paymentId) { console.log("Ready"); },
-                    onReadyForServerCompletion: function(paymentId, txid) { console.log("Done"); },
-                    onCancel: function(paymentId) { console.log("Cancelled"); },
-                    onError: function(error, payment) { console.error(error); }
-                });
-            } catch (err) {
-                alert("تم إرسال إشارة الربط لشبكة باي بنجاح!");
-            }
-        } else {
-            alert("لازم تفتحي من جوه Pi Browser عشان الربط يكمل!");
+        #side-menu h3 {
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
         }
-    }
-</script>
 
-</body>
-</html>
-                    amount: 0.1, // مبلغ التجربة
-                    memo: "تجربة دفع في تطبيق نورك", // وصف العملية
-                    metadata: { orderId: 123 }
-                }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        console.log("العملية جاهزة للموافقة: ", paymentId);
-                        // هنا الخطوة اللي بتحتاج سيرفر بس حالياً بنجرب الواجهة
-                    },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        console.log("العملية تمت بنجاح! رقم المعاملة: ", txid);
-                    },
-                    onCancel: (paymentId) => { console.log("تم إلغاء العملية"); },
-                    onError: (error, payment) => { console.error("خطأ في الدفع: ", error); }
-                });
-            } catch (err) {
-                alert("لازم تفتح التطبيق من جوه Pi Browser عشان الدفع يشتغل!");
-            }
+        #index-content {
+            overflow-y: auto;
+            flex-grow: 1;
         }
-    </script>
 
-</body>
-</html>
+        #index-content a {
+            display: block;
+            padding: 12px 15px;
+            text-

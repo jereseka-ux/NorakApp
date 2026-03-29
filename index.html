@@ -3,213 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق Norak - نورك</title>
+    <title>تطبيق نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root {
-            --primary: #1e3a8a; /* أزرق إسلامي هادي */
-            --secondary: #f8fafc;
-            --accent: #059669; /* أخضر مريح */
-            --text: #1e293b;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        
-        body { background-color: var(--secondary); color: var(--text); line-height: 1.6; }
-
-        /* الهيدر */
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        /* القائمة السفلية للتنقل */
-        nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            border-top: 1px solid #e2e8f0;
-            z-index: 1000;
-        }
-
-        nav button {
-            background: none;
-            border: none;
-            font-size: 0.9rem;
-            color: var(--primary);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* منطقة المحتوى */
+        :root { --primary: #1e3a8a; --secondary: #f8fafc; --accent: #059669; --text: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--secondary); color: var(--text); }
+        header { background-color: var(--primary); color: white; padding: 15px; text-align: center; position: fixed; top: 0; width: 100%; z-index: 1000; }
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e2e8f0; z-index: 1000; }
+        nav button { background: none; border: none; color: var(--primary); cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 0.9rem; }
         #app { padding: 80px 15px 100px; min-height: 100vh; }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .card:active { transform: scale(0.98); }
-
-        .ayah-text {
-            font-size: 1.4rem;
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 20px;
-            display: block;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .btn-pay {
-            background-color: var(--accent);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+        .ayah-text { font-size: 1.4rem; color: var(--primary); display: block; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
     </style>
 </head>
 <body>
-
-<header>
-    <h2 id="page-title">نورك - Norak</h2>
-</header>
-
-<div id="app">
-    <div id="content-display">
-        <h3 style="text-align: center;">مرحباً بكِ يا ياسمين في تطبيق نورك</h3>
-        <p style="text-align: center; margin-top: 10px;">اختر من القائمة بالأسفل لبدء القراءة</p>
-    </div>
-</div>
-
-<nav>
-    <button onclick="loadQuran()">📖<span>القرآن</span></button>
-    <button onclick="loadAzkar()">📿<span>الأذكار</span></button>
-    <button onclick="loadDuaa()">🤲<span>أدعية</span></button>
-    <button onclick="showSupport()">💰<span>دعم</span></button>
-</nav>
-
-<script>
-    // تهيئة Pi SDK
-    const Pi = window.Pi;
-    if (Pi) {
-        Pi.init({ version: "2.0", sandbox: true });
-    }
-
-    const display = document.getElementById('content-display');
-    const title = document.getElementById('page-title');
-
-    // 1. وظيفة القرآن الكريم
-    async function loadQuran() {
-        title.innerText = "سور القرآن";
-        display.innerHTML = "جاري تحميل السور...";
-        try {
+    <header><h2>نورك - Norak</h2></header>
+    <div id="app"><div id="content-display">
+        <h3 style="text-align: center;">مرحباً بكم في تطبيق نورك</h3>
+        <p style="text-align: center; margin-top: 10px;">نور حياتك بالذكر والقرآن</p>
+    </div></div>
+    <nav>
+        <button onclick="loadQuran()">📖<span>القرآن</span></button>
+        <button onclick="loadAzkar()">📿<span>الأذكار</span></button>
+        <button onclick="loadDuaa()">🤲<span>أدعية</span></button>
+    </nav>
+    <script>
+        const Pi = window.Pi; if (Pi) { Pi.init({ version: "2.0", sandbox: true }); }
+        const display = document.getElementById('content-display');
+        async function loadQuran() {
+            display.innerHTML = "جاري التحميل...";
             const res = await fetch('https://api.alquran.cloud/v1/surah');
             const data = await res.json();
-            display.innerHTML = data.data.map(s => `
-                <div class="card" onclick="loadAyahs(${s.number}, '${s.name}')">
-                    <strong>${s.number}. ${s.name}</strong> (${s.englishName})
-                </div>
-            `).join('');
-        } catch (e) { display.innerHTML = "فشل التحميل، تأكدي من الاتصال بالإنترنت."; }
-    }
-
-    async function loadAyahs(num, name) {
-        title.innerText = name;
-        display.innerHTML = "جاري تحميل الآيات...";
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
-        const data = await res.json();
-        display.innerHTML = data.data.ayahs.map(a => `
-            <span class="ayah-text">${a.text} ﴿${a.numberInSurah}﴾</span>
-        `).join('');
-        window.scrollTo(0,0);
-    }
-
-    // 2. وظيفة الأذكار
-    function loadAzkar() {
-        title.innerText = "الأذكار";
-        const azkar = [
-            {t: "أذكار الصباح", c: "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..."},
-            {t: "أذكار المساء", c: "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..."},
-            {t: "أذكار النوم", c: "باسمك ربي وضعت جنبي، وبك أرفعه، إن أمسكت نفسي فارحمها..."}
-        ];
-        display.innerHTML = azkar.map(a => `
-            <div class="card" onclick="showText('${a.t}', '${a.c}')">
-                <strong>${a.t}</strong>
-            </div>
-        `).join('');
-    }
-
-    // 3. وظيفة الأدعية
-    function loadDuaa() {
-        title.innerText = "أدعية مختارة";
-        const adia = [
-            {t: "دعاء الفرج", c: "لا إله إلا أنت سبحانك إني كنت من الظالمين."},
-            {t: "دعاء الاستخارة", c: "اللهم إني أستخيرك بعلمك، وأستقدرك بقدرتك..."},
-            {t: "دعاء تيسير الأمور", c: "اللهم لا سهل إلا ما جعلته سهلاً، وأنت تجعل الحزن إذا شئت سهلاً."}
-        ];
-        display.innerHTML = adia.map(d => `
-            <div class="card" onclick="showText('${d.t}', '${d.c}')">
-                <strong>${d.t}</strong>
-            </div>
-        `).join('');
-    }
-
-    function showText(t, c) {
-        title.innerText = t;
-        display.innerHTML = `<div class="card" style="font-size: 1.3rem; text-align: center;">${c}</div>
-        <button class="btn-pay" onclick="loadAzkar()">العودة</button>`;
-    }
-
-    // 4. وظيفة دعم التطبيق (Pi Payment)
-    function showSupport() {
-        title.innerText = "دعم التطبيق";
-        display.innerHTML = `
-            <div class="card" style="text-align: center;">
-                <p>إذا أعجبك التطبيق، يمكنك المساهمة في تطويره عبر عملة Pi</p>
-                <button class="btn-pay" onclick="requestPayment()">تبرع بـ 1 Pi</button>
-            </div>
-        `;
-    }
-
-    async function requestPayment() {
-        try {
-            const payment = await Pi.createPayment({
-                amount: 1,
-                memo: "دعم تطبيق نورك - Norak",
-                metadata: { orderId: 12345 },
-            }, {
-                onReadyForServerApproval: (paymentId) => { console.log("Approved", paymentId); },
-                onReadyForServerCompletion: (paymentId, txid) => { alert("شكراً لدعمك!"); },
-                onCancel: (paymentId) => { console.log("Cancelled"); },
-                onError: (error, payment) => { console.error(error); },
-            });
-        } catch (e) {
-            alert("خاصية الدفع تعمل فقط داخل شبكة Pi الرسمية.");
+            display.innerHTML = data.data.map(s => `<div class="card" onclick="loadAyahs(${s.number},'${s.name}')"><strong>${s.name}</strong></div>`).join('');
         }
-    }
-</script>
-
+        async function loadAyahs(num, name) {
+            display.innerHTML = "جاري تحميل الآيات...";
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
+            const data = await res.json();
+            display.innerHTML = `<h3>${name}</h3>` + data.data.ayahs.map(a => `<span class="ayah-text">${a.text} ﴿${a.numberInSurah}﴾</span>`).join('');
+            window.scrollTo(0,0);
+        }
+        function loadAzkar() {
+            const azkar = [{t:"أذكار الصباح", c:"أصبحنا وأصبح الملك لله..."}, {t:"أذكار المساء", c:"أمسينا وأمسى الملك لله..."}];
+            display.innerHTML = azkar.map(a => `<div class="card"><strong>${a.t}</strong><p>${a.c}</p></div>`).join('');
+        }
+        function loadDuaa() {
+            const adia = [{t:"دعاء الفرج", c:"لا إله إلا أنت سبحانك إني كنت من الظالمين."}];
+            display.innerHTML = adia.map(d => `<div class="card"><strong>${d.t}</strong><p>${d.c}</p></div>`).join('');
+        }
+    </script>
 </body>
 </html>

@@ -3,198 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق Norak للقرآن الكريم</title>
+    <title>تطبيق Norak - نورك</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #f4f7f6;
-            --accent-color: #27ae60;
-            --font-color: #333;
-            --bg-color: #ffffff;
-            --sidebar-bg: #ffffff;
+            --primary: #1e3a8a; /* أزرق إسلامي هادي */
+            --secondary: #f8fafc;
+            --accent: #059669; /* أخضر مريح */
+            --text: #1e293b;
         }
 
-        .dark-mode {
-            --primary-color: #1a252f;
-            --secondary-color: #2c3e50;
-            --font-color: #ecf0f1;
-            --bg-color: #34495e;
-            --sidebar-bg: #2c3e50;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        
+        body { background-color: var(--secondary); color: var(--text); line-height: 1.6; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--font-color);
-            transition: 0.3s;
-            overflow: hidden;
-        }
-
-        #app-container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-        }
-
+        /* الهيدر */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: var(--primary-color);
+            background-color: var(--primary);
             color: white;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            z-index: 100;
-        }
-
-        #side-menu {
-            width: 250px;
-            background-color: var(--sidebar-bg);
-            border-left: 1px solid #ddd;
-            position: fixed;
-            right: -250px;
-            top: 0;
-            height: 100%;
-            transition: 0.3s;
-            z-index: 1000;
-            overflow-y: auto;
-            padding-top: 60px;
-        }
-
-        #side-menu.open {
-            right: 0;
-        }
-
-        .surah-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            display: block;
-            text-decoration: none;
-            color: var(--font-color);
-        }
-
-        .surah-item:hover {
-            background-color: var(--secondary-color);
-        }
-
-        #main-content {
-            flex-grow: 1;
-            padding: 80px 20px 20px;
-            overflow-y: auto;
+            padding: 15px;
             text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .ayah {
-            font-size: 1.4em;
-            line-height: 2.2;
-            margin-bottom: 15px;
-            display: inline-block;
+        /* القائمة السفلية للتنقل */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #e2e8f0;
+            z-index: 1000;
         }
 
-        button {
+        nav button {
             background: none;
             border: none;
-            color: white;
-            font-size: 1.5em;
+            font-size: 0.9rem;
+            color: var(--primary);
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 500;
+        /* منطقة المحتوى */
+        #app { padding: 80px 15px 100px; min-height: 100vh; }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        .overlay.active {
+        .card:active { transform: scale(0.98); }
+
+        .ayah-text {
+            font-size: 1.4rem;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
             display: block;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .btn-pay {
+            background-color: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div id="app-container">
-        <div id="side-menu">
-            <div id="surah-list"></div>
-        </div>
+<header>
+    <h2 id="page-title">نورك - Norak</h2>
+</header>
 
-        <div class="overlay" id="overlay"></div>
-
-        <div id="main-content">
-            <header>
-                <button onclick="toggleMenu()">☰</button>
-                <h2>Norak</h2>
-                <button onclick="toggleTheme()">🌙</button>
-            </header>
-
-            <div id="reading-area">
-                <h3 id="surah-title">اختر سورة من القائمة</h3>
-                <div id="content-body"></div>
-            </div>
-        </div>
+<div id="app">
+    <div id="content-display">
+        <h3 style="text-align: center;">مرحباً بكِ يا ياسمين في تطبيق نورك</h3>
+        <p style="text-align: center; margin-top: 10px;">اختر من القائمة بالأسفل لبدء القراءة</p>
     </div>
+</div>
 
-    <script>
-        // تفعيل الـ Pi SDK
-        const Pi = window.Pi;
-        if (Pi) { Pi.init({ version: "2.0", sandbox: true }); }
+<nav>
+    <button onclick="loadQuran()">📖<span>القرآن</span></button>
+    <button onclick="loadAzkar()">📿<span>الأذكار</span></button>
+    <button onclick="loadDuaa()">🤲<span>أدعية</span></button>
+    <button onclick="showSupport()">💰<span>دعم</span></button>
+</nav>
 
-        const surahList = document.getElementById('surah-list');
-        const contentBody = document.getElementById('content-body');
-        const surahTitle = document.getElementById('surah-title');
-        const sideMenu = document.getElementById('side-menu');
-        const overlay = document.getElementById('overlay');
+<script>
+    // تهيئة Pi SDK
+    const Pi = window.Pi;
+    if (Pi) {
+        Pi.init({ version: "2.0", sandbox: true });
+    }
 
-        // جلب قائمة السور
-        async function getSurahs() {
+    const display = document.getElementById('content-display');
+    const title = document.getElementById('page-title');
+
+    // 1. وظيفة القرآن الكريم
+    async function loadQuran() {
+        title.innerText = "سور القرآن";
+        display.innerHTML = "جاري تحميل السور...";
+        try {
             const res = await fetch('https://api.alquran.cloud/v1/surah');
             const data = await res.json();
-            surahList.innerHTML = data.data.map(s => `
-                <div class="surah-item" onclick="getAyahs(${s.number}, '${s.name}')">
-                    ${s.number}. ${s.name}
+            display.innerHTML = data.data.map(s => `
+                <div class="card" onclick="loadAyahs(${s.number}, '${s.name}')">
+                    <strong>${s.number}. ${s.name}</strong> (${s.englishName})
                 </div>
             `).join('');
+        } catch (e) { display.innerHTML = "فشل التحميل، تأكدي من الاتصال بالإنترنت."; }
+    }
+
+    async function loadAyahs(num, name) {
+        title.innerText = name;
+        display.innerHTML = "جاري تحميل الآيات...";
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
+        const data = await res.json();
+        display.innerHTML = data.data.ayahs.map(a => `
+            <span class="ayah-text">${a.text} ﴿${a.numberInSurah}﴾</span>
+        `).join('');
+        window.scrollTo(0,0);
+    }
+
+    // 2. وظيفة الأذكار
+    function loadAzkar() {
+        title.innerText = "الأذكار";
+        const azkar = [
+            {t: "أذكار الصباح", c: "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..."},
+            {t: "أذكار المساء", c: "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..."},
+            {t: "أذكار النوم", c: "باسمك ربي وضعت جنبي، وبك أرفعه، إن أمسكت نفسي فارحمها..."}
+        ];
+        display.innerHTML = azkar.map(a => `
+            <div class="card" onclick="showText('${a.t}', '${a.c}')">
+                <strong>${a.t}</strong>
+            </div>
+        `).join('');
+    }
+
+    // 3. وظيفة الأدعية
+    function loadDuaa() {
+        title.innerText = "أدعية مختارة";
+        const adia = [
+            {t: "دعاء الفرج", c: "لا إله إلا أنت سبحانك إني كنت من الظالمين."},
+            {t: "دعاء الاستخارة", c: "اللهم إني أستخيرك بعلمك، وأستقدرك بقدرتك..."},
+            {t: "دعاء تيسير الأمور", c: "اللهم لا سهل إلا ما جعلته سهلاً، وأنت تجعل الحزن إذا شئت سهلاً."}
+        ];
+        display.innerHTML = adia.map(d => `
+            <div class="card" onclick="showText('${d.t}', '${d.c}')">
+                <strong>${d.t}</strong>
+            </div>
+        `).join('');
+    }
+
+    function showText(t, c) {
+        title.innerText = t;
+        display.innerHTML = `<div class="card" style="font-size: 1.3rem; text-align: center;">${c}</div>
+        <button class="btn-pay" onclick="loadAzkar()">العودة</button>`;
+    }
+
+    // 4. وظيفة دعم التطبيق (Pi Payment)
+    function showSupport() {
+        title.innerText = "دعم التطبيق";
+        display.innerHTML = `
+            <div class="card" style="text-align: center;">
+                <p>إذا أعجبك التطبيق، يمكنك المساهمة في تطويره عبر عملة Pi</p>
+                <button class="btn-pay" onclick="requestPayment()">تبرع بـ 1 Pi</button>
+            </div>
+        `;
+    }
+
+    async function requestPayment() {
+        try {
+            const payment = await Pi.createPayment({
+                amount: 1,
+                memo: "دعم تطبيق نورك - Norak",
+                metadata: { orderId: 12345 },
+            }, {
+                onReadyForServerApproval: (paymentId) => { console.log("Approved", paymentId); },
+                onReadyForServerCompletion: (paymentId, txid) => { alert("شكراً لدعمك!"); },
+                onCancel: (paymentId) => { console.log("Cancelled"); },
+                onError: (error, payment) => { console.error(error); },
+            });
+        } catch (e) {
+            alert("خاصية الدفع تعمل فقط داخل شبكة Pi الرسمية.");
         }
+    }
+</script>
 
-        // جلب آيات السورة
-        async function getAyahs(num, name) {
-            toggleMenu();
-            surahTitle.innerText = name;
-            contentBody.innerHTML = "جاري التحميل...";
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
-            const data = await res.json();
-            contentBody.innerHTML = data.data.ayahs.map(a => `
-                <span class="ayah">${a.text} ﴿${a.numberInSurah}﴾</span>
-            `).join(' ');
-            document.getElementById('main-content').scrollTop = 0;
-        }
-
-        function toggleMenu() {
-            sideMenu.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-
-        overlay.onclick = toggleMenu;
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        getSurahs();
-    </script>
 </body>
 </html>

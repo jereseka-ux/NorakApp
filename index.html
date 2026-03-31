@@ -3,99 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - Norak</title>
-    
+    <title>نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
     <style>
-        :root { --bg-color: #f4f4f9; --text-color: #333; --card-bg: #ffffff; }
-        .dark-mode { --bg-color: #1a1a2e; --text-color: #e0e0e0; --card-bg: #16213e; }
-        
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; transition: 0.3s; padding-bottom: 50px; }
-        header { background: #6d28d9; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        
-        .main-container { padding: 20px; text-align: center; max-width: 600px; margin: auto; }
-        .logo-img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        
+        :root { --main: #6d28d9; --bg: #f4f4f9; --text: #333; --card: #ffffff; }
+        .dark-mode { --bg: #1a1a2e; --text: #e0e0e0; --card: #16213e; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding-bottom: 50px; transition: 0.3s; }
+        header { background: var(--main); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .container { max-width: 600px; margin: auto; padding: 20px; text-align: center; }
+        .logo-img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px; border: 3px solid white; }
         .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .nav-item { background: var(--card-bg); padding: 25px 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border: 1px solid rgba(0,0,0,0.05); }
-        .nav-item:active { transform: scale(0.95); }
-        .nav-item span { font-size: 30px; display: block; margin-bottom: 10px; }
-        .nav-item p { margin: 0; font-weight: bold; font-size: 18px; }
-        
-        .btn-support { background: linear-gradient(45deg, #fbbf24, #f59e0b); color: #000; font-weight: bold; padding: 18px; border-radius: 15px; margin-top: 25px; border: none; width: 100%; cursor: pointer; font-size: 18px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); }
-        
-        #user-info-box { margin-top: 15px; font-size: 0.9em; color: #6d28d9; font-weight: bold; }
-        .dark-mode #user-info-box { color: #4cc9f0; }
+        .nav-item { background: var(--card); padding: 20px; border-radius: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .section-box { display: none; background: var(--card); margin-top: 20px; padding: 20px; border-radius: 15px; text-align: right; max-height: 400px; overflow-y: auto; border: 1px solid var(--main); }
+        .active { display: block; animation: fadeIn 0.4s; }
+        .quran-list, .azkar-list { list-style: none; padding: 0; }
+        .quran-list li, .azkar-list li { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .quran-list li:hover { background: #f0f0f0; color: var(--main); }
+        .btn-support { background: #fbbf24; color: #000; font-weight: bold; padding: 15px; border-radius: 12px; margin-top: 20px; border: none; width: 100%; cursor: pointer; font-size: 18px; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body id="bodyTag">
+<body id="mainBody">
 
     <header>
         <div onclick="toggleDarkMode()" style="cursor:pointer; font-size: 24px;">🌙</div>
         <div style="font-size: 22px; font-weight: bold;">نورك - Norak</div>
-        <div onclick="alert('الإعدادات قريباً')" style="cursor:pointer; font-size: 24px;">⚙️</div>
+        <div onclick="showSection('settings')" style="cursor:pointer; font-size: 24px;">⚙️</div>
     </header>
 
-    <div class="main-container">
-        <img src="logo.png" class="logo-img" alt="Norak Logo" onerror="this.src='https://via.placeholder.com/120?text=Norak'">
+    <div class="container">
+        <img src="logo.png" class="logo-img" alt="Norak Logo" onerror="this.src='https://via.placeholder.com/100?text=Norak'">
         
-        <h1>مرحباً بك في تطبيق نورك</h1>
-        <p style="color: #666;">تطبيقك الإيماني المتكامل على شبكة Pi</p>
+        <div id="user-status" style="font-weight: bold; color: var(--main); margin: 10px 0;">جاري ربط حساب باي...</div>
 
-        <div id="user-info-box">جاري التحقق من الهوية...</div>
-        
         <div class="nav-grid">
-            <div class="nav-item" onclick="alert('سيتم إضافة المصحف الشريف قريباً')"><span>📖</span><p>القرآن</p></div>
-            <div class="nav-item" onclick="alert('سيتم إضافة الأذكار قريباً')"><span>📿</span><p>الأذكار</p></div>
-            <div class="nav-item" onclick="alert('سيتم إضافة الأدعية قريباً')"><span>🤲</span><p>أدعية</p></div>
-            <div class="nav-item" onclick="toggleDarkMode()"><span>💡</span><p>الإضاءة</p></div>
+            <div class="nav-item" onclick="showSection('quran-index')">📖<br>القرآن الكريم</div>
+            <div class="nav-item" onclick="showSection('azkar-index')">📿<br>الأذكار</div>
+            <div class="nav-item" onclick="showSection('doua-index')">🤲<br>أدعية مختارة</div>
+            <div class="nav-item" onclick="toggleDarkMode()">💡<br>الإضاءة</div>
         </div>
 
-        <button class="btn-support" onclick="handlePayment()">دعم المشروع بـ 1 Pi</button>
+        <div id="quran-index" class="section-box">
+            <h3 style="text-align:center; color:var(--main);">فهرس السور (30 جزء)</h3>
+            <ul class="quran-list" id="surah-list">
+                </ul>
+        </div>
+
+        <div id="azkar-index" class="section-box">
+            <h3 style="text-align:center; color:var(--main);">الأذكار اليومية</h3>
+            <ul class="azkar-list">
+                <li onclick="alert('أصبحنا وأصبح الملك لله...')">أذكار الصباح</li>
+                <li onclick="alert('أمسينا وأمسى الملك لله...')">أذكار المساء</li>
+                <li onclick="alert('سبحان الله (33)، الحمد لله (33)، الله أكبر (34)')">أذكار بعد الصلاة</li>
+                <li onclick="alert('باسمك ربي وضعت جنبي...')">أذكار النوم</li>
+            </ul>
+        </div>
+
+        <div id="settings" class="section-box">
+            <h3 style="text-align:center;">إعدادات التطبيق</h3>
+            <p>المطور: ياسمين</p>
+            <p>حالة الشبكة: <span style="color: green;">Testnet Active</span></p>
+            <button onclick="showSection('home')" style="width:100%; padding:10px; background:var(--main); color:white; border:none; border-radius:8px;">إغلاق</button>
+        </div>
+
+        <button class="btn-support" onclick="handlePiPayment()">دعم المشروع بـ 1 Pi</button>
     </div>
 
     <script>
-        // 2. تفعيل الساند بوكس (السطر المطلوب للخطوة 6)
+        // 1. الربط مع باي (نفس السطور اللي نجحتنا)
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        // 3. تسجيل الدخول التلقائي
-        async function initApp() {
+        async function startApp() {
             try {
                 const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, (payment) => {
-                    console.log("Incomplete payment found", payment);
-                });
-                document.getElementById('user-info-box').innerText = "أهلاً بك يا " + auth.user.username;
+                const auth = await Pi.authenticate(scopes, (payment) => {});
+                document.getElementById('user-status').innerText = "مرحباً بك: " + auth.user.username;
             } catch (err) {
-                document.getElementById('user-info-box').innerText = "يرجى الفتح من داخل Pi Browser";
+                document.getElementById('user-status').innerText = "يرجى الفتح من Pi Browser";
             }
         }
+        startApp();
 
-        initApp();
+        // 2. توليد فهرس القرآن (114 سورة)
+        const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
+        
+        const listContainer = document.getElementById('surah-list');
+        surahs.forEach((name, index) => {
+            let li = document.createElement('li');
+            li.innerText = `${index + 1}. سورة ${name}`;
+            li.onclick = () => alert(`جاري تحميل سورة ${name}...`);
+            listContainer.appendChild(li);
+        });
 
-        // 4. وظيفة الدفع
-        async function handlePayment() {
+        // 3. التنقل بين الأقسام
+        function showSection(id) {
+            document.querySelectorAll('.section-box').forEach(s => s.classList.remove('active'));
+            if(id !== 'home') document.getElementById(id).classList.add('active');
+        }
+
+        // 4. نظام الدفع (Sandbox)
+        async function handlePiPayment() {
             try {
-                const payment = await Pi.createPayment({
+                await Pi.createPayment({
                     amount: 1,
-                    memo: "دعم تطبيق نورك",
-                    metadata: { orderId: "support_1" },
+                    memo: "دعم تطوير تطبيق نورك",
+                    metadata: { order: "support_full_v1" }
                 }, {
-                    onReadyForServerApproval: (id) => console.log("Payment Ready:", id),
-                    onReadyForServerCompletion: (id, txid) => alert("تم الدعم بنجاح! شكراً لك."),
-                    onCancel: (id) => console.log("Cancelled"),
-                    onError: (err) => console.error("Error:", err),
+                    onReadyForServerApproval: (id) => console.log("Approved"),
+                    onReadyForServerCompletion: (id, tx) => alert("تقبل الله منك! تم الدعم بنجاح."),
+                    onCancel: (id) => {},
+                    onError: (err) => {}
                 });
-            } catch (err) {
-                alert("يجب فتح التطبيق من Pi Browser لتنفيذ الدفع");
-            }
+            } catch (err) { alert("افتح التطبيق من Pi Browser"); }
         }
 
-        // 5. وضع الإضاءة
         function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
+            document.getElementById('mainBody').classList.toggle('dark-mode');
         }
     </script>
 </body>

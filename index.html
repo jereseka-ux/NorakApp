@@ -4,247 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق نورك - Norak</title>
+    
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
     <style>
-        :root {
-            --primary: #1e3a8a;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --nav-bg: #ffffff;
-        }
-
-        .dark-mode {
-            --primary: #38bdf8;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text: #f1f5f9;
-            --nav-bg: #1e293b;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: 0.3s; }
-        
-        body { background-color: var(--bg); color: var(--text); }
-
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        header h2 { font-size: 1.2rem; }
-
-        #app { padding: 75px 15px 100px; min-height: 100vh; }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            cursor: pointer;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .ayah-text {
-            font-size: 1.5rem;
-            line-height: 2.2;
-            text-align: center;
-            display: block;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--nav-bg);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 1px solid #cbd5e1;
-            z-index: 1000;
-        }
-
-        nav button {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 0.8rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        nav button svg { width: 24px; height: 24px; margin-bottom: 4px; fill: var(--primary); }
-
-        .settings-panel { text-align: center; padding: 20px; }
-        
-        .btn-action {
-            background: var(--primary);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 10px;
-            border: none;
-            margin-top: 15px;
-            font-weight: bold;
-            width: 100%;
-        }
-
-        .badge { background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-left: 5px; }
+        /* ستايل سريع عشان الصور تظهر والواجهة تبقى مريحة */
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        img { max-width: 100%; height: auto; border-radius: 10px; margin-bottom: 20px; }
+        button { background-color: #6d28d9; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; margin-top: 20px; }
+        button:hover { background-color: #5b21b6; }
+        .status { margin-top: 10px; color: #666; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<header>
-    <button onclick="showSettings()" style="background:none; border:none; color:white; font-size:1.5rem;">⚙️</button>
-    <h2 id="main-title">نورك - Norak</h2>
-    <button onclick="toggleTheme()" id="theme-icon" style="background:none; border:none; color:white; font-size:1.5rem;">🌙</button>
-</header>
+    <div class="container">
+        <img src="logo.png" alt="شعار نورك" onerror="this.src='https://via.placeholder.com/150?text=Norak+Logo'">
+        
+        <h1>مرحباً بكم في تطبيق نورك</h1>
+        <p>تطبيقك الإيماني المتكامل على شبكة Pi</p>
 
-<div id="app">
-    <div id="display-area">
-        <div style="text-align:center; margin-top:50px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/2904/2904841.png" width="100" style="margin-bottom:20px;">
-            <h3>مرحباً بكم في تطبيق نورك</h3>
-            <p>تطبيقك الإيماني المتكامل على شبكة Pi</p>
-        </div>
+        <div id="user-info" class="status">جاري التحقق من اتصالك بشبكة باي...</div>
+
+        <button onclick="transferPi()">دعم بـ 1 Pi</button>
+
+        <div id="payment-status" class="status"></div>
     </div>
-</div>
 
-<nav>
-    <button onclick="loadQuran()">📖<span>القرآن</span></button>
-    <button onclick="loadAzkar()">📿<span>الأذكار</span></button>
-    <button onclick="loadDuaa()">🤲<span>أدعية</span></button>
-    <button onclick="showSupport()">💰<span>دعم</span></button>
-</nav>
+    <script>
+        // 2. إعدادات البداية - ركزي هنا "sandbox: true" هي اللي هتفتح الخطوة 6
+        Pi.init({ version: "2.0", sandbox: true });
 
-<script>
-    // Pi Network Initialization
-    const Pi = window.Pi;
-    if (Pi) { Pi.init({ version: "2.0", sandbox: true }); }
+        // 3. تسجيل دخول المستخدم تلقائياً عند فتح التطبيق
+        const scopes = ['username', 'payments'];
 
-    const display = document.getElementById('display-area');
-    const title = document.getElementById('main-title');
+        function onIncompletePaymentFound(payment) {
+            console.log("يوجد عملية دفع معلقة:", payment);
+            // هنا ممكن نكلم السيرفر بتاعنا لو عايزين نسجل العملية
+        };
 
-    // Theme Toggle
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        const icon = document.getElementById('theme-icon');
-        icon.innerText = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
-    }
+        Pi.authenticate(scopes, onIncompletePaymentFound).then(function(auth) {
+            document.getElementById('user-info').innerText = "أهلاً بك يا " + auth.user.username;
+            console.log("تم تسجيل الدخول بنجاح!");
+        }).catch(function(error) {
+            document.getElementById('user-info').innerText = "يرجى فتح التطبيق من داخل Pi Browser الرسمي";
+            console.error(error);
+        });
 
-    // Settings
-    function showSettings() {
-        title.innerText = "الإعدادات";
-        display.innerHTML = `
-            <div class="settings-panel">
-                <div class="card">
-                    <h4>إعدادات المظهر</h4>
-                    <button class="btn-action" onclick="toggleTheme()">تغيير الوضع (ليلي/نهاري)</button>
-                </div>
-                <div class="card">
-                    <h4>عن التطبيق</h4>
-                    <p>إصدار v1.0.0 - جاهز للنشر على متصفح Pi</p>
-                </div>
-            </div>
-        `;
-    }
-
-    // Quran Logic
-    async function loadQuran() {
-        title.innerText = "فهرس السور";
-        display.innerHTML = "<p style='text-align:center;'>جاري تحميل كلام الله...</p>";
-        try {
-            const res = await fetch('https://api.alquran.cloud/v1/surah');
-            const data = await res.json();
-            display.innerHTML = data.data.map(s => `
-                <div class="card" onclick="loadSurah(${s.number}, '${s.name}')">
-                    <span class="badge">${s.number}</span> <strong>${s.name}</strong>
-                    <br><small>${s.revelationType === 'Meccan' ? 'مكية' : 'مدنية'} - آياتها: ${s.numberOfAyahs}</small>
-                </div>
-            `).join('');
-        } catch (e) { display.innerHTML = "يرجى التأكد من اتصال الإنترنت."; }
-    }
-
-    async function loadSurah(num, name) {
-        title.innerText = name;
-        display.innerHTML = "<p style='text-align:center;'>جاري تحميل الآيات...</p>";
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
-        const data = await res.json();
-        display.innerHTML = data.data.ayahs.map(a => `
-            <span class="ayah-text">${a.text} ﴿${a.numberInSurah}﴾</span>
-        `).join('');
-        window.scrollTo(0,0);
-    }
-
-    // Azkar & Duaa
-    function loadAzkar() {
-        title.innerText = "الأذكار";
-        const items = [
-            {t:"أذكار الصباح", c:"أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..."},
-            {t:"أذكار المساء", c:"أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..."},
-            {t:"أذكار الاستيقاظ", c:"الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور."}
-        ];
-        renderStatic(items);
-    }
-
-    function loadDuaa() {
-        title.innerText = "أدعية مختارة";
-        const items = [
-            {t:"دعاء الهم والحزن", c:"اللهم إني أعوذ بك من الهم والحزن، والعجز والكسل..."},
-            {t:"دعاء طلب الرزق", c:"اللهم اكفني بحلالك عن حرامك، وأغنني بفضلك عمن سواك."},
-            {t:"دعاء تيسير الأمور", c:"اللهم لا سهل إلا ما جعلته سهلاً، وأنت تجعل الحزن إذا شئت سهلاً."}
-        ];
-        renderStatic(items);
-    }
-
-    function renderStatic(items) {
-        display.innerHTML = items.map(i => `
-            <div class="card" onclick="alert('${i.c}')">
-                <strong>${i.t}</strong>
-                <p style="font-size:0.9rem; color:#666; margin-top:5px;">اضغط للقراءة</p>
-            </div>
-        `).join('');
-    }
-
-    // Pi Payment
-    function showSupport() {
-        title.innerText = "دعم المشروع";
-        display.innerHTML = `
-            <div class="card" style="text-align:center;">
-                <p>ساهم في تطوير التطبيق ونشره للجميع</p>
-                <button class="btn-action" onclick="payPi()">دعم بـ 1 Pi</button>
-            </div>
-        `;
-    }
-
-    async function payPi() {
-        if (!Pi) return alert("افتح التطبيق من Pi Browser");
-        try {
-            await Pi.createPayment({
+        // 4. وظيفة الدفع الفعلي (التي تظهر في الصورة اللي بعتيها)
+        function transferPi() {
+            const paymentData = {
                 amount: 1,
-                memo: "دعم تطبيق نورك - Norak",
-                metadata: { orderId: Date.now() },
-            }, {
-                onReadyForServerApproval: (pId) => console.log("Payment ID:", pId),
-                onReadyForServerCompletion: (pId, tx) => alert("تقبل الله منك، تم الدعم بنجاح!"),
-                onCancel: (pId) => {},
-                onError: (e) => console.error(e)
-            });
-        } catch (e) { alert("هذه الميزة تعمل فقط داخل Pi Browser الرسمي."); }
-    }
-</script>
+                memo: "دعم تطوير تطبيق نورك",
+                metadata: { orderId: 12345 }
+            };
+
+            const callbacks = {
+                onReadyForServerApproval: function(paymentId) {
+                    console.log("الدفع جاهز للموافقة:", paymentId);
+                    // في مرحلة الـ Mainnet هنحتاج سيرفر يوافق، حالياً الساند بوكس هيعديها
+                },
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    console.log("اكتمل الدفع بنجاح! رقم العملية:", txid);
+                    document.getElementById('payment-status').innerText = "شكراً لدعمك! تم التحويل بنجاح.";
+                },
+                onCancel: function(paymentId) { console.log("تم إلغاء العملية"); },
+                onError: function(error, payment) { console.error("خطأ في الدفع:", error); }
+            };
+
+            Pi.createPayment(paymentData, callbacks);
+        }
+    </script>
+
 </body>
 </html>

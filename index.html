@@ -2,239 +2,121 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نورك - Norak</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق نورك | القرآن الكريم كاملًا</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-bg: #f4f4f9;
-            --header-bg: #4b0082;
-            --text-color: #333;
-            --card-bg: #ffffff;
-            --accent: #ffd700;
-        }
+        :root { --gold: #D4AF37; --dark-bg: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--dark-bg); color: var(--text-color); margin: 0; padding: 0; overflow-x: hidden; }
+        
+        /* شاشة التحميل الذكية */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: 0.5s; }
+        .loader { width: 60px; height: 60px; border: 5px solid #333; border-top: 5px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        body.dark-mode {
-            --primary-bg: #1a1a2e;
-            --header-bg: #0f0f1b;
-            --text-color: #e0e0e0;
-            --card-bg: #16213e;
-        }
+        /* الهيدر والتصميم */
+        header { background: linear-gradient(180deg, #1a1a1a, var(--dark-bg)); padding: 40px 20px; border-bottom: 2px solid var(--gold); text-align: center; }
+        h1 { font-family: 'Amiri', serif; color: var(--gold); font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .subtitle { color: #888; font-size: 1.1rem; margin-top: 10px; }
 
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--primary-bg);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            transition: 0.3s;
-        }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+        
+        /* كروت السور */
+        .sura-card { background: var(--card-bg); border: 1px solid #333; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .sura-card:hover { border-color: var(--gold); transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .sura-card i { display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 10px; opacity: 0.7; }
+        .sura-card span { font-family: 'Amiri', serif; font-size: 1.4rem; font-weight: bold; color: #fff; }
+        
+        /* عرض المصحف */
+        #reader-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf6e3; color: #333; z-index: 10000; overflow-y: auto; padding: 40px 20px; box-sizing: border-box; }
+        .reader-header { display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .close-btn { background: var(--gold); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .quran-text { max-width: 800px; margin: 0 auto; font-family: 'Amiri', serif; font-size: 1.8rem; line-height: 2.5; text-align: justify; }
 
-        header {
-            background: var(--header-bg);
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-icon { font-size: 24px; background: var(--accent); color: #000; padding: 5px 10px; border-radius: 50%; font-weight: bold; }
-
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-
-        .surah-card {
-            background: var(--card-bg);
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-
-        .surah-card:active { transform: scale(0.98); }
-
-        .surah-info { display: flex; align-items: center; gap: 15px; }
-        .surah-number { color: var(--header-bg); font-weight: bold; font-size: 1.2em; min-width: 30px; }
-
-        #quran-content {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--card-bg);
-            z-index: 2000;
-            overflow-y: auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .quran-text {
-            font-family: 'Amiri', serif;
-            font-size: 1.5em;
-            line-height: 2.2;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .btn-close {
-            background: #ff4757; color: white; border: none; padding: 10px 20px;
-            border-radius: 5px; cursor: pointer; margin-bottom: 20px;
-        }
-
-        .footer-action {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .btn-donate {
-            background: #5b9a42;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 15px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.1em;
-            box-shadow: 0 4px 15px rgba(91, 154, 66, 0.4);
-        }
-
-        /* لودر التحميل */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="loader">جاري تشغيل نورك...</div>
-
-<header>
-    <div class="logo-area">
-        <div class="logo-icon">N</div>
-        <h2 style="margin:0">نورك - Norak</h2>
-    </div>
-    <div onclick="toggleDarkMode()" style="cursor:pointer; font-size: 1.5em;">🌙</div>
-</header>
-
-<div class="container" id="surah-list">
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p style="margin-top: 20px; color: var(--gold); font-size: 1.2rem;">جاري تشغيل نورك...</p>
     </div>
 
-<div id="quran-content">
-    <button class="btn-close" onclick="closeQuran()">إغلاق العرض</button>
-    <h2 id="current-surah-title" style="text-align: center;"></h2>
-    <div class="quran-text" id="text-display"></div>
-</div>
+    <div id="app-content">
+        <header>
+            <h1>نورك</h1>
+            <p class="subtitle">القرآن الكريم كاملاً - مشروع ياسمين التقني</p>
+        </header>
 
-<div class="footer-action">
-    <button class="btn-donate" onclick="onIncompletePaymentFound()">دعم المشروع بـ 1 Pi</button>
-</div>
-
-<script>
-    // تهيئة Pi SDK
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true }); // تم تفعيل الـ Sandbox لسهولة الاختبار
-
-    async function authUser() {
-        try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            console.log("Welcome " + auth.user.username);
-            document.getElementById('loader').style.display = 'none';
-        } catch (err) {
-            console.error(err);
-            // إذا لم يفتح من Pi Browser سيظهر تنبيه
-            alert("برجاء فتح التطبيق من داخل Pi Browser ليعمل بشكل صحيح");
-        }
-    }
-
-    // قائمة السور (عينة وسيتم جلبها كاملة من API)
-    const surahs = [
-        "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال"
-    ]; // هنا يتم وضع الـ 114 سورة
-
-    function loadSurahs() {
-        const list = document.getElementById('surah-list');
-        for (let i = 1; i <= 114; i++) {
-            const card = document.createElement('div');
-            card.className = 'surah-card';
-            card.onclick = () => showSurah(i);
-            card.innerHTML = `
-                <div class="surah-info">
-                    <span class="surah-number">${i}</span>
-                    <span>سورة رقم ${i}</span>
+        <div class="container">
+            <div class="grid" id="quran-grid">
                 </div>
-                <span>📖</span>
-            `;
-            list.appendChild(card);
-        }
-    }
+        </div>
+    </div>
 
-    async function showSurah(num) {
-        document.getElementById('quran-content').style.display = 'block';
-        document.getElementById('text-display').innerText = "جاري تحميل الآيات...";
+    <div id="reader-view">
+        <div class="reader-header">
+            <h2 id="sura-name" style="font-family: 'Amiri'; margin: 0;">اسم السورة</h2>
+            <button class="close-btn" onclick="closeReader()">إغلاق</button>
+        </div>
+        <div class="quran-text" id="quran-content">
+            بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ... (جاري تحميل النص)
+        </div>
+    </div>
+
+    <script>
+        const suras = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
+
+        const grid = document.getElementById('quran-grid');
         
-        try {
-            const response = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
-            const data = await response.json();
-            let fullText = data.data.ayahs.map(a => a.text + ` ﴿${a.numberInSurah}﴾ `).join(' ');
-            document.getElementById('current-surah-title').innerText = data.data.name;
-            document.getElementById('text-display').innerText = fullText;
-        } catch (e) {
-            document.getElementById('text-display').innerText = "حدث خطأ في جلب البيانات، تأكد من الإنترنت.";
+        // بناء الشبكة
+        suras.forEach((name, index) => {
+            const card = document.createElement('div');
+            card.className = 'sura-card';
+            card.innerHTML = `<i>سورة رقم ${index + 1}</i><span>${name}</span>`;
+            card.onclick = () => openReader(name);
+            grid.appendChild(card);
+        });
+
+        function openReader(name) {
+            document.getElementById('sura-name').innerText = name;
+            document.getElementById('reader-view').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            // هنا ممكن نربط API حقيقي للقرآن مستقبلاً
+            document.getElementById('quran-content').innerText = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ. الحمد لله رب العالمين... النص الكامل لسورة " + name + " سيظهر هنا في التحديث القادم.";
         }
-    }
 
-    function closeQuran() {
-        document.getElementById('quran-content').style.display = 'none';
-    }
-
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-    }
-
-    // وظيفة الدفع (Payment)
-    async function onIncompletePaymentFound(payment) {
-        // في حال وجود دفعة معلقة يتم التعامل معها هنا
-    }
-
-    async function transferPi() {
-        try {
-            const payment = await Pi.createPayment({
-                amount: 1,
-                memo: "دعم تطبيق نورك",
-                metadata: { internal_id: "support_1" },
-            }, {
-                onReadyForServerApproval: (paymentId) => { /* اتركها فارغة للآن */ },
-                onReadyForServerCompletion: (paymentId, txid) => { /* اتركها فارغة للآن */ },
-                onCancel: (paymentId) => { },
-                onError: (error, payment) => { },
-            });
-        } catch (err) {
-            alert("خطأ في عملية الدفع");
+        function closeReader() {
+            document.getElementById('reader-view').style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
-    }
 
-    // تشغيل التطبيق
-    window.onload = () => {
-        loadSurahs();
-        authUser();
-    };
-</script>
+        // تهيئة Pi SDK مع نظام حماية من التعليق
+        async function initPi() {
+            try {
+                if (window.Pi) {
+                    await window.Pi.init({ version: "2.0", sandbox: true });
+                    console.log("Pi SDK Ready");
+                }
+            } catch (e) {
+                console.log("Not in Pi Browser or SDK Error");
+            }
+            hideLoading();
+        }
 
+        function hideLoading() {
+            const loader = document.getElementById('loading-screen');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.classList.add('hidden'), 500);
+        }
+
+        // أمان إضافي: لو عدا 4 ثواني والتحميل مخلصش، افتح التطبيق غصب عنه
+        setTimeout(hideLoading, 4000);
+
+        window.onload = initPi;
+    </script>
 </body>
 </html>

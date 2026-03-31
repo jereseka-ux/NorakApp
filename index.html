@@ -11,84 +11,91 @@
         :root { --bg-color: #f4f4f9; --text-color: #333; --card-bg: #ffffff; }
         .dark-mode { --bg-color: #1a1a2e; --text-color: #e0e0e0; --card-bg: #16213e; }
         
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; transition: 0.3s; }
-        header { background: #6d28d9; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; transition: 0.3s; padding-bottom: 50px; }
+        header { background: #6d28d9; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         
-        .main-container { padding: 20px; text-align: center; }
-        .logo-img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px; }
+        .main-container { padding: 20px; text-align: center; max-width: 600px; margin: auto; }
+        .logo-img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         
-        /* تصميم الزراير اللي كانت ظاهرة في تطبيقك */
         .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .nav-item { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; }
+        .nav-item { background: var(--card-bg); padding: 25px 15px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border: 1px solid rgba(0,0,0,0.05); }
         .nav-item:active { transform: scale(0.95); }
-        .nav-item i { font-size: 24px; display: block; margin-bottom: 10px; }
+        .nav-item span { font-size: 30px; display: block; margin-bottom: 10px; }
+        .nav-item p { margin: 0; font-weight: bold; font-size: 18px; }
         
-        .btn-support { background: #fbbf24; color: #000; font-weight: bold; padding: 15px; border-radius: 12px; margin-top: 20px; border: none; width: 100%; cursor: pointer; }
+        .btn-support { background: linear-gradient(45deg, #fbbf24, #f59e0b); color: #000; font-weight: bold; padding: 18px; border-radius: 15px; margin-top: 25px; border: none; width: 100%; cursor: pointer; font-size: 18px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); }
         
-        #user-info { font-size: 0.9em; background: rgba(0,0,0,0.1); padding: 5px 10px; border-radius: 20px; margin-top: 10px; display: inline-block; }
+        #user-info-box { margin-top: 15px; font-size: 0.9em; color: #6d28d9; font-weight: bold; }
+        .dark-mode #user-info-box { color: #4cc9f0; }
     </style>
 </head>
 <body id="bodyTag">
 
     <header>
-        <div onclick="toggleDarkMode()" style="cursor:pointer; font-size: 20px;">🌙</div>
+        <div onclick="toggleDarkMode()" style="cursor:pointer; font-size: 24px;">🌙</div>
         <div style="font-size: 22px; font-weight: bold;">نورك - Norak</div>
-        <div style="cursor:pointer; font-size: 20px;">⚙️</div>
+        <div onclick="alert('الإعدادات قريباً')" style="cursor:pointer; font-size: 24px;">⚙️</div>
     </header>
 
     <div class="main-container">
-        <img src="logo.png" class="logo-img" alt="Norak Logo" onerror="this.src='https://via.placeholder.com/100?text=NOURK'">
+        <img src="logo.png" class="logo-img" alt="Norak Logo" onerror="this.src='https://via.placeholder.com/120?text=Norak'">
         
-        <div id="user-status">جاري الاتصال بـ Pi...</div>
+        <h1>مرحباً بك في تطبيق نورك</h1>
+        <p style="color: #666;">تطبيقك الإيماني المتكامل على شبكة Pi</p>
+
+        <div id="user-info-box">جاري التحقق من الهوية...</div>
         
         <div class="nav-grid">
-            <div class="nav-item" onclick="alert('قريباً: المصحف الكامل')">📖 <br> القرآن</div>
-            <div class="nav-item" onclick="alert('قريباً: أذكار الصباح والمساء')">📿 <br> الأذكار</div>
-            <div class="nav-item" onclick="alert('قريباً: أدعية مختارة')">🤲 <br> أدعية</div>
-            <div class="nav-item" onclick="toggleDarkMode()">💡 <br> الإضاءة</div>
+            <div class="nav-item" onclick="alert('سيتم إضافة المصحف الشريف قريباً')"><span>📖</span><p>القرآن</p></div>
+            <div class="nav-item" onclick="alert('سيتم إضافة الأذكار قريباً')"><span>📿</span><p>الأذكار</p></div>
+            <div class="nav-item" onclick="alert('سيتم إضافة الأدعية قريباً')"><span>🤲</span><p>أدعية</p></div>
+            <div class="nav-item" onclick="toggleDarkMode()"><span>💡</span><p>الإضاءة</p></div>
         </div>
 
-        <button class="btn-support" onclick="startPayment()">دعم المشروع بـ 1 Pi</button>
+        <button class="btn-support" onclick="handlePayment()">دعم المشروع بـ 1 Pi</button>
     </div>
 
     <script>
-        // 2. تفعيل الربط مع باي (السطر اللي هيخضر رقم 6)
+        // 2. تفعيل الساند بوكس (السطر المطلوب للخطوة 6)
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        // 3. كود تسجيل دخول المستخدم عشان يظهر اسمه
-        async function login() {
+        // 3. تسجيل الدخول التلقائي
+        async function initApp() {
             try {
                 const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, (payment) => {});
-                document.getElementById('user-status').innerHTML = `<span id="user-info">أهلاً بك: ${auth.user.username}</span>`;
+                const auth = await Pi.authenticate(scopes, (payment) => {
+                    console.log("Incomplete payment found", payment);
+                });
+                document.getElementById('user-info-box').innerText = "أهلاً بك يا " + auth.user.username;
             } catch (err) {
-                document.getElementById('user-status').innerHTML = "يرجى الفتح من Pi Browser";
+                document.getElementById('user-info-box').innerText = "يرجى الفتح من داخل Pi Browser";
             }
         }
-        login();
 
-        // 4. كود الدفع الفعال
-        async function startPayment() {
+        initApp();
+
+        // 4. وظيفة الدفع
+        async function handlePayment() {
             try {
-                await Pi.createPayment({
+                const payment = await Pi.createPayment({
                     amount: 1,
                     memo: "دعم تطبيق نورك",
-                    metadata: { order: "support_01" }
+                    metadata: { orderId: "support_1" },
                 }, {
-                    onReadyForServerApproval: (id) => console.log("Approval:", id),
-                    onReadyForServerCompletion: (id, tx) => alert("تم الدعم بنجاح! شكراً لك."),
-                    onCancel: (id) => console.log("تم الإلغاء"),
-                    onError: (err) => console.error("خطأ:", err)
+                    onReadyForServerApproval: (id) => console.log("Payment Ready:", id),
+                    onReadyForServerCompletion: (id, txid) => alert("تم الدعم بنجاح! شكراً لك."),
+                    onCancel: (id) => console.log("Cancelled"),
+                    onError: (err) => console.error("Error:", err),
                 });
             } catch (err) {
-                console.error(err);
+                alert("يجب فتح التطبيق من Pi Browser لتنفيذ الدفع");
             }
         }
 
-        // 5. كود الإضاءة اللي طلبتيه
+        // 5. وضع الإضاءة
         function toggleDarkMode() {
-            document.getElementById('bodyTag').classList.toggle('dark-mode');
+            document.body.classList.toggle('dark-mode');
         }
     </script>
 </body>

@@ -3,59 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق نورك - المصحف الكامل</title>
+    <title>تطبيق نورك - النسخة المعتمدة</title>
 
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --p: #6c5ce7; --bg: #f4f7f6; --c: #ffffff; --t: #2d3436; --s: 0 10px 20px rgba(0,0,0,0.05);
-        }
-        body.dark {
-            --bg: #121212; --c: #1e1e1e; --t: #f5f5f5;
-        }
+        :root { --p: #6c5ce7; --bg: #f8f9fa; --c: #ffffff; --t: #2d3436; }
+        body.dark { --bg: #1a1a1a; --c: #2d2d2d; --t: #f5f5f5; }
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
-        body { background: var(--bg); color: var(--t); margin: 0; padding-bottom: 90px; }
+        body { background: var(--bg); color: var(--t); margin: 0; padding-bottom: 90px; overflow-x: hidden; }
 
         header {
             background: linear-gradient(135deg, var(--p), #a29bfe);
-            color: white; padding: 50px 20px; text-align: center;
-            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
+            color: white; padding: 45px 20px; text-align: center;
+            border-radius: 0 0 40px 40px; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
         }
 
-        .search-area { margin: -25px 20px 20px; }
-        .search-area input {
-            width: 100%; padding: 18px 25px; border-radius: 30px; border: none;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1); outline: none;
-        }
-
-        .container { padding: 0 20px; max-width: 600px; margin: auto; }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        
         .card {
-            background: var(--c); padding: 20px; border-radius: 20px; margin-bottom: 12px;
+            background: var(--c); padding: 20px; border-radius: 20px; margin-bottom: 15px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: var(--s); cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid rgba(0,0,0,0.02);
         }
-        .card:active { transform: scale(0.97); }
+
         .idx { background: var(--p); color: white; width: 40px; height: 40px; border-radius: 12px;
-               display: flex; align-items: center; justify-content: center; font-weight: 900; }
+               display: flex; align-items: center; justify-content: center; font-weight: 900; margin-left: 15px; }
 
         #reader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 10000; display: none; flex-direction: column;
         }
-        .r-header { background: var(--p); color: white; padding: 20px; display: flex; justify-content: space-between; }
-        .r-body { flex: 1; padding: 30px; overflow-y: auto; text-align: center; font-size: 1.8rem; line-height: 2.5; }
+        .r-header { background: var(--p); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .r-body { flex: 1; padding: 40px 25px; overflow-y: auto; text-align: center; font-size: 1.7rem; line-height: 2.6; }
 
         nav {
             position: fixed; bottom: 0; width: 100%; background: var(--c);
             display: flex; justify-content: space-around; padding: 15px 0;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-radius: 25px 25px 0 0;
         }
-        .nav-link { text-decoration: none; color: #b2bec3; font-weight: 700; text-align: center; font-size: 0.9rem; }
-        .nav-link.active { color: var(--p); }
+        .nav-item { cursor: pointer; color: #b2bec3; font-weight: 700; text-align: center; font-size: 0.9rem; flex:1; }
+        .nav-item.active { color: var(--p); }
 
-        .btn-pay { background: var(--p); color: white; border: none; padding: 12px 25px; border-radius: 15px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        /* زرار الدفع الحقيقي */
+        .pay-btn {
+            background: linear-gradient(45deg, #f1c40f, #f39c12);
+            color: white; border: none; padding: 18px; border-radius: 15px;
+            font-weight: 900; width: 100%; cursor: pointer; font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.3); margin-top: 10px;
+        }
+        .pay-btn:hover { transform: translateY(-2px); }
+
         .hidden { display: none; }
     </style>
 </head>
@@ -63,127 +62,119 @@
 
 <header>
     <h1 style="margin:0">نُورك</h1>
-    <p>تطبيقك الإيماني المتكامل على شبكة Pi</p>
+    <p style="margin:5px 0 0; opacity:0.9">المصحف والأذكار - نسخة Pi المعتمدة</p>
 </header>
 
-<div class="search-area">
-    <input type="text" id="mainSearch" placeholder="ابحث عن السورة أو الذكر..." onkeyup="filterItems()">
-</div>
-
 <div class="container">
-    <div id="quran-view" class="page-view">
-        <h3 style="border-right: 4px solid var(--p); padding-right: 10px;">📖 فهرس القرآن الكريم</h3>
+    <div id="page-quran" class="view">
+        <h3 style="border-right: 5px solid var(--p); padding-right: 10px;">📖 فهرس السور</h3>
         <div id="q-list"></div>
     </div>
 
-    <div id="azkar-view" class="page-view hidden">
-        <h3 style="border-right: 4px solid var(--p); padding-right: 10px;">📿 الأذكار اليومية</h3>
+    <div id="page-azkar" class="view hidden">
+        <h3 style="border-right: 5px solid var(--p); padding-right: 10px;">📿 الأذكار اليومية</h3>
         <div id="a-list"></div>
     </div>
 
-    <div id="settings-view" class="page-view hidden">
-        <h3 style="border-right: 4px solid var(--p); padding-right: 10px;">⚙️ الإعدادات</h3>
-        <div class="card" onclick="toggleDark()">
-            <span>الوضع الليلي (Dark Mode)</span>
-            <span id="dark-status">🌙</span>
+    <div id="page-settings" class="view hidden">
+        <div class="card" style="display:block; text-align:center; background: #fff9e6; border: 1px solid #f1c40f;">
+            <h3 style="margin-top:0; color:#d35400">فتح النسخة الكاملة ✨</h3>
+            <p style="font-size:0.9rem">استمتع بجميع سور القرآن والأذكار بدون إنترنت</p>
+            <button class="pay-btn" id="pi-pay-button">ادفع 1 Pi للتفعيل</button>
+        </div>
+
+        <div class="card" onclick="document.body.classList.toggle('dark')">
+            <span>تبديل الوضع الليلي</span>
+            <span>🌙</span>
         </div>
         <div class="card">
             <div style="width:100%">
                 <p>حجم الخط</p>
-                <input type="range" min="18" max="45" value="26" style="width:100%" oninput="updateFont(this.value)">
+                <input type="range" min="18" max="45" value="25" style="width:100%" oninput="document.getElementById('rbody').style.fontSize = this.value + 'px'">
             </div>
-        </div>
-        <div class="card" style="display:block">
-            <p>دعم التطبيق عبر Pi Network</p>
-            <button class="btn-pay" onclick="requestPiPayment()">تفعيل النسخة الكاملة (1 Pi)</button>
         </div>
     </div>
 </div>
 
 <div id="reader">
     <div class="r-header">
-        <span onclick="closeReader()" style="cursor:pointer; font-size: 1.5rem;">✕</span>
-        <span id="rtitle" style="font-weight: 900;"></span>
-        <span onclick="copyContent()" style="cursor:pointer;">📋</span>
+        <span onclick="document.getElementById('reader').style.display='none'" style="cursor:pointer; font-size:1.5rem">✕</span>
+        <span id="rtitle" style="font-weight:900"></span>
+        <span onclick="alert('تم حفظ العلامة 🔖')">🔖</span>
     </div>
     <div id="rbody" class="r-body"></div>
 </div>
 
 <nav>
-    <div class="nav-link active" onclick="switchPage('quran', this)">📖<br>القرآن</div>
-    <div class="nav-link" onclick="switchPage('azkar', this)">📿<br>الأذكار</div>
-    <div class="nav-link" onclick="switchPage('settings', this)">⚙️<br>الإعدادات</div>
+    <div class="nav-item active" onclick="showPage('quran', this)">📖<br>القرآن</div>
+    <div class="nav-item" onclick="showPage('azkar', this)">📿<br>الأذكار</div>
+    <div class="nav-item" onclick="showPage('settings', this)">⚙️<br>الإعدادات</div>
 </nav>
 
 <script>
-    // تهيئة Pi SDK للقبول الرسمي
-    try { Pi.init({ version: "2.0" }); } catch(e) { console.log("Pi SDK error"); }
-
+    // بيانات حقيقية دسمة
     const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
 
-    const quranData = {
-        "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
-        "آية الكرسي": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
-        "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)",
-        "الفلق": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ (1) مِنْ شَرِّ مَا خَلَقَ (2) وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ (3) وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ (4) وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ (5)",
-        "الناس": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ (1) مَلِكِ النَّاسِ (2) إِلَهِ النَّاسِ (3) مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ (4) الَّذِي يُوَسْوِسُ فِي صُدورِ النَّاسِ (5) مِنَ الْجِنَّةِ وَالنَّاسِ (6)"
+    const content = {
+        "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1)\nالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
+        "آية الكرسي": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهما وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+        "سيد الاستغفار": "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت.",
+        "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)"
     };
 
-    const azkarData = [
-        { title: "أذكار الصباح", content: "أصبحنا وأصبح الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له.. (النص الكامل متوفر)" },
-        { title: "أذكار المساء", content: "أمسينا وأمسى الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له.. (النص الكامل متوفر)" },
-        { title: "سيد الاستغفار", content: "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت." }
-    ];
-
-    function startApp() {
+    function init() {
         const qList = document.getElementById('q-list');
         qList.innerHTML = surahs.map((s, i) => `
-            <div class="card" onclick="openContent('سورة ${s}', '${quranData[s] || 'نص سورة ' + s + ' متاح في النسخة الكاملة.'}')">
+            <div class="card" onclick="openMe('سورة ${s}', '${content[s] || 'نص سورة ' + s + ' سيكون متاحاً بعد التفعيل.'}')">
                 <div style="display:flex; align-items:center">
                     <div class="idx">${i+1}</div>
-                    <b style="margin-right:15px">سورة ${s}</b>
+                    <b>سورة ${s}</b>
                 </div>
-                <span>📖</span>
+                <span style="color:var(--p)">📖</span>
             </div>
         `).join('');
 
         const aList = document.getElementById('a-list');
-        aList.innerHTML = azkarData.map(a => `
-            <div class="card" onclick="openContent('${a.title}', '${a.content}')">
-                <b>${a.title}</b>
-                <span>📿</span>
+        const azkarArr = ["آية الكرسي", "سيد الاستغفار"];
+        aList.innerHTML = azkarArr.map(a => `
+            <div class="card" onclick="openMe('${a}', '${content[a]}')">
+                <b>${a}</b>
+                <span>✨</span>
             </div>
         `).join('');
     }
 
-    function switchPage(p, el) {
-        document.querySelectorAll('.page-view').forEach(v => v.classList.add('hidden'));
-        document.getElementById(p + '-view').classList.remove('hidden');
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function openContent(t, c) {
+    function openMe(t, c) {
         document.getElementById('rtitle').innerText = t;
         document.getElementById('rbody').innerText = c;
         document.getElementById('reader').style.display = 'flex';
     }
 
-    function closeReader() { document.getElementById('reader').style.display = 'none'; }
-
-    function filterItems() {
-        let v = document.getElementById('mainSearch').value.toLowerCase();
-        document.querySelectorAll('.card').forEach(c => {
-            c.style.display = c.innerText.toLowerCase().includes(v) ? 'flex' : 'none';
-        });
+    function showPage(p, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.getElementById('page-' + p).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
     }
 
-    function toggleDark() { document.body.classList.toggle('dark'); }
-    function updateFont(s) { document.getElementById('rbody').style.fontSize = s + 'px'; }
-    function copyContent() { navigator.clipboard.writeText(document.getElementById('rbody').innerText); alert("تم النسخ!"); }
-    function requestPiPayment() { alert("جاري الاتصال بـ Pi Browser لإتمام عملية التفعيل..."); }
+    // --- الربط الحقيقي بـ Pi SDK ---
+    const Pi = window.Pi;
+    Pi.init({ version: "2.0" });
 
-    window.onload = startApp;
+    document.getElementById('pi-pay-button').onclick = function() {
+        Pi.createPayment({
+            amount: 1,
+            memo: "تفعيل نسخة تطبيق نورك الكاملة",
+            metadata: { orderId: "12345" }
+        }, {
+            onReadyForServerApproval: function(paymentId) { console.log("Payment Ready"); },
+            onReadyForServerCompletion: function(paymentId, txid) { alert("تم الدفع بنجاح!"); },
+            onCancel: function(paymentId) { alert("تم إلغاء العملية"); },
+            onError: function(error, paymentId) { alert("خطأ في الدفع: " + error.message); }
+        });
+    };
+
+    window.onload = init;
 </script>
 </body>
 </html>

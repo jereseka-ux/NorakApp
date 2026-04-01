@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نورك - تطبيق إيماني متكامل</title>
+    <title>نورك - واحتك الإيمانية الذكية</title>
+    
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --main-grad: linear-gradient(135deg, #8e44ad, #6c5ce7);
@@ -23,30 +25,29 @@
             --accent-color: #a29bfe;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
+        * { box-sizing: border-box; transition: all 0.3s ease; font-family: 'Tajawal', sans-serif; }
 
         body {
-            font-family: 'Tajawal', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding-bottom: 80px;
+            padding-bottom: 90px;
         }
 
         header {
             background: var(--main-grad);
             color: white;
-            padding: 40px 20px;
+            padding: 45px 20px;
             text-align: center;
             border-radius: 0 0 40px 40px;
             box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
         }
 
         .search-bar {
-            margin: -25px 20px 20px;
+            margin: -25px 25px 20px;
             background: var(--card-bg);
             border-radius: 15px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             display: flex;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
@@ -63,15 +64,15 @@
         .controls-row {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
         .control-btn {
             background: var(--card-bg);
             border: none;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -95,21 +96,20 @@
             border: 1px solid rgba(0,0,0,0.03);
         }
 
-        .sura-card:hover { transform: scale(1.02); border-color: var(--accent-color); }
-
         .sura-num {
             background: var(--accent-color);
             color: white;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
 
-        /* نافذة القراءة */
+        /* شاشة القراءة (Overlay) */
         #reader-overlay {
             position: fixed;
             top: 0;
@@ -117,13 +117,13 @@
             width: 100%;
             height: 100%;
             background: var(--bg-color);
-            z-index: 1000;
+            z-index: 2000;
             display: none;
             flex-direction: column;
         }
 
         .reader-header {
-            padding: 20px;
+            padding: 15px 20px;
             background: var(--main-grad);
             color: white;
             display: flex;
@@ -132,15 +132,15 @@
         }
 
         .reader-content {
-            padding: 30px;
+            padding: 25px;
             overflow-y: auto;
-            font-size: 1.4rem;
-            line-height: 2.5;
+            font-size: 1.5rem;
+            line-height: 2.2;
             text-align: center;
             flex-grow: 1;
         }
 
-        /* Navigation */
+        /* Bottom Nav */
         nav {
             position: fixed;
             bottom: 0;
@@ -150,38 +150,39 @@
             justify-content: space-around;
             padding: 12px 0;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            z-index: 900;
+            z-index: 1000;
         }
 
         .nav-link {
             text-decoration: none;
             color: var(--nav-inactive);
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
 
         .nav-link.active { color: var(--accent-color); font-weight: bold; }
-
-        .nav-link i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .nav-link i { font-size: 1.5rem; display: block; margin-bottom: 2px; }
 
         .upgrade-card {
             background: linear-gradient(45deg, #f1c40f, #f39c12);
             color: white;
-            padding: 25px;
+            padding: 30px 20px;
             border-radius: 20px;
             text-align: center;
             margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(241, 196, 15, 0.3);
         }
 
         .pay-btn {
             background: white;
             color: #d35400;
             border: none;
-            padding: 12px 40px;
-            border-radius: 25px;
+            padding: 12px 45px;
+            border-radius: 30px;
             font-weight: bold;
-            margin-top: 15px;
+            margin-top: 20px;
             cursor: pointer;
+            font-size: 1.1rem;
         }
 
         .hidden { display: none; }
@@ -199,26 +200,25 @@
 </div>
 
 <div class="controls-row">
-    <button class="control-btn" onclick="toggleTheme()">🌓</button>
-    <button class="control-btn" onclick="goToBookmark()">🔖</button>
-    <button class="control-btn" onclick="shareApp()">📤</button>
+    <button class="control-btn" onclick="toggleTheme()" title="تغيير الإضاءة">🌓</button>
+    <button class="control-btn" onclick="goToBookmark()" title="العلامة المحفوظة">🔖</button>
+    <button class="control-btn" onclick="shareApp()" title="مشاركة">📤</button>
 </div>
 
 <div class="container">
     <div id="quran-page" class="page">
-        <h3 style="margin-right: 10px;">فهرس السور</h3>
-        <div id="surah-list">
-            </div>
+        <h3 style="margin: 0 10px 15px 0;">فهرس السور</h3>
+        <div id="surah-list"></div>
     </div>
 
     <div id="azkar-page" class="page hidden">
-        <h3>الأذكار المستجابة</h3>
+        <h3 style="margin: 0 10px 15px 0;">الأذكار والتحصين</h3>
         <div class="zekr-item" onclick="openZekr('morning')">
-            <span>☀️ أذكار الصباح كاملة</span>
+            <span>☀️ أذكار الصباح</span>
             <span>⬅️</span>
         </div>
         <div class="zekr-item" onclick="openZekr('evening')">
-            <span>🌙 أذكار المساء كاملة</span>
+            <span>🌙 أذكار المساء</span>
             <span>⬅️</span>
         </div>
         <div class="zekr-item" onclick="openZekr('sleep')">
@@ -229,21 +229,21 @@
 
     <div id="upgrade-page" class="page hidden">
         <div class="upgrade-card">
-            <h3>تفعيل العضوية الممتازة</h3>
-            <p>افتح ميزات البحث المتقدم، القراءة الليلية التلقائية، ودعم استمرار التطبيق بدون إعلانات.</p>
+            <h2 style="margin-top:0;">تفعيل ميزات Premium</h2>
+            <p>افتح البحث المتقدم، الحفظ التلقائي غير المحدود، ودعم تطوير التطبيق.</p>
             <button class="pay-btn" onclick="handlePiPayment()">دفع 1 Pi للتفعيل</button>
         </div>
-        <div style="text-align: center; margin-top: 20px; color: #7f8c8d;">
-            <small>نسخة التطبيق: 2.0.4 | شبكة Pi الرسمية</small>
-        </div>
+        <p style="text-align: center; color: #7f8c8d; margin-top: 30px; font-size: 0.9rem;">
+            حالة النظام: متصل بشبكة Pi<br>الإصدار 2.1.0
+        </p>
     </div>
 </div>
 
 <div id="reader-overlay">
     <div class="reader-header">
-        <button onclick="closeReader()" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
-        <span id="reader-title">السورة</span>
-        <button onclick="saveCurrentBookmark()" style="background:none; border:none; color:white;">حفظ 🔖</button>
+        <button onclick="closeReader()" style="background:none; border:none; color:white; font-size:1.8rem; cursor:pointer;">✕</button>
+        <span id="reader-title" style="font-weight:bold; font-size:1.2rem;">نص القراءة</span>
+        <button onclick="saveCurrentBookmark()" style="background:none; border:none; color:white; font-weight:bold; cursor:pointer;">حفظ 🔖</button>
     </div>
     <div id="reader-body" class="reader-content"></div>
 </div>
@@ -255,18 +255,19 @@
 </nav>
 
 <script>
-    // بيانات السور (أمثلة وسيتم توليد القائمة كاملة)
+    // 1. مصفوفة السور الكاملة
     const surahs = [
         "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"
     ];
 
+    // 2. بيانات الأذكار
     const azkar = {
-        morning: "أصبحنا وأصبح الملك لله والحمد لله.. (نص أذكار الصباح الكامل يوضع هنا)",
-        evening: "أمسينا وأمسي الملك لله والحمد لله.. (نص أذكار المساء الكامل يوضع هنا)",
-        sleep: "باسمك ربي وضعت جنبي وبك أرفعه.. (أذكار النوم)"
+        morning: "أصبحنا وأصبح الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له.. (اللهم ما أصبح بي من نعمة فمنك وحدك).",
+        evening: "أمسينا وأمسي الملك لله والحمد لله.. (يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله).",
+        sleep: "باسمك ربي وضعت جنبي وبك أرفعه.. (آية الكرسي، الإخلاص والمعوذتين)."
     };
 
-    // توليد قائمة السور
+    // 3. توليد قائمة السور برمجياً
     function renderSurahs() {
         const list = document.getElementById('surah-list');
         list.innerHTML = surahs.map((name, index) => `
@@ -280,18 +281,22 @@
         `).join('');
     }
 
-    // التنقل بين الصفحات
+    // 4. نظام التنقل
     function switchPage(pageId, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
         document.getElementById(pageId + '-page').classList.remove('hidden');
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         el.classList.add('active');
+        window.scrollTo(0, 0);
     }
 
-    // فتح السورة (محاكاة لجلب النص)
+    // 5. وظائف القراءة
     function openSura(name, id) {
         document.getElementById('reader-title').innerText = "سورة " + name;
-        document.getElementById('reader-body').innerHTML = `<p>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p><p>هنا يظهر نص سورة ${name} كاملاً بالتشكيل لراحة المستخدم...</p>`;
+        document.getElementById('reader-body').innerHTML = `
+            <p style="color:var(--accent-color); font-weight:bold;">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+            <p>هذا النص تجريبي لسورة ${name}. (يمكنكِ لاحقاً ربط التطبيق بملف JSON يحتوي على القرآن كاملاً).</p>
+        `;
         document.getElementById('reader-overlay').style.display = 'flex';
     }
 
@@ -306,7 +311,7 @@
         document.getElementById('reader-overlay').style.display = 'none';
     }
 
-    // نظام البحث
+    // 6. البحث، الوضع الليلي، والبوكمارك
     function filterContent() {
         let input = document.getElementById('searchInput').value.toLowerCase();
         let cards = document.querySelectorAll('.sura-card');
@@ -315,4 +320,37 @@
         });
     }
 
-    // الوضع
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    function saveCurrentBookmark() {
+        const title = document.getElementById('reader-title').innerText;
+        localStorage.setItem('quran_bookmark', title);
+        alert('تم حفظ "' + title + '" في العلامات! 🔖');
+    }
+
+    function goToBookmark() {
+        const last = localStorage.getItem('quran_bookmark');
+        if(last) alert('آخر علامة محفوظة: ' + last);
+        else alert('لا توجد علامات محفوظة.');
+    }
+
+    function shareApp() {
+        alert('رابط تطبيقك: ' + window.location.href);
+    }
+
+    async function handlePiPayment() {
+        alert("سيتم تحويلك الآن لإتمام الدفع عبر محفظة Pi لـ 1 Pi.");
+    }
+
+    // عند التحميل
+    window.onload = () => {
+        renderSurahs();
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    };
+</script>
+
+</body>
+</html>

@@ -3,95 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نورك - المصحف والأذكار</title>
+    <title>نورك - النسخة الاحترافية</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fdfdfd; text-align: center; margin: 0; padding: 15px; }
-        .header { background: #673ab7; color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px; }
-        #mainSearch { width: 90%; padding: 15px; border-radius: 25px; border: 2px solid #673ab7; margin-bottom: 20px; outline: none; }
-        .pay-btn { background: #ffc107; border: none; padding: 18px; width: 90%; border-radius: 30px; font-weight: bold; font-size: 1.2rem; cursor: pointer; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .container { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 500px; margin: 0 auto; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-right: 8px solid #673ab7; position: relative; }
-        .card h3 { margin: 0 0 10px 0; font-size: 1.4rem; color: #333; }
-        .card p { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
-        .read-btn { background: none; border: 1px solid #333; padding: 8px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .read-btn:hover { background: #333; color: white; }
+        :root { --bg: #f4f7f6; --card: #ffffff; --text: #333; --primary: #673ab7; }
+        .dark-mode { --bg: #1a1a1a; --card: #2d2d2d; --text: #eee; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding-bottom: 80px; transition: 0.3s; }
+        
+        .header { background: linear-gradient(135deg, #673ab7, #9575cd); color: white; padding: 25px; border-radius: 0 0 25px 25px; }
+        .search-container { padding: 15px; }
+        #mainSearch { width: 100%; padding: 12px; border-radius: 10px; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
+        
+        .pay-banner { background: #ffc107; margin: 15px; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; color: #000; }
+        
+        .settings-panel { background: var(--card); margin: 15px; padding: 15px; border-radius: 12px; display: none; }
+        .setting-item { display: flex; justify-content: space-between; margin: 10px 0; align-items: center; }
+
+        .container { padding: 10px; }
+        .card { background: var(--card); margin-bottom: 15px; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: center; }
+        .read-btn { background: none; border: 1px solid var(--text); color: var(--text); padding: 8px 30px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
+        .nav-item { cursor: pointer; font-size: 0.9rem; opacity: 0.7; }
+        .nav-item.active { color: var(--primary); opacity: 1; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>نُورك</h1>
-        <p>تطبيقك الروحاني المتكامل - القرآن والأذكار</p>
+        <p>تطبيقك الروحاني المتكامل</p>
     </div>
 
-    <input type="text" id="mainSearch" onkeyup="search()" placeholder="ابحث عن سورة أو ذكر...">
-    
-    <button class="pay-btn" onclick="startPay()">تفعيل نسخة نُورك الكاملة (1 Pi)</button>
+    <div class="search-container">
+        <input type="text" id="mainSearch" onkeyup="search()" placeholder="ابحث عن سورة أو ذكر...">
+    </div>
 
-    <div class="container" id="content-area">
+    <div class="pay-banner" onclick="startPay()">تفعيل نسخة نُورك الكاملة (1 Pi)</div>
+
+    <div id="settings-area" class="settings-panel">
+        <h3>⚙️ الإعدادات</h3>
+        <div class="setting-item">
+            <span>الوضع الليلي 🌙</span>
+            <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
         </div>
+        <div class="setting-item">
+            <span>حجم الخط</span>
+            <input type="range" min="16" max="30" value="20" oninput="changeFont(this.value)">
+        </div>
+    </div>
+
+    <div class="container" id="content-area"></div>
+
+    <div class="footer-nav">
+        <div class="nav-item active" onclick="showTab('quran')">📖 القرآن</div>
+        <div class="nav-item" onclick="showTab('azkar')">📿 الأذكار</div>
+        <div class="nav-item" onclick="showTab('settings')">⚙️ الإعدادات</div>
+    </div>
 
 <script>
-    // تهيئة شبكة باي
+    let currentTab = 'quran';
+    const surahs = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الوم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+
     window.onload = () => {
         try { Pi.init({ version: "2.0", sandbox: true }); } catch (e) {}
-        renderContent();
+        showTab('quran');
     };
 
-    // كود الدفع المعتمد للخطوة 10
-    async function startPay() {
-        try {
-            await Pi.createPayment({
-                amount: 1,
-                memo: "دعم تطبيق نورك - النسخة الكاملة",
-                metadata: { item: "full_access" }
-            }, {
-                onReadyForServerApproval: (id) => console.log("Approval:", id),
-                onReadyForServerCompletion: (id, tx) => alert("تم التفعيل بنجاح!"),
-                onCancel: (id) => {},
-                onError: (e) => alert("افتحي التطبيق من Pi Browser")
-            });
-        } catch (err) { alert("افتحي من متصفح باي"); }
+    function showTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('settings-area').style.display = (tab === 'settings') ? 'block' : 'none';
+        document.getElementById('content-area').style.display = (tab === 'settings') ? 'none' : 'block';
+        render();
     }
 
-    // توليد كل السور والأذكار (أوفلاين تماماً)
-    function renderContent() {
+    function render() {
         const area = document.getElementById('content-area');
-        const surahs = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
-        
         let html = '';
-        
-        // إضافة الأذكار أولاً
-        html += createCard("أذكار الصباح", "أذكار", "أصبحنا وأصبح الملك لله...");
-        html += createCard("أذكار المساء", "أذكار", "أمسينا وأمسى الملك لله...");
-        html += createCard("دعاء السفر", "أدعية", "سبحان الذي سخر لنا هذا...");
-
-        // إضافة الـ 114 سورة
-        surahs.forEach((name, i) => {
-            html += createCard("سورة " + name, "قرآن كريم", "نص السورة رقم " + (i+1) + " سيظهر هنا...");
-        });
-
+        if(currentTab === 'quran') {
+            surahs.forEach((s, i) => html += createCard(`سورة ${s}`, "قرآن كريم", `نص سورة ${s} كاملاً...`));
+        } else if(currentTab === 'azkar') {
+            html += createCard("أذكار الصباح", "أذكار", "أصبحنا وأصبح الملك لله...");
+            html += createCard("أذكار المساء", "أذكار", "أمسينا وأمسى الملك لله...");
+        }
         area.innerHTML = html;
     }
 
     function createCard(title, type, content) {
-        return `
-            <div class="card">
-                <h3>${title}</h3>
-                <p>${type}</p>
-                <button class="read-btn" onclick="alert('${content}')">قراءة</button>
-            </div>
-        `;
+        return `<div class="card"><h2>${title}</h2><p>${type}</p><button class="read-btn" onclick="alert('${content}')">قراءة</button></div>`;
+    }
+
+    async function startPay() {
+        try {
+            await Pi.createPayment({ amount: 1, memo: "تفعيل نسخة نورك الكاملة", metadata: { id: "norak_pro" } }, {
+                onReadyForServerApproval: (id) => console.log("Approved", id),
+                onReadyForServerCompletion: (id, tx) => alert("تم التفعيل!"),
+                onCancel: (id) => {}, onError: (e) => alert("افتحي من Pi Browser")
+            });
+        } catch (e) { alert("افتحي من Pi Browser"); }
     }
 
     function search() {
-        let input = document.getElementById('mainSearch').value.toLowerCase();
-        let cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
-        });
+        let v = document.getElementById('mainSearch').value.toLowerCase();
+        document.querySelectorAll('.card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(v) ? 'block' : 'none');
     }
+
+    function changeFont(v) { document.body.style.fontSize = v + 'px'; }
 </script>
 </body>
 </html>

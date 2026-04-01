@@ -3,85 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك</title>
+    <title>تطبيق نورك - النسخة المعتمدة</title>
+    
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --p: #6c5ce7; --bg: #f4f7f6; --c: #ffffff; --t: #2d3436; }
-        body { background: var(--bg); color: var(--t); margin: 0; padding-bottom: 80px; font-family: 'Tajawal', sans-serif; direction: rtl; }
-        header { background: var(--p); color: white; padding: 30px; text-align: center; border-radius: 0 0 30px 30px; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; direction: rtl; }
+        header { background: #6c5ce7; color: white; padding: 25px; text-align: center; border-radius: 0 0 25px 25px; }
         .container { padding: 20px; }
-        .card { background: var(--c); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer; }
-        #reader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: none; flex-direction: column; }
-        .r-header { background: var(--p); color: white; padding: 20px; display: flex; justify-content: space-between; }
-        .r-body { padding: 30px; font-size: 1.5rem; text-align: center; line-height: 2; overflow-y: auto; }
-        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #ddd; }
-        .nav-item { cursor: pointer; font-weight: bold; color: #777; }
-        .active { color: var(--p); }
-        .hidden { display: none; }
+        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .pay-section { background: #fff3cd; border: 1px solid #ffeeba; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+        .btn-pay { background: #f1c40f; color: #000; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1rem; }
+        #reader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; flex-direction: column; z-index: 2000; }
+        .r-header { background: #6c5ce7; color: white; padding: 15px; display: flex; justify-content: space-between; }
+        .r-body { padding: 25px; font-size: 1.5rem; line-height: 2.2; text-align: center; overflow-y: auto; }
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #ddd; }
+        .nav-item { cursor: pointer; font-weight: bold; color: #888; }
+        .active { color: #6c5ce7; }
     </style>
 </head>
 <body>
 
-<header><h1>نورك</h1></header>
+<header>
+    <h1>نُورك</h1>
+    <p>بوابتك للقرآن الكريم على شبكة Pi</p>
+</header>
 
 <div class="container">
-    <div id="quran-page">
-        <h3>📖 القرآن الكريم</h3>
-        <div id="q-list"></div>
+    <div class="pay-section">
+        <h4 style="margin:0 0 10px">دعم التطبيق عبر Pi Network</h4>
+        <button class="btn-pay" id="payButton">تفعيل النسخة الكاملة (1 Pi)</button>
     </div>
-    <div id="azkar-page" class="hidden">
-        <h3>📿 الأذكار</h3>
-        <div id="a-list"></div>
+
+    <div id="quran-list">
+        <h3 style="border-right: 4px solid #6c5ce7; padding-right: 10px;">📖 السور المتاحة</h3>
+        <div id="items"></div>
     </div>
 </div>
 
 <div id="reader">
-    <div class="r-header"><span onclick="closeR()">✕</span><span id="rtitle"></span><span>🔖</span></div>
+    <div class="r-header">
+        <span onclick="closeReader()" style="cursor:pointer">✕ إغلاق</span>
+        <span id="rtitle"></span>
+    </div>
     <div id="rbody" class="r-body"></div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="show('quran')">القرآن</div>
-    <div class="nav-item" onclick="show('azkar')">الأذكار</div>
+    <div class="nav-item active">الرئيسية</div>
+    <div class="nav-item">الأذكار</div>
+    <div class="nav-item">الإعدادات</div>
 </nav>
 
 <script>
-    const surahs = ["الفاتحة", "البقرة", "آية الكرسي", "الإخلاص", "الفلق", "الناس"];
-    const db = {
+    // 1. تعريف الداتا
+    const data = {
         "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
-        "آية الكرسي": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+        "آية الكرسي": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خلفهم.. (النص الكامل)",
         "الإخلاص": "قُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)"
     };
 
-    function load() {
-        let h = "";
-        surahs.forEach(s => {
-            h += `<div class="card" onclick="openR('${s}')"><span>${s}</span><span>📖</span></div>`;
+    // 2. تشغيل التطبيق
+    function init() {
+        let html = "";
+        Object.keys(data).forEach(s => {
+            html += `<div class="card" onclick="openReader('${s}')"><b>${s}</b><span>📖</span></div>`;
         });
-        document.getElementById('q-list').innerHTML = h;
+        document.getElementById('items').innerHTML = html;
+        
+        // ربط شبكة باي عند التحميل
+        try {
+            Pi.init({ version: "2.0" });
+            console.log("Pi SDK Initialized");
+        } catch(e) { console.error("SDK Error"); }
     }
 
-    function openR(s) {
+    function openReader(s) {
         document.getElementById('rtitle').innerText = s;
-        document.getElementById('rbody').innerText = db[s] || "النص متاح في النسخة الكاملة";
+        document.getElementById('rbody').innerText = data[s];
         document.getElementById('reader').style.display = 'flex';
     }
 
-    function closeR() { document.getElementById('reader').style.display = 'none'; }
-
-    function show(p) {
-        if(p=='quran') {
-            document.getElementById('quran-page').classList.remove('hidden');
-            document.getElementById('azkar-page').classList.add('hidden');
-        } else {
-            document.getElementById('quran-page').classList.add('hidden');
-            document.getElementById('azkar-page').classList.remove('hidden');
-        }
+    function closeReader() {
+        document.getElementById('reader').style.display = 'none';
     }
 
-    window.onload = load;
-    try { Pi.init({ version: "2.0" }); } catch(e){}
+    // 3. وظيفة الدفع الحقيقية لشبكة باي
+    document.getElementById('payButton').onclick = function() {
+        try {
+            Pi.createPayment({
+                amount: 1,
+                memo: "تفعيل نسخة تطبيق نورك",
+                metadata: { orderId: "yasmine_123" }
+            }, {
+                onReadyForServerApproval: (paymentId) => { console.log("Payment ID:", paymentId); },
+                onReadyForServerCompletion: (paymentId, txid) => { alert("تم التفعيل بنجاح!"); },
+                onCancel: (paymentId) => { alert("تم إلغاء الدفع"); },
+                onError: (error, paymentId) => { alert("خطأ: " + error.message); }
+            });
+        } catch(err) {
+            alert("يرجى فتح التطبيق من داخل Pi Browser لتفعيل الدفع.");
+        }
+    };
+
+    window.onload = init;
 </script>
 </body>
 </html>

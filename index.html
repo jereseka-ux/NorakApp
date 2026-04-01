@@ -10,197 +10,190 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --p-purple: #673AB7; --d-purple: #311B92; --bg: #f4f7f6; --txt: #2c3e50; --card: #ffffff; }
-        .dark-mode { --bg: #1a1a2e; --txt: #e0e0e0; --card: #16213e; background: #1a1a2e; color: #e0e0e0; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--txt); transition: 0.3s; padding-bottom: 90px; }
-        .quran-font { font-family: 'Amiri', serif; line-height: 2.2; }
-        .card-custom { background: var(--card); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.2s; }
-        .dark-mode .card-custom { border: 1px solid #ffffff10; }
+        :root { --p-purple: #673AB7; --bg: #f8f9fa; --txt: #2d3436; --card: #ffffff; }
+        .dark-mode { --bg: #0f0c29; --txt: #f5f6fa; --card: #1b1448; }
+        
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--txt); transition: 0.3s; margin: 0; padding-bottom: 80px; }
+        .quran-text { font-family: 'Amiri', serif; line-height: 2.5; text-align: justify; text-align-last: center; }
+        .card-custom { background: var(--card); border-radius: 20px; shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tab-content { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; padding: 10px 0; z-index: 100; border-top: 1px solid #eee; }
-        .dark-mode .bottom-bar { border-top: 1px solid #ffffff10; }
-        .nav-btn { flex: 1; text-align: center; color: #888; font-size: 12px; border: none; background: none; outline: none !important; }
-        .nav-btn.active { color: var(--p-purple); font-weight: bold; }
+        .active-tab { display: block; }
+        
+        /* زرار الإضاءة */
+        .theme-toggle { position: fixed; top: 20px; left: 20px; z-index: 1000; background: var(--p-purple); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.1); z-index: 500; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: #a1a1a1; cursor: pointer; }
+        .nav-item.active { color: var(--p-purple); font-weight: bold; }
+        
+        /* تحسين عرض الآيات */
+        .ayah-num { color: var(--p-purple); font-weight: bold; font-family: 'Tajawal'; font-size: 0.8em; margin: 0 5px; border: 1px solid var(--p-purple); border-radius: 50%; padding: 2px 6px; display: inline-block; min-width: 30px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <header class="bg-[#311B92] text-white p-6 rounded-b-[30px] shadow-lg mb-6">
-        <div class="flex justify-between items-center">
-            <div><h1 class="text-3xl font-bold">نورك</h1><p class="text-xs opacity-80">تطبيقك الإسلامي المتكامل يا ياسمين</p></div>
-            <button onclick="toggleLight()" class="text-2xl"><i id="light-icon" class="fas fa-moon"></i></button>
-        </div>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i id="theme-icon" class="fas fa-moon"></i>
+    </div>
+
+    <header class="p-8 pt-12 text-center" style="background: linear-gradient(135deg, #673AB7, #311B92); color: white; border-radius: 0 0 40px 40px;">
+        <h1 class="text-4xl font-bold mb-2">نورك - Norak</h1>
+        <p class="opacity-90">مرحباً بكِ يا ياسمين في تطبيقكِ الشامل</p>
     </header>
 
-    <div class="container mx-auto px-4 max-w-lg">
-
-        <section id="content-quran" class="tab-content active-tab">
-            <div class="flex gap-2 mb-4">
-                <button onclick="toggleQuranList('juz')" id="juz-btn" class="flex-1 py-2 bg-purple-600 text-white rounded-lg font-bold">الأجزاء</button>
-                <button onclick="toggleQuranList('surah')" id="surah-btn" class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold">السور</button>
+    <main class="container mx-auto px-4 mt-6">
+        
+        <section id="tab-quran" class="tab-content active-tab">
+            <div class="flex bg-gray-200 dark:bg-gray-800 rounded-xl p-1 mb-6">
+                <button onclick="switchQuranView('surah')" id="btn-surah" class="flex-1 py-2 rounded-lg font-bold bg-white text-purple-700 shadow">السور</button>
+                <button onclick="switchQuranView('juz')" id="btn-juz" class="flex-1 py-2 rounded-lg font-bold text-gray-600">الأجزاء</button>
             </div>
-            
-            <div id="juz-grid" class="grid grid-cols-2 gap-4"></div>
-            <div id="surah-list" class="hidden space-y-2"></div>
-        </section>
-
-        <section id="content-azkar" class="tab-content">
-            <div class="space-y-4">
-                <div class="card-custom p-4 flex items-center gap-4 cursor-pointer" onclick="showAzkar('morning')">
-                    <i class="fas fa-sun text-orange-400 text-2xl"></i><div><h3 class="font-bold">أذكار الصباح</h3></div>
+            <div id="quran-list" class="grid grid-cols-1 gap-3">
                 </div>
-                <div class="card-custom p-4 flex items-center gap-4 cursor-pointer" onclick="showAzkar('evening')">
-                    <i class="fas fa-moon text-blue-400 text-2xl"></i><div><h3 class="font-bold">أذكار المساء</h3></div>
-                </div>
+        </section>
+
+        <section id="tab-settings" class="tab-content">
+            <div class="card-custom p-6 mb-4 shadow-lg">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-wallet text-purple-600"></i> تفعيل الخطوة 10</h3>
+                <button onclick="handlePiPayment()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-2xl transition-all transform active:scale-95 shadow-md">
+                    دفع 1 Pi للتفعيل النهائي
+                </button>
+                <p id="pay-status" class="text-center text-xs mt-3 text-gray-500">جاري الربط مع شبكة Pi Network..</p>
+            </div>
+
+            <div class="card-custom p-6 shadow-lg">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-text-height text-purple-600"></i> تخصيص القراءة</h3>
+                <label class="block text-sm mb-2 text-gray-500">حجم الخط الحالي: <span id="font-val">24</span>px</label>
+                <input type="range" id="font-slider" min="16" max="40" value="24" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
             </div>
         </section>
 
-        <section id="content-sebha" class="tab-content text-center py-10">
-            <div class="inline-block p-10 rounded-full border-8 border-purple-500 card-custom mb-8">
-                <div id="sebha-count" class="text-6xl font-bold text-purple-600">0</div>
-            </div><br>
-            <button onclick="countSebha()" class="w-32 h-32 bg-[#673AB7] rounded-full text-white text-2xl shadow-lg active:scale-90 transition">سبّح</button>
-        </section>
+        <section id="tab-azkar" class="tab-content text-center py-10">قريباً.. أذكار الصباح والمساء</section>
+        <section id="tab-sebha" class="tab-content text-center py-10">قريباً.. المسبحة الإلكترونية الذكية</section>
 
-        <section id="content-settings" class="tab-content">
-            <div id="bookmark-card" class="hidden card-custom p-4 mb-4 border-2 border-yellow-500 bg-yellow-50">
-                <p id="bookmark-info" class="text-sm font-bold mb-2"></p>
-                <button onclick="goToBookmark()" class="w-full bg-yellow-500 text-white py-2 rounded-lg text-sm font-bold">مواصلة القراءة</button>
-            </div>
-            <div class="card-custom p-6 mb-4">
-                <h3 class="font-bold text-purple-700 mb-2">الخطوة 10 - Pi Network</h3>
-                <button onclick="startPiPayment()" class="w-full bg-amber-400 hover:bg-amber-500 text-black font-bold py-3 rounded-xl shadow-md transition">دفع 1 Pi للتفعيل</button>
-                <div id="payment-status" class="mt-2 text-center text-[11px] font-bold text-green-600">جاري الاتصال بالمحفظة...</div>
-            </div>
-            <div class="card-custom p-4">
-                <label class="block mb-2 font-bold text-sm">حجم الخط: <span id="font-size-val">22</span>px</label>
-                <input type="range" min="18" max="45" value="22" class="w-full accent-purple-600" id="font-slider">
-            </div>
-        </section>
-    </div>
+    </main>
 
-    <div id="reader-modal" class="fixed inset-0 bg-black/70 z-[200] hidden flex flex-col justify-end">
-        <div class="bg-white dark-mode:bg-gray-900 w-full h-[92vh] rounded-t-[30px] p-6 overflow-hidden flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b pb-4">
-                <div class="flex gap-4">
-                    <button onclick="closeReader()" class="text-xl p-2"><i class="fas fa-times"></i></button>
-                    <button onclick="saveCurrentPosition()" id="save-mark-btn" class="text-xl text-gray-400 p-2"><i class="fas fa-bookmark"></i></button>
-                </div>
-                <h3 id="modal-title" class="text-lg font-bold text-purple-800"></h3>
-            </div>
-            <div id="modal-content" class="overflow-y-auto quran-font text-center p-4"></div>
+    <div id="reader-modal" class="fixed inset-0 bg-black bg-opacity-90 z-[2000] hidden flex flex-col">
+        <div class="flex justify-between items-center p-4 bg-purple-900 text-white">
+            <button onclick="closeReader()" class="text-2xl"><i class="fas fa-arrow-right"></i></button>
+            <h2 id="reader-title" class="font-bold text-lg"></h2>
+            <button onclick="saveBookmark()" class="text-xl"><i id="book-icon" class="far fa-bookmark"></i></button>
         </div>
+        <div id="reader-body" class="flex-1 overflow-y-auto p-6 bg-white dark:bg-gray-900 quran-text">
+            </div>
     </div>
 
-    <nav class="bottom-bar">
-        <button onclick="switchTab('quran')" id="btn-quran" class="nav-btn active"><i class="fas fa-quran text-xl mb-1"></i><br>القرآن</button>
-        <button onclick="switchTab('azkar')" id="btn-azkar" class="nav-btn"><i class="fas fa-pray text-xl mb-1"></i><br>الأذكار</button>
-        <button onclick="switchTab('sebha')" id="btn-sebha" class="nav-btn"><i class="fas fa-beads text-xl mb-1"></i><br>المسبحة</button>
-        <button onclick="switchTab('settings')" id="btn-settings" class="nav-btn"><i class="fas fa-cog text-xl mb-1"></i><br>الإعدادات</button>
+    <nav class="bottom-nav">
+        <div onclick="showTab('quran')" id="nav-quran" class="nav-item active"><i class="fas fa-quran text-xl mb-1"></i><span>القرآن</span></div>
+        <div onclick="showTab('azkar')" id="nav-azkar" class="nav-item"><i class="fas fa-hand-holding-heart text-xl mb-1"></i><span>الأذكار</span></div>
+        <div onclick="showTab('sebha')" id="nav-sebha" class="nav-item"><i class="fas fa-beads text-xl mb-1"></i><span>المسبحة</span></div>
+        <div onclick="showTab('settings')" id="nav-settings" class="nav-item"><i class="fas fa-user-cog text-xl mb-1"></i><span>الإعدادات</span></div>
     </nav>
 
     <script>
-        const Pi = window.Pi; Pi.init({ version: "1.5", sandbox: true });
-        let currentReadingData = { type: '', id: '', title: '' };
+        // تفعيل SDK الخاص بباي
+        const Pi = window.Pi;
+        Pi.init({ version: "1.5", sandbox: true });
 
-        // --- نظام القرآن ---
-        function initQuran() {
-            const juzGrid = document.getElementById('juz-grid');
-            for(let i=1; i<=30; i++) {
-                juzGrid.innerHTML += `<div class="card-custom p-4 text-center cursor-pointer border-r-4 border-purple-600" onclick="loadContent('juz', ${i}, 'الجزء ${i}')">
-                    <span class="text-2xl font-bold text-purple-700">${i}</span></div>`;
-            }
-            fetch('https://api.alquran.cloud/v1/surah').then(res => res.json()).then(data => {
-                const list = document.getElementById('surah-list');
-                data.data.forEach(s => {
-                    list.innerHTML += `<div class="card-custom p-3 flex justify-between items-center cursor-pointer px-6" onclick="loadContent('surah', ${s.number}, 'سورة ${s.name}')">
-                        <span class="text-purple-700 font-bold">${s.number}. ${s.name}</span>
-                        <span class="text-xs opacity-50">${s.englishName}</span></div>`;
-                });
-            });
+        let currentFontSize = 24;
+
+        // --- نظام التبديل بين التابات ---
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active-tab');
+            document.getElementById('nav-' + tabId).classList.add('active');
+            if(tabId === 'quran') loadSurahs();
         }
 
-        async function loadContent(type, id, title) {
-            const modal = document.getElementById('reader-modal');
-            const content = document.getElementById('modal-content');
-            currentReadingData = { type: type, id: id, title: title };
-            document.getElementById('modal-title').innerText = title;
-            content.innerHTML = `<i class="fas fa-spinner fa-spin text-2xl text-purple-500"></i>`;
-            modal.classList.remove('hidden');
-            document.getElementById('save-mark-btn').className = "text-xl text-gray-400 p-2";
-            
-            // تطبيق حجم الخط الحالي عند فتح المودال
-            const currentSize = document.getElementById('font-slider').value + 'px';
-            content.style.fontSize = currentSize;
+        // --- نظام الإضاءة (Dark Mode) ---
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.getElementById('theme-icon');
+            icon.classList.toggle('fa-moon');
+            icon.classList.toggle('fa-sun');
+        }
 
-            const url = type === 'juz' ? `https://api.alquran.cloud/v1/juz/${id}/quran-uthmani` : `https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`;
+        // --- نظام حجم الخط ---
+        document.getElementById('font-slider').addEventListener('input', function(e) {
+            currentFontSize = e.target.value;
+            document.getElementById('font-val').innerText = currentFontSize;
+            document.getElementById('reader-body').style.fontSize = currentFontSize + 'px';
+        });
+
+        // --- معالجة القرآن (منع التداخل) ---
+        async function loadSurahs() {
+            const list = document.getElementById('quran-list');
+            list.innerHTML = '<p class="text-center opacity-50 p-10">جاري تحميل السور برباط سليم...</p>';
             try {
-                const res = await fetch(url); const data = await res.json();
-                let txt = "";
-                data.data.ayahs.forEach(a => { txt += ` ${a.text} <span class="text-purple-600 font-bold mx-1">﴿${a.numberInSurah}﴾</span> `; });
-                content.innerHTML = `<div class="text-right">${txt}</div>`;
-            } catch (e) { content.innerHTML = "حدث خطأ في الاتصال."; }
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json();
+                list.innerHTML = '';
+                data.data.forEach(surah => {
+                    list.innerHTML += `
+                        <div onclick="openReader('surah', ${surah.number}, '${surah.name}')" class="card-custom p-4 flex justify-between items-center cursor-pointer hover:bg-purple-50 transition">
+                            <div class="flex items-center gap-4">
+                                <span class="bg-purple-100 text-purple-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">${surah.number}</span>
+                                <div><h4 class="font-bold">${surah.name}</h4><p class="text-[10px] text-gray-400">${surah.englishName}</p></div>
+                            </div>
+                            <i class="fas fa-chevron-left text-gray-300"></i>
+                        </div>`;
+                });
+            } catch (e) { list.innerHTML = "فشل التحميل، تأكدي من الإنترنت."; }
         }
 
-        function toggleQuranList(type) {
-            document.getElementById('juz-grid').classList.toggle('hidden', type !== 'juz');
-            document.getElementById('surah-list').classList.toggle('hidden', type !== 'surah');
-            document.getElementById('juz-btn').className = type === 'juz' ? 'flex-1 py-2 bg-purple-600 text-white rounded-lg font-bold' : 'flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold';
-            document.getElementById('surah-btn').className = type === 'surah' ? 'flex-1 py-2 bg-purple-600 text-white rounded-lg font-bold' : 'flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold';
+        async function openReader(type, id, title) {
+            const modal = document.getElementById('reader-modal');
+            const body = document.getElementById('reader-body');
+            document.getElementById('reader-title').innerText = title;
+            body.innerHTML = '<div class="text-center p-20"><i class="fas fa-spinner fa-spin text-3xl text-purple-600"></i><br>جاري ترتيب الآيات بدقة...</div>';
+            body.style.fontSize = currentFontSize + 'px';
+            modal.classList.remove('hidden');
+
+            const url = type === 'surah' ? `https://api.alquran.cloud/v1/surah/${id}` : `https://api.alquran.cloud/v1/juz/${id}/quran-uthmani`;
+            
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                let fullText = "";
+                const ayahs = type === 'surah' ? data.data.ayahs : data.data.ayahs;
+                
+                ayahs.forEach(ayah => {
+                    // عرض الآية ثم رقمها بوضوح لمنع التداخل
+                    fullText += `${ayah.text} <span class="ayah-num">${ayah.numberInSurah}</span> `;
+                });
+                
+                body.innerHTML = fullText;
+            } catch (e) { body.innerHTML = "حدث خطأ أثناء جلب الآيات."; }
         }
 
-        // --- الميكانيكا (التصحيحات الجديدة) ---
-        // تصحيح ربط حجم الخط، دلوقتي بيغير الخط فعلاً
-        document.getElementById('font-slider').oninput = function() {
-            const val = this.value + 'px';
-            document.getElementById('modal-content').style.fontSize = val;
-            document.getElementById('font-size-val').innerText = this.value;
-        };
+        function closeReader() { document.getElementById('reader-modal').classList.add('hidden'); }
 
-        function saveCurrentPosition() {
-            localStorage.setItem('noork_save', JSON.stringify(currentReadingData));
-            document.getElementById('save-mark-btn').className = "text-xl text-yellow-500 p-2";
-            alert('تم الحفظ!'); checkBookmark();
-        }
-
-        function checkBookmark() {
-            const saved = localStorage.getItem('noork_save');
-            if(saved) {
-                const data = JSON.parse(saved);
-                document.getElementById('bookmark-card').classList.remove('hidden');
-                document.getElementById('bookmark-info').innerText = "واصل قراءة: " + data.title;
+        // --- نظام دفع Pi (الخطوة 10) ---
+        async function handlePiPayment() {
+            const status = document.getElementById('pay-status');
+            status.innerText = "⏳ جاري الاتصال بمحفظتك في Pi Browser...";
+            
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 1,
+                    memo: "تفعيل تطبيق نورك - ياسمين",
+                    metadata: { activation: "step_10" },
+                }, {
+                    onReadyForServerCompletion: (paymentId) => {
+                        status.innerText = "✅ تم الدفع! جاري التفعيل التلقائي...";
+                        alert("مبروك يا ياسمين! تم تفعيل الخطوة 10 بنجاح.");
+                    },
+                    onCancel: () => { status.innerText = "❌ تم إلغاء العملية."; },
+                    onError: (error) => { status.innerText = "⚠️ افتحي التطبيق من داخل Pi Browser لتفعيل الدفع."; }
+                });
+            } catch (e) {
+                status.innerText = "⚠️ تأكدي من استخدام متصفح Pi Browser.";
             }
         }
 
-        function goToBookmark() {
-            const d = JSON.parse(localStorage.getItem('noork_save'));
-            loadContent(d.type, d.id, d.title);
-        }
-
-        // --- الوظائف الباقية (مسبحة، تابات، دفع) ---
-        function switchTab(t) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('content-'+t).classList.add('active-tab');
-            document.getElementById('btn-'+t).classList.add('active');
-            if(t==='settings') checkBookmark();
-        }
-
-        let cCount = 0; function countSebha() { cCount++; document.getElementById('sebha-count').innerText = cCount; }
-        function toggleLight() { document.body.classList.toggle('dark-mode'); }
-        function closeReader() { document.getElementById('reader-modal').classList.add('hidden'); }
-        
-        // تصحيح زرار الدفع لتفعيله
-        async function startPiPayment() {
-            document.getElementById('payment-status').innerText = "⏳ جاري تحضير المحفظة..";
-            try { await Pi.createPayment({ amount: 1, memo: "تفعيل نورك (ياسمين)", metadata: { type: "activation" } }, {
-                onReadyForServerCompletion: () => { document.getElementById('payment-status').innerText = "✅ تم التفعيل بنجاح! راجعي الـ Checklist."; alert("مبروك! تمت العملية."); }
-            }); } catch(e) { document.getElementById('payment-status').innerText = "⚠️ تأكدي من فتح التطبيق في Pi Browser."; }
-        }
-
-        window.onload = () => { initQuran(); checkBookmark(); };
+        // تشغيل افتراضي
+        window.onload = () => { loadSurahs(); };
     </script>
 </body>
 </html>

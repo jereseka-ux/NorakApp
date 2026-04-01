@@ -3,159 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - الإصدار الاحترافي المتكامل</title>
+    <title>تطبيق نورك - الإصدار الإيماني الشامل</title>
+    
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --p: #6c5ce7; --bg: #fdfdfd; --c: #ffffff; --t: #2d3436; --s: #a29bfe; }
-        .dark-mode { --bg: #121212; --c: #1e1e1e; --t: #f5f5f5; --s: #4834d4; }
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
-        body { background: var(--bg); color: var(--t); margin: 0; padding-bottom: 90px; }
-        
-        header { background: linear-gradient(135deg, var(--p), var(--s)); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 40px 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .top-tools { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        .top-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+        /* تعريف الألوان المتغيرة */
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --gold: #f1c40f;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
 
-        .container { padding: 20px; max-width: 600px; margin: auto; }
-        .section-h { border-right: 4px solid var(--p); padding-right: 10px; margin: 25px 0 15px; font-weight: 700; }
-        
-        .card { background: var(--c); border-radius: 18px; padding: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(0,0,0,0.03); }
-        .card:active { transform: scale(0.98); }
-        .num { background: var(--p); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+        /* الوضع الليلي */
+        .dark-mode {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #f5f5f5;
+            --text-sub: #b2bec3;
+            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-        #reader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: none; flex-direction: column; }
-        .r-header { background: var(--p); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .r-content { padding: 30px; overflow-y: auto; font-size: 1.7rem; line-height: 2.3; text-align: center; white-space: pre-wrap; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.3s ease;
+        }
 
-        .premium-zone { background: linear-gradient(135deg, #f1c40f, #f39c12); color: white; border-radius: 25px; padding: 35px 20px; text-align: center; margin-top: 20px; box-shadow: 0 8px 20px rgba(243,156,18,0.3); }
-        .pay-btn { background: white; color: #e67e22; border: none; padding: 14px 45px; border-radius: 35px; font-weight: 700; cursor: pointer; margin-top: 20px; font-size: 1.1rem; }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-        nav { position: fixed; bottom: 0; width: 100%; background: var(--c); display: flex; justify-content: space-around; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); border-top: 1px solid rgba(0,0,0,0.05); }
-        .nav-item { text-decoration: none; color: #b2bec3; text-align: center; font-size: 0.85rem; cursor: pointer; font-weight: 500; }
-        .nav-item.active { color: var(--p); font-weight: 700; }
+        /* رأس الصفحة - Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 0 0 40px 40px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* شريط البحث */
+        .search-container {
+            margin: -25px 20px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+            outline: none;
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        /* الحاوية الرئيسية */
+        .main-content {
+            padding: 0 20px 100px;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .section-title {
+            margin: 25px 5px 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-right: 5px solid var(--primary);
+            padding-right: 15px;
+        }
+
+        /* تصميم الكروت - Cards */
+        .item-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .item-number {
+            background: var(--primary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .item-name {
+            font-size: 1.15rem;
+            font-weight: 500;
+        }
+
+        /* شاشة القراءة - Reader */
+        #reader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .reader-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reader-content {
+            flex: 1;
+            padding: 40px 30px;
+            overflow-y: auto;
+            text-align: center;
+            font-size: 1.8rem;
+            line-height: 2.5;
+            white-space: pre-wrap;
+        }
+
+        /* القائمة السفلية - Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-sub);
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* صفحة الدفع - Pi Premium */
+        .premium-card {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 35px;
+            border-radius: 30px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 15px 35px rgba(230, 126, 34, 0.3);
+        }
+
+        .premium-card h2 { margin: 0; font-size: 1.8rem; }
+        .premium-card p { margin: 15px 0 25px; font-size: 1rem; opacity: 0.9; }
+
+        .pi-button {
+            background: white;
+            color: #e67e22;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* الإعدادات */
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
         .hidden { display: none; }
+
+        /* الأنيميشن */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate { animation: fadeIn 0.4s ease forwards; }
+
     </style>
 </head>
 <body>
 
 <header>
-    <h1 style="margin:0; font-size: 1.8rem;">نورك</h1>
-    <p style="opacity:0.9; font-size: 0.9rem;">تطبيقك الإيماني المتكامل على شبكة Pi</p>
-    <div class="top-tools">
-        <button class="top-btn" onclick="toggleTheme()">🌓 الإضاءة</button>
-        <button class="top-btn" onclick="showBookmark()">🔖 آخر علامة</button>
-    </div>
+    <h1>نورك</h1>
+    <p>تطبيقك الإيماني الذكي والشامل</p>
 </header>
 
-<div class="container">
-    <div id="page-quran" class="main-page">
-        <h3 class="section-h">📖 فهرس السور</h3>
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="ابحث عن سورة، ذكر، أو دعاء..." onkeyup="filterItems()">
+</div>
+
+<div class="main-content">
+    
+    <div id="quran-page" class="page-view">
+        <div class="section-title">فهرس القرآن الكريم (114 سورة)</div>
         <div id="surah-list"></div>
     </div>
 
-    <div id="page-azkar" class="main-page hidden">
-        <h3 class="section-h">📿 الأذكار والتحصين</h3>
-        <div class="card" onclick="openReader('أذكار الصباح', 'أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له...')"><span>☀️ أذكار الصباح</span><span>◀</span></div>
-        <div class="card" onclick="openReader('أذكار المساء', 'أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له...')"><span>🌙 أذكار المساء</span><span>◀</span></div>
-        <div class="card" onclick="openReader('آية الكرسي', 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...')"><span>🛡️ آية الكرسي</span><span>◀</span></div>
+    <div id="azkar-page" class="page-view hidden">
+        <div class="section-title">الأذكار والتحصين</div>
+        <div id="azkar-list"></div>
     </div>
 
-    <div id="page-pay" class="main-page hidden">
-        <div class="premium-zone">
-            <h2>تفعيل النسخة الكاملة ✨</h2>
-            <p>افتح 114 سورة كاملة وادعم استمرار التطبيق</p>
-            <button class="pay-btn" onclick="startPiPayment()">دفع 1 Pi للتفعيل</button>
-            <p id="pi-log" style="margin-top:15px; font-size:0.8rem; opacity:0.9;">حالة الاتصال: جاهز</p>
+    <div id="premium-page" class="page-view hidden">
+        <div class="premium-card">
+            <h2>تفعيل النسخة المميزة</h2>
+            <p>افتح جميع السور بالصوت، وادعم استمرار التطبيق وتطويره على شبكة Pi</p>
+            <button class="pi-button" onclick="initiatePayment()">تفعيل بـ 1 Pi فقط</button>
+            <div id="payment-status" style="margin-top:20px; font-weight:bold;"></div>
+        </div>
+        
+        <div class="section-title">إعدادات التطبيق</div>
+        <div class="item-card">
+            <div class="settings-row" style="width:100%">
+                <span>الوضع الليلي (Dark Mode)</span>
+                <button onclick="toggleDarkMode()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px;">تبديل</button>
+            </div>
+        </div>
+        <div class="item-card">
+            <div class="settings-row" style="width:100%">
+                <span>حجم خط القراءة</span>
+                <input type="range" min="15" max="40" value="25" oninput="changeFontSize(this.value)">
+            </div>
         </div>
     </div>
+
 </div>
 
-<div id="reader">
-    <div class="r-header">
+<div id="reader-overlay">
+    <div class="reader-header">
         <button onclick="closeReader()" style="background:none; border:none; color:white; font-size:1.8rem; cursor:pointer;">✕</button>
-        <span id="reader-title" style="font-weight:700;">اسم السورة</span>
+        <span id="reader-title" style="font-weight:bold; font-size:1.2rem;"></span>
         <button onclick="saveBookmark()" style="background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;">🔖</button>
     </div>
-    <div id="reader-text" class="r-content"></div>
+    <div id="reader-content" class="reader-content"></div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="navigate('quran', this)">📖<br>القرآن</div>
-    <div class="nav-item" onclick="navigate('azkar', this)">📿<br>الأذكار</div>
-    <div class="nav-item" onclick="navigate('pay', this)">✨<br>الترقية</div>
+    <a class="nav-link active" onclick="showPage('quran', this)">
+        <span class="nav-icon">📖</span>القرآن
+    </a>
+    <a class="nav-link" onclick="showPage('azkar', this)">
+        <span class="nav-icon">📿</span>الأذكار
+    </a>
+    <a class="nav-link" onclick="showPage('premium', this)">
+        <span class="nav-icon">✨</span>الترقية
+    </a>
 </nav>
 
 <script>
-    // تهيئة شبكة Pi (ضروري لقبول التطبيق)
-    try {
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0" });
-    } catch(e) { console.log("Pi SDK not found, running in browser mode."); }
+    // قائمة السور الكاملة 114 سورة بالترتيب الصحيح
+    const surahNames = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
 
-    const quranData = {
+    const azkarData = [
+        { name: "أذكار الصباح", content: "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له...\n(آية الكرسي)\n(المعوذات)" },
+        { name: "أذكار المساء", content: "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له...\n(آية الكرسي)\n(المعوذات)" },
+        { name: "أذكار النوم", content: "باسمك ربي وضعت جنبي وبك أرفعه، فإن أمسكت نفسي فارحمها..." },
+        { name: "دعاء الاستخارة", content: "اللهم إني أستخيرك بعلمك وأستقدرك بقدرك وأسألك من فضلك العظيم..." }
+    ];
+
+    const quranTexts = {
         "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1)\nالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
-        "البقرة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nالم (1) ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِلْمُتَّقِينَ (2) الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ (3)...",
         "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)"
     };
 
-    const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الإخلاص", "الفلق", "الناس"];
-
-    function initSurahs() {
-        const list = document.getElementById('surah-list');
-        list.innerHTML = surahs.map((s, i) => `
-            <div class="card" onclick="openReader('سورة ${s}', '${quranData[s] || 'نص السورة متاح في النسخة الكاملة بعد الترقية.'}')">
-                <div style="display:flex; align-items:center;">
-                    <span class="num">${i+1}</span>
-                    <span style="margin-right:15px; font-weight:500;">سورة ${s}</span>
+    // تهيئة البيانات
+    function init() {
+        const sList = document.getElementById('surah-list');
+        sList.innerHTML = surahNames.map((s, i) => `
+            <div class="item-card animate" onclick="openReader('سورة ${s}', '${quranTexts[s] || 'نص السورة متاح بالكامل في النسخة المميزة لرواد شبكة باي.'}')">
+                <div class="item-info">
+                    <span class="item-number">${i+1}</span>
+                    <span class="item-name">سورة ${s}</span>
                 </div>
                 <span>📖</span>
             </div>
         `).join('');
+
+        const aList = document.getElementById('azkar-list');
+        aList.innerHTML = azkarData.map((a, i) => `
+            <div class="item-card animate" onclick="openReader('${a.name}', '${a.content}')">
+                <div class="item-info">
+                    <span class="item-number">✨</span>
+                    <span class="item-name">${a.name}</span>
+                </div>
+                <span>📿</span>
+            </div>
+        `).join('');
     }
 
-    function navigate(id, el) {
-        document.querySelectorAll('.main-page').forEach(p => p.classList.add('hidden'));
-        document.getElementById('page-' + id).classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    // التنقل بين الصفحات
+    function showPage(page, el) {
+        document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+        document.getElementById(page + '-page').classList.remove('hidden');
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
         window.scrollTo(0,0);
     }
 
-    function openReader(title, text) {
+    // فتح شاشة القراءة
+    function openReader(title, content) {
         document.getElementById('reader-title').innerText = title;
-        document.getElementById('reader-text').innerText = text;
-        document.getElementById('reader').style.display = 'flex';
+        document.getElementById('reader-content').innerText = content;
+        document.getElementById('reader-overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
 
-    function closeReader() { document.getElementById('reader').style.display = 'none'; }
+    function closeReader() {
+        document.getElementById('reader-overlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 
-    function toggleTheme() {
+    // البحث
+    function filterItems() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.item-card').forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(input) ? 'flex' : 'none';
+        });
+    }
+
+    // إعدادات الوضع الليلي والخط
+    function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
-        localStorage.setItem('nook-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        localStorage.setItem('nook-dark', document.body.classList.contains('dark-mode'));
     }
 
+    function changeFontSize(size) {
+        document.getElementById('reader-content').style.fontSize = size + 'px';
+    }
+
+    // حفظ العلامة (Bookmark)
     function saveBookmark() {
         const title = document.getElementById('reader-title').innerText;
-        localStorage.setItem('nook-mark', title);
-        alert('تم حفظ ' + title + ' في العلامات بنجاح 🔖');
+        localStorage.setItem('nook-bookmark', title);
+        alert('تم حفظ ' + title + ' كعلامة قراءة بنجاح 🔖');
     }
 
-    function showBookmark() {
-        const b = localStorage.getItem('nook-mark');
-        b ? alert('آخر علامة محفوظة: ' + b) : alert('لا توجد علامات محفوظة.');
-    }
-
-    async function startPiPayment() {
-        document.getElementById('pi-log').innerText = "جاري طلب الدفع...";
+    // وظائف Pi Network
+    async function initiatePayment() {
+        const status = document.getElementById('payment-status');
+        status.innerText = "جاري الاتصال بمحفظة Pi...";
+        
         try {
-            alert("سيتم الآن فتح محفظة Pi لدفع 1 Pi لتفعيل النسخة الكاملة.");
-            // كود الربط الفعلي مع المحفظة يوضع هنا
-        } catch(e) { alert("حدث خطأ في الاتصال بشبكة Pi"); }
+            // محاكاة طلب الدفع لـ Pi SDK
+            alert("سيتم الآن فتح واجهة دفع Pi لخصم 1 Pi مقابل الخدمات المميزة.");
+            // Pi.createPayment(...)
+        } catch (err) {
+            status.innerText = "خطأ في الاتصال بشبكة باي.";
+        }
     }
 
     window.onload = () => {
-        initSurahs();
-        if(localStorage.getItem('nook-theme') === 'dark') document.body.classList.add('dark-mode');
+        init();
+        if(localStorage.getItem('nook-dark') === 'true') document.body.classList.add('dark-mode');
+        const b = localStorage.getItem('nook-bookmark');
+        if(b) console.log("آخر علامة محفوظة: " + b);
     };
 </script>
 </body>

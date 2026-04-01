@@ -3,220 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نورك - Norak Smart App</title>
+    <title>نورك - Norak App</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root { --p-purple: #6c5ce7; --bg: #f0f2f5; --txt: #2d3436; --card: #ffffff; }
-        .dark-mode { --bg: #0a0a1a; --txt: #f5f6fa; --card: #16162d; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--txt); transition: 0.3s; margin: 0; padding-bottom: 90px; }
-        .quran-text { font-family: 'Amiri', serif; line-height: 2.8; text-align: center; }
-        .card-rich { background: var(--card); border-radius: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
-        .card-rich:active { transform: scale(0.97); }
-        .tab-content { display: none; }
-        .active-tab { display: block; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .theme-toggle { position: fixed; top: 20px; left: 20px; z-index: 2000; background: white; color: var(--p-purple); width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); cursor: pointer; }
-        .dark-mode .theme-toggle { background: #6c5ce7; color: #ffd700; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(0,0,0,0.05); z-index: 1000; border-radius: 25px 25px 0 0; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #b2bec3; cursor: pointer; }
-        .nav-item.active { color: var(--p-purple); font-weight: bold; }
-        .ayah-tag { color: var(--p-purple); font-weight: bold; border: 1.5px solid var(--p-purple); border-radius: 50%; padding: 2px 6px; font-size: 0.7em; margin: 0 4px; display: inline-block; }
+        :root { --main-p: #6c5ce7; --bg-soft: #f4f7fe; --card-w: #ffffff; }
+        .dark-mode { --bg-soft: #080a16; --card-w: #121421; --txt: #e0e0e0; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-soft); color: var(--txt); margin: 0; padding-bottom: 100px; transition: 0.3s; }
+        .ultra-card { background: var(--card-w); border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; }
+        .tab-section { display: none; padding: 20px; animation: fadeIn 0.4s; }
+        .tab-active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--card-w); display: flex; justify-content: space-around; padding: 15px 0; border-radius: 25px 25px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { color: #b2bec3; cursor: pointer; text-align: center; font-size: 12px; }
+        .nav-item.active { color: var(--main-p); font-weight: bold; }
+        .quran-v { font-family: 'Amiri', serif; line-height: 2.5; font-size: 22px; text-align: justify; }
+        .ayah-num { color: var(--main-p); font-weight: bold; border: 1px solid; border-radius: 50%; padding: 2px 6px; font-size: 14px; margin: 0 5px; }
     </style>
 </head>
 <body>
-
-    <div class="theme-toggle" onclick="toggleTheme()"><i id="theme-icon" class="fas fa-moon"></i></div>
-
-    <header class="pt-16 pb-12 text-center relative shadow-2xl overflow-hidden" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border-radius: 0 0 60px 60px;">
-        <div class="relative z-10">
-            <h1 class="text-4xl font-black mb-1">نورك</h1>
-            <p id="user-greeting" class="text-sm opacity-90 mb-4">مرحباً بكِ في واحتك الإيمانية</p>
-            <div class="mx-6 p-4 bg-white/20 backdrop-blur-md rounded-2xl text-xs italic" id="daily-ayah">
-                "إِنَّ مَعَ الْعُسْرِ يُسْرًا"
-            </div>
-        </div>
+    <header class="p-10 text-center" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border-radius: 0 0 50px 50px;">
+        <h1 class="text-3xl font-black">نورك</h1>
+        <p class="opacity-80">واحتك الإيمانية الذكية</p>
     </header>
-
-    <main class="container mx-auto px-6 mt-8">
-        
-        <section id="tab-quran" class="tab-content active-tab">
-            <h2 class="font-bold text-xl mb-4 border-r-4 border-purple-500 pr-3">المصحف الشريف</h2>
-            <div id="quran-list" class="grid grid-cols-1 gap-4"></div>
+    <main class="mt-6">
+        <section id="sec-quran" class="tab-section tab-active">
+            <h3 class="font-bold text-xl mb-4 px-4">الفهرس الشريف</h3>
+            <div id="surah-list" class="grid gap-3 px-4"></div>
         </section>
-
-        <section id="tab-azkar" class="tab-content">
-            <h2 class="font-bold text-xl mb-4 border-r-4 border-orange-500 pr-3">الأذكار والأدعية</h2>
-            <div class="grid gap-4">
-                <div onclick="openAzkar('صباح')" class="card-rich p-6 flex items-center gap-4 cursor-pointer">
-                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"><i class="fas fa-sun text-orange-500"></i></div>
-                    <div><h3 class="font-bold text-lg">أذكار الصباح</h3><p class="text-xs text-gray-400">ابدأي يومك بنور</p></div>
+        <section id="sec-azkar" class="tab-section">
+            <h3 class="font-bold text-xl mb-4 px-4">أذكار المسلم</h3>
+            <div class="grid gap-4 px-4">
+                <div onclick="openAzkar('صباح')" class="ultra-card p-6 flex items-center gap-4 cursor-pointer">
+                    <i class="fas fa-sun text-orange-400 text-2xl"></i>
+                    <div><h4 class="font-bold">أذكار الصباح</h4><p class="text-xs opacity-50">نور لصباحك</p></div>
                 </div>
-                <div onclick="openAzkar('مساء')" class="card-rich p-6 flex items-center gap-4 cursor-pointer">
-                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-moon text-blue-500"></i></div>
-                    <div><h3 class="font-bold text-lg">أذكار المساء</h3><p class="text-xs text-gray-400">طمأنينة لقلبك</p></div>
-                </div>
-                <div onclick="openAzkar('نوم')" class="card-rich p-6 flex items-center gap-4 cursor-pointer">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center"><i class="fas fa-bed text-indigo-500"></i></div>
-                    <div><h3 class="font-bold text-lg">أذكار النوم</h3><p class="text-xs text-gray-400">حفظ من الله</p></div>
-                </div>
-                <div onclick="openAzkar('أدعية')" class="card-rich p-6 flex items-center gap-4 cursor-pointer">
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-hand-holding-heart text-green-500"></i></div>
-                    <div><h3 class="font-bold text-lg">جوامع الدعاء</h3><p class="text-xs text-gray-400">من الكتاب والسنة</p></div>
+                <div onclick="openAzkar('مساء')" class="ultra-card p-6 flex items-center gap-4 cursor-pointer">
+                    <i class="fas fa-moon text-blue-400 text-2xl"></i>
+                    <div><h4 class="font-bold">أذكار المساء</h4><p class="text-xs opacity-50">هدوء لليلك</p></div>
                 </div>
             </div>
         </section>
-
-        <section id="tab-sebha" class="tab-content text-center py-6">
-            <div class="relative inline-block mb-10">
-                <svg class="w-48 h-48 transform -rotate-90">
-                    <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="8" fill="transparent" class="text-gray-200 dark:text-gray-800" />
-                    <circle id="sebha-progress" cx="96" cy="96" r="88" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="553" stroke-dashoffset="553" class="text-purple-500 transition-all duration-300" />
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center flex-col">
-                    <span id="sebha-count" class="text-5xl font-black text-purple-600">0</span>
-                    <span class="text-xs text-gray-400">تسبيحة</span>
-                </div>
-            </div><br>
-            <button onclick="countSebha()" class="w-32 h-32 bg-purple-600 rounded-full text-white text-4xl shadow-2xl active:scale-90 transition-all border-8 border-purple-200">
-                <i class="fas fa-fingerprint"></i>
+        <section id="sec-sebha" class="tab-section text-center py-10">
+            <div class="inline-block p-10 ultra-card rounded-full">
+                <span id="s-val" class="text-6xl font-black text-purple-600">0</span>
+            </div>
+            <button onclick="countS()" class="block mx-auto mt-10 w-24 h-24 bg-purple-600 rounded-full text-white text-3xl shadow-xl active:scale-90 transition">
+                <i class="fas fa-plus"></i>
             </button>
-            <div class="mt-8 flex justify-center gap-4">
-                <button onclick="resetSebha()" class="bg-gray-200 dark:bg-gray-800 px-6 py-2 rounded-full text-sm">تصفير</button>
+            <button onclick="resetS()" class="mt-6 opacity-40 text-xs">تصفير العداد</button>
+        </section>
+        <section id="sec-settings" class="tab-section">
+            <div class="ultra-card p-6 mb-4">
+                <h4 class="font-bold mb-4">تفعيل الخطوة 10</h4>
+                <button onclick="payPi()" class="w-full bg-yellow-500 text-white py-4 rounded-2xl font-bold shadow-lg">دفع 1 Pi للتفعيل</button>
+                <p id="pi-log" class="mt-2 text-[10px] text-center opacity-40">Status: Ready</p>
+            </div>
+            <div class="ultra-card p-6">
+                <h4 class="font-bold mb-4">حجم الخط: <span id="fz-val">22px</span></h4>
+                <input type="range" id="fz-slider" min="16" max="40" value="22" class="w-full accent-purple-600">
             </div>
         </section>
-
-        <section id="tab-settings" class="tab-content">
-            <div class="card-rich p-6 mb-6 border-b-8 border-yellow-500">
-                <h3 class="font-bold text-lg mb-2">شبكة باي - الخطوة 10</h3>
-                <p class="text-xs text-gray-500 mb-4">اضغطي للتفعيل النهائي للتطبيق داخل المتصفح الرسمي</p>
-                <button onclick="payPi()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-black py-4 rounded-2xl shadow-lg transition">تفعيل Pi (1 Pi)</button>
-                <p id="pay-status" class="text-center text-[10px] mt-3 uppercase text-gray-400 italic">Pi SDK Init...</p>
-            </div>
-            <div class="card-rich p-6">
-                <h3 class="font-bold mb-4 flex justify-between"><span>تخصيص الخط</span> <span id="f-size-val" class="text-purple-600">24px</span></h3>
-                <input type="range" id="font-slider" min="18" max="45" value="24" class="w-full accent-purple-600">
-            </div>
-        </section>
-
     </main>
-
-    <div id="reader-modal" class="fixed inset-0 bg-black/90 z-[3000] hidden flex flex-col">
-        <div class="p-5 bg-purple-900 text-white flex justify-between items-center shadow-lg">
-            <button onclick="closeReader()"><i class="fas fa-arrow-right text-xl"></i></button>
-            <h2 id="reader-title" class="font-bold text-lg"></h2>
-            <i class="fas fa-ellipsis-v opacity-30"></i>
+    <div id="reader" class="fixed inset-0 bg-white z-[2000] hidden flex flex-col">
+        <div class="p-5 bg-purple-700 text-white flex justify-between">
+            <button onclick="closeReader()"><i class="fas fa-times"></i></button>
+            <h2 id="r-title" class="font-bold"></h2>
+            <div></div>
         </div>
-        <div id="reader-body" class="flex-1 overflow-y-auto p-10 bg-white dark:bg-gray-900 quran-text text-gray-800 dark:text-gray-100"></div>
+        <div id="r-content" class="flex-1 overflow-y-auto p-8 quran-v"></div>
     </div>
-
-    <nav class="bottom-nav shadow-2xl">
-        <div onclick="showTab('quran')" id="n-quran" class="nav-item active"><i class="fas fa-quran text-2xl mb-1"></i><span>القرآن</span></div>
-        <div onclick="showTab('azkar')" id="n-azkar" class="nav-item"><i class="fas fa-pray text-2xl mb-1"></i><span>الأذكار</span></div>
-        <div onclick="showTab('sebha')" id="n-sebha" class="nav-item"><i class="fas fa-beads text-2xl mb-1"></i><span>المسبحة</span></div>
-        <div onclick="showTab('settings')" id="n-settings" class="nav-item"><i class="fas fa-shield-alt text-2xl mb-1"></i><span>التفعيل</span></div>
+    <nav class="nav-bar">
+        <div onclick="showTab('quran')" id="n-quran" class="nav-item active"><i class="fas fa-book-open text-xl"></i><br>القرآن</div>
+        <div onclick="showTab('azkar')" id="n-azkar" class="nav-item"><i class="fas fa-pray text-xl"></i><br>الأذكار</div>
+        <div onclick="showTab('sebha')" id="n-sebha" class="nav-item"><i class="fas fa-beads text-xl"></i><br>المسبحة</div>
+        <div onclick="showTab('settings')" id="n-settings" class="nav-item"><i class="fas fa-cog text-xl"></i><br>الإعدادات</div>
     </nav>
-
     <script>
         const Pi = window.Pi; Pi.init({ version: "1.5", sandbox: true });
-        let count = 0; let currentFont = 24;
-
-        // آيات عشوائية لزيادة "غنى" التطبيق
-        const ayahs = [
-            "إِنَّ مَعَ الْعُسْرِ يُسْرًا", "وَقُل رَّبِّ زِدْنِي عِلْمًا", "فَاذْكُرُونِي أَذْكُرْكُمْ", "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ"
-        ];
-        document.getElementById('daily-ayah').innerText = `"${ayahs[Math.floor(Math.random()*ayahs.length)]}"`;
-
-        async function fetchUser() {
-            try { const auth = await Pi.authenticate(['username'], (p)=>{}); 
-            document.getElementById('user-greeting').innerText = `مرحباً بكِ يا ${auth.user.username}`; } catch(e){}
-        }
-
+        let count = 0;
         function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-purple-600'));
-            document.getElementById('tab-' + id).classList.add('active-tab');
-            document.getElementById('n-' + id).classList.add('active', 'text-purple-600');
-            if(id === 'quran') loadSurahs();
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('tab-active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('sec-'+id).classList.add('tab-active');
+            document.getElementById('n-'+id).classList.add('active');
+            if(id === 'quran') loadQuran();
         }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        async function loadQuran() {
+            const list = document.getElementById('surah-list');
+            if(list.innerHTML) return;
+            const res = await fetch('https://api.alquran.cloud/v1/surah');
+            const data = await res.json();
+            data.data.forEach(s => {
+                list.innerHTML += `<div onclick="readS(${s.number}, '${s.name}')" class="ultra-card p-4 flex justify-between cursor-pointer border-r-4 border-purple-500">
+                    <span>${s.number}. ${s.name}</span><i class="fas fa-chevron-left opacity-20"></i></div>`;
+            });
         }
-
-        document.getElementById('font-slider').oninput = function() {
-            currentFont = this.value;
-            document.getElementById('f-size-val').innerText = currentFont + 'px';
-            document.getElementById('reader-body').style.fontSize = currentFont + 'px';
-        };
-
-        async function loadSurahs() {
-            const list = document.getElementById('quran-list');
-            if(list.innerHTML !== "") return;
-            try {
-                const res = await fetch('https://api.alquran.cloud/v1/surah');
-                const data = await res.json();
-                list.innerHTML = "";
-                data.data.forEach(s => {
-                    list.innerHTML += `<div onclick="readSurah(${s.number}, '${s.name}')" class="card-rich p-5 flex justify-between items-center cursor-pointer border-r-4 border-purple-500">
-                        <div class="flex items-center gap-4"><span class="text-xs font-bold text-purple-400">#${s.number}</span><span class="font-bold">${s.name}</span></div>
-                        <i class="fas fa-play-circle text-purple-100"></i></div>`;
-                });
-            } catch(e) { list.innerHTML = "جاري التحميل..."; }
-        }
-
-        async function readSurah(id, title) {
-            const body = document.getElementById('reader-body');
-            document.getElementById('reader-title').innerText = title;
-            document.getElementById('reader-modal').classList.remove('hidden');
-            body.innerHTML = "<div class='py-20 text-center'><i class='fas fa-sync fa-spin'></i> جاري جلب الوحي...</div>";
-            body.style.fontSize = currentFont + 'px';
+        async function readS(id, name) {
+            const cont = document.getElementById('r-content');
+            document.getElementById('r-title').innerText = name;
+            document.getElementById('reader').classList.remove('hidden');
+            cont.innerHTML = "جاري التحميل...";
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
             const data = await res.json();
             let txt = "";
-            data.data.ayahs.forEach(a => { txt += `${a.text} <span class="ayah-tag">${a.numberInSurah}</span> `; });
-            body.innerHTML = `<div class="text-right leading-loose">${txt}</div>`;
+            data.data.ayahs.forEach(a => { txt += `${a.text} <span class="ayah-num">${a.numberInSurah}</span> `; });
+            cont.innerHTML = txt;
         }
-
         function openAzkar(type) {
-            document.getElementById('reader-modal').classList.remove('hidden');
-            document.getElementById('reader-title').innerText = "أذكار ال" + type;
-            let content = "";
-            if(type === 'صباح') content = "أصبحنا وأصبح الملك لله.. (سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ - 3 مرات)";
-            else if(type === 'مساء') content = "أمسينا وأمسى الملك لله.. (أعوذ بكلمات الله التامات من شر ما خلق - 3 مرات)";
-            else if(type === 'نوم') content = "باسمك ربي وضعت جنبي.. (آية الكرسي، المعوذات، سورة الملك)";
-            else content = "اللهم إنا نسألك من خير ما سألك منه نبيك محمد.. ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة.";
-            document.getElementById('reader-body').innerHTML = `<div class='p-5 text-2xl text-center leading-loose'>${content}</div>`;
+            document.getElementById('reader').classList.remove('hidden');
+            document.getElementById('r-title').innerText = "أذكار " + (type === 'صباح' ? "الصباح" : "المساء");
+            let db = {
+                'صباح': 'أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له.<br><br>اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت.',
+                'مساء': 'أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له.<br><br>يا حي يا قيوم برحمتك أستغيث، أصلح لي شأني كله ولا تكلني إلى نفسي طرفة عين.'
+            };
+            document.getElementById('r-content').innerHTML = `<div class='text-center leading-loose'>${db[type]}</div>`;
         }
-
-        function countSebha() {
-            count++;
-            document.getElementById('sebha-count').innerText = count;
-            const offset = 553 - (count % 34 * (553 / 33));
-            document.getElementById('sebha-progress').style.strokeDashoffset = offset;
-            if(window.navigator.vibrate) window.navigator.vibrate(50);
-            if(count % 33 === 0) { alert("تمت 33 تسبيحة، بارك الله فيكِ"); }
-        }
-
-        function resetSebha() { count = 0; document.getElementById('sebha-count').innerText = 0; document.getElementById('sebha-progress').style.strokeDashoffset = 553; }
-        function closeReader() { document.getElementById('reader-modal').classList.add('hidden'); }
-
+        function countS() { count++; document.getElementById('s-val').innerText = count; }
+        function resetS() { count = 0; document.getElementById('s-val').innerText = 0; }
+        function closeReader() { document.getElementById('reader').classList.add('hidden'); }
+        document.getElementById('fz-slider').oninput = function() {
+            document.getElementById('fz-val').innerText = this.value + "px";
+            document.getElementById('r-content').style.fontSize = this.value + "px";
+        };
         async function payPi() {
-            const log = document.getElementById('pay-status');
-            log.innerText = "⏳ التحقق من المحفظة...";
+            const log = document.getElementById('pi-log');
+            log.innerText = "⏳ Connecting...";
             try {
-                await Pi.createPayment({ amount: 1, memo: "Activation of Norak Smart App", metadata: { step: "10" } }, {
-                    onReadyForServerCompletion: () => { log.innerText = "✅ تفعيل ناجح!"; alert("تم التفعيل يا ياسمين!"); }
+                await Pi.createPayment({ amount: 1, memo: "Step 10 Activation", metadata: { step: "10" } }, {
+                    onReadyForServerCompletion: () => { log.innerText = "✅ Success!"; alert("تم التفعيل!"); }
                 });
-            } catch(e) { log.innerText = "⚠️ افتحي من Pi Browser"; }
+            } catch(e) { log.innerText = "❌ Pi Browser Required"; alert("افتحي من Pi Browser"); }
         }
-
-        window.onload = () => { fetchUser(); loadSurahs(); };
+        window.onload = loadQuran;
     </script>
 </body>
 </html>

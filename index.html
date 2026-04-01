@@ -3,143 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - الإصدار الكامل</title>
+    <title>تطبيق نورك - الإصدار الاحترافي المتكامل</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --p: #6c5ce7; --bg: #fdfdfd; --c: #ffffff; --t: #2d3436; --s: #a29bfe; }
-        .dark-mode { --bg: #1a1a1a; --c: #2d2d2d; --t: #f5f5f5; --s: #4834d4; }
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.2s; }
+        .dark-mode { --bg: #121212; --c: #1e1e1e; --t: #f5f5f5; --s: #4834d4; }
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
         body { background: var(--bg); color: var(--t); margin: 0; padding-bottom: 90px; }
         
-        /* Header */
-        header { background: linear-gradient(45deg, var(--p), var(--s)); color: white; padding: 45px 20px; text-align: center; border-radius: 0 0 40px 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        
-        /* Layout */
+        header { background: linear-gradient(135deg, var(--p), var(--s)); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 40px 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .top-tools { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        .top-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+
         .container { padding: 20px; max-width: 600px; margin: auto; }
-        .card { background: var(--c); border-radius: 18px; padding: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(0,0,0,0.03); }
-        .card:hover { transform: translateY(-3px); }
+        .section-h { border-right: 4px solid var(--p); padding-right: 10px; margin: 25px 0 15px; font-weight: 700; }
         
-        /* Reader Overlay */
+        .card { background: var(--c); border-radius: 18px; padding: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(0,0,0,0.03); }
+        .card:active { transform: scale(0.98); }
+        .num { background: var(--p); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+
         #reader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: none; flex-direction: column; }
-        .r-header { background: var(--p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .r-content { padding: 30px; overflow-y: auto; font-size: 1.6rem; line-height: 2.2; text-align: center; white-space: pre-wrap; }
+        .r-header { background: var(--p); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .r-content { padding: 30px; overflow-y: auto; font-size: 1.7rem; line-height: 2.3; text-align: center; white-space: pre-wrap; }
 
-        /* Pi Premium Box */
-        .premium { background: linear-gradient(135deg, #f1c40f, #f39c12); color: white; border-radius: 20px; padding: 30px; text-align: center; margin-top: 20px; }
-        .btn-pi { background: white; color: #e67e22; border: none; padding: 12px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1rem; }
+        .premium-zone { background: linear-gradient(135deg, #f1c40f, #f39c12); color: white; border-radius: 25px; padding: 35px 20px; text-align: center; margin-top: 20px; box-shadow: 0 8px 20px rgba(243,156,18,0.3); }
+        .pay-btn { background: white; color: #e67e22; border: none; padding: 14px 45px; border-radius: 35px; font-weight: 700; cursor: pointer; margin-top: 20px; font-size: 1.1rem; }
 
-        /* Navigation */
-        nav { position: fixed; bottom: 0; width: 100%; background: var(--c); display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
-        .nav-item { text-decoration: none; color: #b2bec3; text-align: center; font-size: 0.85rem; cursor: pointer; }
-        .nav-item.active { color: var(--p); font-weight: bold; }
+        nav { position: fixed; bottom: 0; width: 100%; background: var(--c); display: flex; justify-content: space-around; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); border-top: 1px solid rgba(0,0,0,0.05); }
+        .nav-item { text-decoration: none; color: #b2bec3; text-align: center; font-size: 0.85rem; cursor: pointer; font-weight: 500; }
+        .nav-item.active { color: var(--p); font-weight: 700; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1 style="margin:0">نورك</h1>
-    <p style="opacity:0.9">مصحفك وأذكارك في مكان واحد</p>
-    <div style="margin-top:15px">
-        <button onclick="toggleMode()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 15px; border-radius:20px; cursor:pointer">🌓 تغيير الإضاءة</button>
-        <button onclick="goBookmark()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 15px; border-radius:20px; cursor:pointer">🔖 آخر قراءة</button>
+    <h1 style="margin:0; font-size: 1.8rem;">نورك</h1>
+    <p style="opacity:0.9; font-size: 0.9rem;">تطبيقك الإيماني المتكامل على شبكة Pi</p>
+    <div class="top-tools">
+        <button class="top-btn" onclick="toggleTheme()">🌓 الإضاءة</button>
+        <button class="top-btn" onclick="showBookmark()">🔖 آخر علامة</button>
     </div>
 </header>
 
 <div class="container">
-    <div id="quran-p" class="page">
-        <h3 style="border-right: 4px solid var(--p); padding-right:10px">📖 سور القرآن المختارة</h3>
+    <div id="page-quran" class="main-page">
+        <h3 class="section-h">📖 فهرس السور</h3>
         <div id="surah-list"></div>
     </div>
 
-    <div id="azkar-p" class="page hidden">
-        <h3 style="border-right: 4px solid var(--p); padding-right:10px">📿 حصن المسلم</h3>
-        <div class="card" onclick="openContent('أذكار الصباح', 'أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.')">☀️ أذكار الصباح</div>
-        <div class="card" onclick="openContent('أذكار المساء', 'أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.')">🌙 أذكار المساء</div>
-        <div class="card" onclick="openContent('آية الكرسي', 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ...')">🛡️ آية الكرسي</div>
+    <div id="page-azkar" class="main-page hidden">
+        <h3 class="section-h">📿 الأذكار والتحصين</h3>
+        <div class="card" onclick="openReader('أذكار الصباح', 'أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له...')"><span>☀️ أذكار الصباح</span><span>◀</span></div>
+        <div class="card" onclick="openReader('أذكار المساء', 'أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له...')"><span>🌙 أذكار المساء</span><span>◀</span></div>
+        <div class="card" onclick="openReader('آية الكرسي', 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...')"><span>🛡️ آية الكرسي</span><span>◀</span></div>
     </div>
 
-    <div id="premium-p" class="page hidden">
-        <div class="premium">
-            <h2>تفعيل النسخة الكاملة</h2>
-            <p>افتح 114 سورة كاملة مع التفسير والمميزات الحصرية</p>
-            <button class="btn-pi" onclick="payPi()">تفعيل بـ 1 Pi فقط</button>
-            <p id="pi-status" style="margin-top:10px; font-size:0.8rem">النظام جاهز للاستخدام</p>
+    <div id="page-pay" class="main-page hidden">
+        <div class="premium-zone">
+            <h2>تفعيل النسخة الكاملة ✨</h2>
+            <p>افتح 114 سورة كاملة وادعم استمرار التطبيق</p>
+            <button class="pay-btn" onclick="startPiPayment()">دفع 1 Pi للتفعيل</button>
+            <p id="pi-log" style="margin-top:15px; font-size:0.8rem; opacity:0.9;">حالة الاتصال: جاهز</p>
         </div>
     </div>
 </div>
 
 <div id="reader">
     <div class="r-header">
-        <button onclick="closeReader()" style="background:none; border:none; color:white; font-size:1.5rem">✕</button>
-        <span id="r-title">اسم السورة</span>
-        <button onclick="setBookmark()" style="background:none; border:none; color:white; font-size:1.2rem">🔖</button>
+        <button onclick="closeReader()" style="background:none; border:none; color:white; font-size:1.8rem; cursor:pointer;">✕</button>
+        <span id="reader-title" style="font-weight:700;">اسم السورة</span>
+        <button onclick="saveBookmark()" style="background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;">🔖</button>
     </div>
-    <div id="r-text" class="r-content"></div>
+    <div id="reader-text" class="r-content"></div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showPage('quran', this)">📖<br>القرآن</div>
-    <div class="nav-item" onclick="showPage('azkar', this)">📿<br>الأذكار</div>
-    <div class="nav-item" onclick="showPage('premium', this)">✨<br>الترقية</div>
+    <div class="nav-item active" onclick="navigate('quran', this)">📖<br>القرآن</div>
+    <div class="nav-item" onclick="navigate('azkar', this)">📿<br>الأذكار</div>
+    <div class="nav-item" onclick="navigate('pay', this)">✨<br>الترقية</div>
 </nav>
 
 <script>
-    const data = {
+    // تهيئة شبكة Pi (ضروري لقبول التطبيق)
+    try {
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0" });
+    } catch(e) { console.log("Pi SDK not found, running in browser mode."); }
+
+    const quranData = {
         "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1)\nالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
-        "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)",
-        "الفلق": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ (1) مِنْ شَرِّ مَا خَلَقَ (2) وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ (3) وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ (4) وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ (5)",
-        "الناس": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ (1) مَلِكِ النَّاسِ (2) إِلَهِ النَّاسِ (3) مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ (4) الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ (5) مِنَ الْجِنَّةِ وَالنَّاسِ (6)"
+        "البقرة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nالم (1) ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِلْمُتَّقِينَ (2) الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ (3)...",
+        "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)"
     };
 
-    function init() {
+    const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الإخلاص", "الفلق", "الناس"];
+
+    function initSurahs() {
         const list = document.getElementById('surah-list');
-        const surahs = ["الفاتحة", "الإخلاص", "الفلق", "الناس", "البقرة", "آل عمران"];
         list.innerHTML = surahs.map((s, i) => `
-            <div class="card" onclick="openContent('سورة ${s}', '${data[s] || 'محتوى هذه السورة متاح في النسخة الكاملة بعد الترقية عبر شبكة Pi.'}')">
-                <span>${i+1}. ${s}</span>
+            <div class="card" onclick="openReader('سورة ${s}', '${quranData[s] || 'نص السورة متاح في النسخة الكاملة بعد الترقية.'}')">
+                <div style="display:flex; align-items:center;">
+                    <span class="num">${i+1}</span>
+                    <span style="margin-right:15px; font-weight:500;">سورة ${s}</span>
+                </div>
                 <span>📖</span>
             </div>
         `).join('');
     }
 
-    function showPage(id, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-        document.getElementById(id + '-p').classList.remove('hidden');
+    function navigate(id, el) {
+        document.querySelectorAll('.main-page').forEach(p => p.classList.add('hidden'));
+        document.getElementById('page-' + id).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        window.scrollTo(0,0);
     }
 
-    function openContent(title, text) {
-        document.getElementById('r-title').innerText = title;
-        document.getElementById('r-text').innerText = text;
+    function openReader(title, text) {
+        document.getElementById('reader-title').innerText = title;
+        document.getElementById('reader-text').innerText = text;
         document.getElementById('reader').style.display = 'flex';
     }
 
     function closeReader() { document.getElementById('reader').style.display = 'none'; }
 
-    function toggleMode() { document.body.classList.toggle('dark-mode'); }
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('nook-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
 
-    function setBookmark() {
-        const title = document.getElementById('r-title').innerText;
-        localStorage.setItem('nb-book', title);
+    function saveBookmark() {
+        const title = document.getElementById('reader-title').innerText;
+        localStorage.setItem('nook-mark', title);
         alert('تم حفظ ' + title + ' في العلامات بنجاح 🔖');
     }
 
-    function goBookmark() {
-        const b = localStorage.getItem('nb-book');
-        if(b) alert('آخر سورة كنت تقرأها هي: ' + b);
-        else alert('لا توجد علامات محفوظة بعد.');
+    function showBookmark() {
+        const b = localStorage.getItem('nook-mark');
+        b ? alert('آخر علامة محفوظة: ' + b) : alert('لا توجد علامات محفوظة.');
     }
 
-    async function payPi() {
-        document.getElementById('pi-status').innerText = "جاري طلب الدفع من محفظة Pi...";
-        alert("سيتم الآن فتح واجهة دفع Pi لخصم 1 Pi لتفعيل النسخة الكاملة.");
-        // Pi.createPayment(...)
+    async function startPiPayment() {
+        document.getElementById('pi-log').innerText = "جاري طلب الدفع...";
+        try {
+            alert("سيتم الآن فتح محفظة Pi لدفع 1 Pi لتفعيل النسخة الكاملة.");
+            // كود الربط الفعلي مع المحفظة يوضع هنا
+        } catch(e) { alert("حدث خطأ في الاتصال بشبكة Pi"); }
     }
 
-    window.onload = init;
+    window.onload = () => {
+        initSurahs();
+        if(localStorage.getItem('nook-theme') === 'dark') document.body.classList.add('dark-mode');
+    };
 </script>
 </body>
 </html>

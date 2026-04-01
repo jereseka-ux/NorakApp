@@ -3,326 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق نورك - النسخة الكاملة</title>
+    <title>تطبيق نورك - الإصدار الاحترافي</title>
 
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --p: #6c5ce7;
-            --s: #a29bfe;
-            --bg: #f0f2f5;
+            --primary: #6c5ce7;
+            --bg: #f8f9fa;
             --card: #ffffff;
-            --txt: #2d3436;
-            --sub: #636e72;
+            --text: #2d3436;
             --gold: #f1c40f;
-            --shadow: 0 12px 24px rgba(108, 92, 231, 0.1);
+            --shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        .dark {
-            --bg: #1a1a1a;
-            --card: #2d2d2d;
-            --txt: #f5f5f5;
-            --sub: #b2bec3;
+        body.dark-mode {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #f5f5f5;
+            --shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Tajawal', sans-serif;
-            transition: 0.3s;
-        }
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
+        
+        body { background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--txt);
-            margin: 0;
-            padding-bottom: 100px; /* مساحة للقائمة السفلية */
-        }
-
-        /* Header Style */
+        /* Header */
         header {
-            background: linear-gradient(135deg, var(--p), var(--s));
+            background: linear-gradient(135deg, var(--primary), #a29bfe);
             color: white;
-            padding: 60px 20px 40px;
+            padding: 40px 20px;
             text-align: center;
-            border-radius: 0 0 50px 50px;
+            border-radius: 0 0 40px 40px;
             box-shadow: var(--shadow);
         }
 
-        header h1 { margin: 0; font-size: 2.8rem; font-weight: 900; letter-spacing: -1px; }
-        header p { margin: 10px 0 0; opacity: 0.9; font-size: 1.1rem; }
-
-        /* Search Bar */
-        .search-container {
-            margin: -35px 25px 25px;
-            position: relative;
-            z-index: 10;
+        /* البحث */
+        .search-box {
+            margin: -25px 20px 20px;
         }
 
-        .search-container input {
+        .search-box input {
             width: 100%;
-            padding: 20px 30px;
+            padding: 15px 25px;
             border-radius: 30px;
             border: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 1rem;
             outline: none;
+        }
+
+        /* القائمة */
+        .container { padding: 0 20px; max-width: 600px; margin: auto; }
+        
+        .section-title { margin: 25px 0 15px; font-weight: 900; font-size: 1.3rem; border-right: 5px solid var(--primary); padding-right: 10px; }
+
+        .item-card {
             background: var(--card);
-            color: var(--txt);
-        }
-
-        /* Container */
-        .main-box {
-            padding: 0 20px;
-            max-width: 650px;
-            margin: auto;
-        }
-
-        .label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 30px 5px 15px;
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--p);
-        }
-
-        /* Card System */
-        .card {
-            background: var(--card);
-            border-radius: 25px;
-            padding: 22px;
-            margin-bottom: 15px;
+            padding: 18px;
+            border-radius: 20px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: var(--shadow);
             cursor: pointer;
-            border: 1px solid rgba(0,0,0,0.03);
-            animation: fadeIn 0.5s ease;
         }
 
-        .card:active { transform: scale(0.96); }
+        .item-card:active { transform: scale(0.97); }
 
-        .card-info { display: flex; align-items: center; gap: 20px; }
+        .idx { background: var(--primary); color: white; width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-left: 15px; }
 
-        .num-tag {
-            background: var(--p);
-            color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
-        }
-
-        /* Reader Overlay */
+        /* الشاشة الكاملة للقراءة */
         #reader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            display: none;
-            flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: none; flex-direction: column;
         }
 
-        .r-header {
-            background: var(--p);
-            color: white;
-            padding: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.2rem;
-            font-weight: bold;
+        .reader-nav { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .reader-content {
+            flex: 1; padding: 30px; overflow-y: auto; text-align: center;
+            font-size: 1.5rem; line-height: 2.2; white-space: pre-wrap;
         }
 
-        .r-content {
-            flex: 1;
-            padding: 50px 30px;
-            overflow-y: auto;
-            text-align: center;
-            font-size: 1.8rem;
-            line-height: 2.8;
-            font-weight: 500;
-        }
-
-        .copy-btn {
-            background: var(--p);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-
-        /* Nav Bar */
+        /* Navigation */
         nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--card);
-            display: flex;
-            justify-content: space-around;
-            padding: 18px 0;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
-            z-index: 1000;
-            border-radius: 30px 30px 0 0;
+            position: fixed; bottom: 0; width: 100%; background: var(--card);
+            display: flex; justify-content: space-around; padding: 15px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-radius: 25px 25px 0 0;
         }
 
-        .nav-item {
-            text-align: center;
-            color: var(--sub);
-            font-weight: 700;
-            font-size: 0.9rem;
-            flex: 1;
-        }
+        .nav-link { text-decoration: none; color: #b2bec3; font-weight: bold; text-align: center; }
+        .nav-link.active { color: var(--primary); }
 
-        .nav-item.active { color: var(--p); }
-        .nav-item i { font-size: 1.6rem; display: block; margin-bottom: 5px; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .premium-box {
+            background: linear-gradient(45deg, #f1c40f, #e67e22);
+            color: white; padding: 20px; border-radius: 20px; margin: 20px 0; text-align: center;
         }
 
         .hidden { display: none; }
     </style>
 </head>
-<body class="light">
+<body>
 
 <header>
-    <h1>نورك</h1>
-    <p>تطبيقك الإيماني المتكامل على Pi</p>
+    <h1 style="margin:0">نُورك</h1>
+    <p style="margin:5px 0 0; opacity:0.8">تطبيق القرآن الكريم والأذكار</p>
 </header>
 
-<div class="search-container">
-    <input type="text" id="searchInput" placeholder="ابحث عن اسم السورة..." onkeyup="search()">
+<div class="search-box">
+    <input type="text" id="searchField" placeholder="ابحث عن سورة أو ذكر..." onkeyup="doSearch()">
 </div>
 
-<div class="main-box">
-    <div id="tab-quran" class="view">
-        <div class="label"><span>📖 فهرس السور</span><small id="count">114 سورة</small></div>
-        <div id="q-list"></div>
+<div class="container">
+    
+    <div id="quran-page" class="page">
+        <div class="section-title">فهرس السور (114)</div>
+        <div id="surah-list"></div>
     </div>
 
-    <div id="tab-settings" class="view hidden">
-        <div class="label">⚙️ الإعدادات</div>
-        <div class="card" onclick="changeTheme()">
-            <span>تبديل الوضع الليلي</span>
+    <div id="azkar-page" class="page hidden">
+        <div class="section-title">أذكار وأدعية حقيقية</div>
+        <div id="azkar-list"></div>
+    </div>
+
+    <div id="settings-page" class="page hidden">
+        <div class="premium-box">
+            <h3>النسخة الذهبية ✨</h3>
+            <p>افتح كل المميزات وادعم التطبيق</p>
+            <button onclick="piPay()" style="background:white; border:none; padding:10px 25px; border-radius:20px; color:#d35400; font-weight:900; cursor:pointer">تفعيل بـ 1 Pi</button>
+        </div>
+
+        <div class="section-title">⚙️ الإعدادات</div>
+        <div class="item-card" onclick="toggleDark()">
+            <span>الوضع الليلي (Dark Mode)</span>
             <span>🌙</span>
         </div>
-        <div class="card">
-            <div style="width: 100%;">
-                <span>حجم خط القراءة</span>
-                <input type="range" min="20" max="50" value="28" oninput="resize(this.value)" style="width: 100%; margin-top:15px;">
-            </div>
-        </div>
-        <div class="card" onclick="pay()">
-            <div class="card-info">
-                <div class="num-tag" style="background:var(--gold)">$</div>
-                <span>تفعيل النسخة الكاملة (1 Pi)</span>
-            </div>
+        <div class="item-card">
+            <span>حجم الخط</span>
+            <input type="range" min="16" max="40" value="24" oninput="changeFontSize(this.value)">
         </div>
     </div>
+
 </div>
 
 <div id="reader">
-    <div class="r-header">
-        <span onclick="closeReader()" style="cursor:pointer">✕</span>
-        <span id="r-title">السورة</span>
+    <div class="reader-nav">
+        <span onclick="closeReader()" style="font-size:1.5rem; cursor:pointer">✕</span>
+        <span id="rtitle" style="font-weight:900"></span>
         <span onclick="saveMark()" style="cursor:pointer">🔖</span>
     </div>
-    <div id="r-content" class="r-content"></div>
-    <center><button class="copy-btn" onclick="copyText()">نسخ النص الكامل</button></center>
-    <br><br>
+    <div id="rcontent" class="reader-content"></div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="nav('quran', this)"><i>📖</i>القرآن</div>
-    <div class="nav-item" onclick="nav('settings', this)"><i>⚙️</i>الإعدادات</div>
+    <a href="#" class="nav-link active" onclick="showPage('quran', this)">📖<br>القرآن</a>
+    <a href="#" class="nav-link" onclick="showPage('azkar', this)">📿<br>الأذكار</a>
+    <a href="#" class="nav-link" onclick="showPage('settings', this)">⚙️<br>الإعدادات</a>
 </nav>
 
 <script>
-    // تهيئة الـ Pi SDK
-    try { Pi.init({ version: "2.0" }); } catch(e) {}
+    // 1. بيانات السور
+    const sNames = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
 
-    const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
+    // 2. بيانات حقيقية (أذكار كاملة وآية الكرسي كاملة)
+    const azkarDB = [
+        { t: "آية الكرسي", c: "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ" },
+        { t: "أذكار الصباح", c: "أصبحنا وأصبح الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير. رب أسألك خير ما في هذا اليوم وخير ما بعده، وأعوذ بك من شر ما في هذا اليوم وشر ما بعده." },
+        { t: "سيد الاستغفار", c: "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت." }
+    ];
 
-    const quranData = {
-        "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
-        "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)",
-        "الفلق": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ (1) مِنْ شَرِّ مَا خَلَقَ (2) وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ (3) وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ (4) وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ (5)",
-        "الناس": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ (1) مَلِكِ النَّاسِ (2) إِلَهِ النَّاسِ (3) مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ (4) الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ (5) مِنَ الْجِنَّةِ وَالنَّاسِ (6)",
-        "الكوثر": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nإِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ (1) فَصَلِّ لِرَبِّكَ وَانْحَرْ (2) إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ (3)",
-        "النصر": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nإِذَا جَاءَ نَصْرُ اللَّهِ وَالْفَتْحُ (1) وَرَأَيْتَ النَّاسَ يَدْخُلُونَ فِي دِينِ اللَّهِ أَفْوَاجًا (2) فَسَبِّحْ بِحَمْدِ رَبِّكَ وَاسْتَغْفِرْهُ إِنَّهُ كَانَ تَوَّابًا (3)"
+    const quranTexts = {
+        "الفاتحة": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1)\nالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
+        "الإخلاص": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)"
     };
 
-    function init() {
-        const list = document.getElementById('q-list');
-        list.innerHTML = surahs.map((s, i) => `
-            <div class="card" onclick="openReader('سورة ${s}', '${quranData[s] || 'نص السورة متاح بالكامل لمستخدمي النسخة الكاملة عبر Pi.'}')">
-                <div class="card-info">
-                    <div class="num-tag">${i+1}</div>
-                    <span style="font-weight:800; font-size:1.1rem;">سورة ${s}</span>
+    function loadApp() {
+        // تحميل السور
+        const qList = document.getElementById('surah-list');
+        qList.innerHTML = sNames.map((n, i) => `
+            <div class="item-card" onclick="read('${n}', '${quranTexts[n] || 'نص السورة الكامل سيكون متاحاً في التحديث القادم للنسخة الكاملة.'}')">
+                <div style="display:flex; align-items:center">
+                    <div class="idx">${i+1}</div>
+                    <b>سورة ${n}</b>
                 </div>
-                <span style="color:var(--p)">📖</span>
+                <span>📖</span>
+            </div>
+        `).join('');
+
+        // تحميل الأذكار
+        const aList = document.getElementById('azkar-list');
+        aList.innerHTML = azkarDB.map(a => `
+            <div class="item-card" onclick="read('${a.t}', '${a.c}')">
+                <b>${a.t}</b>
+                <span>📿</span>
             </div>
         `).join('');
     }
 
-    function nav(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-        document.getElementById('tab-' + id).classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    function showPage(p, el) {
+        document.querySelectorAll('.page').forEach(pg => pg.classList.add('hidden'));
+        document.getElementById(p + '-page').classList.remove('hidden');
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         el.classList.add('active');
-        window.scrollTo(0,0);
     }
 
-    function openReader(title, text) {
-        document.getElementById('r-title').innerText = title;
-        document.getElementById('r-content').innerText = text;
+    function read(t, c) {
+        document.getElementById('rtitle').innerText = t;
+        document.getElementById('rcontent').innerText = c;
         document.getElementById('reader').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
     }
 
-    function closeReader() {
-        document.getElementById('reader').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+    function closeReader() { document.getElementById('reader').style.display = 'none'; }
 
-    function search() {
-        let val = document.getElementById('searchInput').value.toLowerCase();
-        document.querySelectorAll('.card').forEach(c => {
-            c.style.display = c.innerText.toLowerCase().includes(val) ? 'flex' : 'none';
+    function doSearch() {
+        let v = document.getElementById('searchField').value.toLowerCase();
+        document.querySelectorAll('.item-card').forEach(c => {
+            c.style.display = c.innerText.toLowerCase().includes(v) ? 'flex' : 'none';
         });
     }
 
-    function changeTheme() {
-        document.body.classList.toggle('dark');
-    }
+    function toggleDark() { document.body.classList.toggle('dark-mode'); }
+    function changeFontSize(s) { document.getElementById('rcontent').style.fontSize = s + 'px'; }
+    function piPay() { alert("جاري فتح محفظة Pi..."); }
 
-    function resize(v) {
-        document.getElementById('r-content').style.fontSize = v + 'px';
-    }
-
-    function copyText() {
-        const text = document.getElementById('r-content').innerText;
-        navigator.clipboard.writeText(text).then(() => alert('تم نسخ النص للمشاركة!'));
-    }
-
-    function pay() { alert("جاري الاتصال بـ Pi Wallet..."); }
-
-    window.onload = init;
+    window.onload = loadApp;
 </script>
 </body>
 </html>

@@ -2,157 +2,100 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق نُورك | النسخة الشاملة المعدلة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نورك - التطبيق الروحاني المتكامل</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #6c5ce7; --bg: #f8f9fa; --c: #ffffff; --t: #2d3436; --s: #a29bfe; }
-        body.dark { --bg: #121212; --c: #1e1e1e; --t: #f5f5f5; --p: #8e84f5; }
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; transition: 0.3s; }
-        body { background: var(--bg); color: var(--t); margin: 0; padding-bottom: 80px; }
-        header { background: linear-gradient(135deg, var(--p), var(--s)); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        .search { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin: -20px 0 20px 0; background: var(--c); color: var(--t); }
-        .card { background: var(--c); padding: 15px; border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; }
-        .tab-content { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #reader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: none; flex-direction: column; }
-        .r-head { background: var(--p); color: white; padding: 15px; display: flex; justify-content: space-between; }
-        .r-body { flex: 1; padding: 25px; overflow-y: auto; text-align: center; line-height: 2.2; font-family: 'Amiri', serif; font-size: 1.5rem; }
-        .sebha-area { text-align: center; padding: 20px; background: var(--c); border-radius: 20px; margin-bottom: 20px; }
-        .sebha-btn { width: 100px; height: 100px; background: var(--p); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 10px auto; border: 8px solid var(--s); }
-        nav { position: fixed; bottom: 0; width: 100%; background: var(--c); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #eee; }
-        .nav-item { cursor: pointer; color: #999; font-size: 0.8rem; text-align: center; }
-        .nav-item.active { color: var(--p); }
-        .btn-pi { background: #f1c40f; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; }
+        /* تنسيق سريع عشان الزرار والشكل العام */
+        body { font-family: sans-serif; background-color: #f4f4f9; text-align: center; padding: 20px; }
+        .card { background: white; margin: 10px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .pay-btn { background-color: #ffc107; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 80%; }
+        .hidden { display: none; }
     </style>
 </head>
-<body id="appBody">
+<body>
 
-<header>
-    <h1 style="margin:0">نُورك</h1>
-    <p style="margin:5px 0 0; opacity:0.8;">تطبيقك الروحاني المتكامل</p>
-</header>
-
-<div class="container">
-    <input type="text" class="search" id="mainSearch" placeholder="ابحث عن سورة أو ذكر..." onkeyup="search()">
-
-    <div id="tab-quran" class="tab-content active-tab">
-        <h3 style="border-right: 5px solid var(--p); padding-right:10px;">📖 القرآن الكريم</h3>
-        <div id="quran-list">جاري التحميل...</div>
+    <div class="header">
+        <h1>نُورك</h1>
+        <p>تطبيقك الروحاني المتكامل</p>
     </div>
 
-    <div id="tab-azkar" class="tab-content">
-        <div class="sebha-area">
-            <div class="sebha-btn" onclick="countS()"><span id="s-count">0</span></div>
-            <button onclick="resetS()" style="color:red; background:none; border:none;">إعادة ضبط</button>
-        </div>
-        <h3 style="border-right: 5px solid var(--p); padding-right:10px;">📿 الأذكار</h3>
-        <div id="azkar-list"></div>
+    <input type="text" id="mainSearch" onkeyup="search()" placeholder="ابحث عن سورة أو ذكر...">
+
+    <div class="section">
+        <button id="piPayBtn" class="pay-btn" onclick="startPay()">تفعيل نسخة نُورك الكاملة (1 Pi)</button>
     </div>
 
-    <div id="tab-settings" class="tab-content">
-        <h3 style="border-right: 5px solid var(--p); padding-right:10px;">⚙️ الإعدادات</h3>
-        <button class="btn-pi" onclick="startPay()">تفعيل نسخة نُورك الكاملة (1 Pi)</button>
-        <div class="card" style="margin-top:20px" onclick="document.body.classList.toggle('dark')">
-            <span>الوضع الليلي</span> <span>🌙</span>
+    <div id="content-area">
         </div>
-        <div class="card">
-            <span>حجم الخط: <b id="fz-val">24</b></span>
-            <input type="range" min="18" max="45" value="24" oninput="changeFontSize(this.value)">
-        </div>
-    </div>
-</div>
-
-<div id="reader">
-    <div class="r-head"><span onclick="closeReader()">✕</span> <b id="r-title"></b> <span>🔖</span></div>
-    <div id="r-body" class="r-body"></div>
-</div>
-
-<nav>
-    <div class="nav-item active" onclick="switchTab('quran', this)">📖<br>القرآن</div>
-    <div class="nav-item" onclick="switchTab('azkar', this)">📿<br>الأذكار</div>
-    <div class="nav-item" onclick="switchTab('settings', this)">⚙️<br>الإعدادات</div>
-</nav>
 
 <script>
-    const azkarData = {
-        "أذكار الصباح": "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..",
-        "أذكار المساء": "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..",
-        "أذكار بعد الصلاة": "أستغفر الله (ثلاثاً)، اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام..",
-        "سيد الاستغفار": "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت.."
+    // 1. تهيئة شبكة باي فور تحميل الصفحة
+    window.onload = () => {
+        try {
+            Pi.init({ version: "2.0", sandbox: true }); // غيري sandbox لـ false عند النشر النهائي
+            console.log("Pi SDK Initialized");
+        } catch (e) {
+            console.error("الـ SDK مش راضي يحمل، اتأكدي إنك فاتحة من جوه Pi Browser", e);
+        }
+        loadContent(); // تحميل البيانات (قرآن، أذكار، أدعية)
     };
 
-    let sCount = 0;
-
-    async function loadQuran() {
+    // 2. دالة الدفع الاحترافية (موافقة لشروط Pi Network)
+    async function startPay() {
         try {
-            const res = await fetch('https://api.alquran.cloud/v1/surah');
-            const json = await res.json();
-            document.getElementById('quran-list').innerHTML = json.data.map(s => `
-                <div class="card" onclick="readQ(${s.number}, '${s.name}')">
-                    <b>سورة ${s.name}</b> <span>⬅️</span>
-                </div>
-            `).join('');
-        } catch(e) { document.getElementById('quran-list').innerText = "تأكد من الإنترنت"; }
+            const payment = await Pi.createPayment({
+                amount: 1,
+                memo: "تفعيل النسخة الكاملة من تطبيق نورك",
+                metadata: { orderId: "norak-full-version-" + Date.now() }
+            }, {
+                onReadyForServerApproval: (paymentId) => {
+                    console.log("العملية بانتظار موافقة السيرفر: ", paymentId);
+                    // هنا المفروض تبعتي الـ paymentId للسيرفر بتاعك (Backend)
+                    // للتبسيط في الخطوة 10، الشبكة بتطلب إنك تسجلي العملية
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    console.log("تمت العملية بنجاح! رقم المعاملة: ", txid);
+                    alert("مبروك! تم تفعيل النسخة الكاملة بنجاح.");
+                    localStorage.setItem('isPremium', 'true'); // حفظ التفعيل في الموبايل
+                },
+                onCancel: (paymentId) => console.log("المستخدم لغى العملية"),
+                onError: (error, payment) => console.error("خطأ في الدفع: ", error)
+            });
+        } catch (err) {
+            alert("لازم تفتحي التطبيق من جوه متصفح Pi Browser عشان الدفع يشتغل");
+        }
     }
 
-    async function readQ(n, name) {
-        document.getElementById('reader').style.display = 'flex';
-        document.getElementById('r-title').innerText = "سورة " + name;
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${n}`);
-        const json = await res.json();
-        document.getElementById('r-body').innerText = json.data.ayahs.map(a => a.text).join(' ');
-    }
+    // 3. نظام عرض المحتوى (قرآن وأذكار) - شغال Offline
+    function loadContent() {
+        const contentArea = document.getElementById('content-area');
+        // هنا بنستخدم Array فيها الداتا عشان تشتغل منغير نت
+        const data = [
+            { type: 'قرآن', title: 'سورة الفاتحة', content: 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ...' },
+            { type: 'أذكار', title: 'أذكار الصباح', content: 'أصبحنا وأصبح الملك لله...' },
+            { type: 'أدعية', title: 'دعاء السفر', content: 'سبحان الذي سخر لنا هذا...' }
+            // تقدري تزودي الـ 30 جزء هنا بنفس النمط
+        ];
 
-    function loadAzkar() {
-        document.getElementById('azkar-list').innerHTML = Object.keys(azkarData).map(t => `
-            <div class="card" onclick="openA('${t}')"><b>${t}</b><span>✨</span></div>
+        contentArea.innerHTML = data.map(item => `
+            <div class="card">
+                <h3>${item.title}</h3>
+                <p class="tag">${item.type}</p>
+                <button onclick="alert('${item.content}')">قراءة</button>
+            </div>
         `).join('');
     }
 
-    function openA(t) {
-        document.getElementById('r-title').innerText = t;
-        document.getElementById('r-body').innerText = azkarData[t];
-        document.getElementById('reader').style.display = 'flex';
-    }
-
-    function switchTab(t, el) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
-        document.getElementById('tab-' + t).classList.add('active-tab');
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function countS() { sCount++; document.getElementById('s-count').innerText = sCount; if(navigator.vibrate) navigator.vibrate(50); }
-    function resetS() { sCount = 0; document.getElementById('s-count').innerText = 0; }
-    function closeReader() { document.getElementById('reader').style.display = 'none'; }
-    function changeFontSize(v) { document.getElementById('fz-val').innerText = v; document.getElementById('r-body').style.fontSize = v + 'px'; }
-
+    // 4. دالة البحث الذكية
     function search() {
-        let v = document.getElementById('mainSearch').value;
-        document.querySelectorAll('.card').forEach(c => {
-            c.style.display = c.innerText.includes(v) ? "flex" : "none";
+        let input = document.getElementById('mainSearch').value.toLowerCase();
+        let cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
         });
     }
 
-    function startPay() {
-        try {
-            Pi.createPayment({ amount: 1, memo: "تفعيل تطبيق نورك", metadata: {id: "noork_full"} }, {
-                onReadyForServerApproval: (id) => console.log("Approval:", id),
-                onReadyForServerCompletion: (id, tx) => alert("تم التفعيل!"),
-                onCancel: (id) => console.log("Canceled"),
-                onError: (e) => console.error("Pi Error:", e)
-            });
-        } catch(e) { console.error("SDK not loaded"); }
-    }
-
-    window.onload = () => {
-        loadQuran(); loadAzkar();
-        try { Pi.init({ version: "2.0", sandbox: false }); } catch(e){}
-    };
 </script>
 </body>
 </html>

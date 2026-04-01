@@ -7,74 +7,164 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Tajawal', sans-serif; background-color: #1a202c; color: white; }
-        .quran-text { font-family: 'Amiri', serif; font-size: 1.5rem; line-height: 2.5rem; }
-        .card { background: #2d3748; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-right: 5px solid #ecc94b; }
+        :root { --primary: #ecc94b; --bg: #1a202c; --card: #2d3748; --text: #ffffff; }
+        .light-mode { --primary: #d69e2e; --bg: #f7fafc; --card: #ffffff; --text: #2d3748; }
+        
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text); transition: 0.3s; margin: 0; padding-bottom: 80px; }
+        .quran-font { font-family: 'Amiri', serif; }
+        .glass-header { background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); }
+        .nav-card { background: var(--card); border-radius: 20px; transition: 0.3s; border: 1px solid transparent; }
+        .nav-card:active { transform: scale(0.95); border-color: var(--primary); }
+        .btn-pi { background: linear-gradient(45deg, #ecc94b, #d69e2e); box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; justify-content: space-around; padding: 15px; border-top: 2px solid var(--primary); border-radius: 25px 25px 0 0; }
+        .tab-content { display: none; animation: fadeIn 0.5s; }
+        .active-content { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header class="bg-gray-800 p-4 sticky top-0 z-50 shadow-lg text-center">
-        <h1 class="text-3xl font-bold text-yellow-500 mb-2">نورك - Norak</h1>
-        <p class="text-sm text-gray-400 mb-4">مرحباً بكِ يا ياسمين في تطبيقك الشامل</p>
-        
-        <button id="pay-btn" onclick="transferPi()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300">
-            تفعيل الخطوة 10 (تجربة دفع 1 Pi)
-        </button>
-        <p id="status" class="text-xs mt-2 text-yellow-200"></p>
+    <header class="glass-header p-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 btn-pi rounded-full flex items-center justify-center text-white shadow-lg">
+                <i class="fa-solid fa-moon text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-yellow-500">نورك</h1>
+        </div>
+        <button onclick="toggleTheme()" class="text-xl p-2"><i id="theme-icon" class="fas fa-sun"></i></button>
     </header>
 
-    <main class="p-4 mb-20">
-        <section id="quran-section">
-            <h2 class="text-xl font-bold mb-4 text-yellow-400 border-b border-yellow-400 pb-2">القرآن الكريم كاملًا</h2>
-            <div id="quran-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                </div>
-        </section>
+    <main class="p-4 container mx-auto max-w-lg">
+        
+        <div class="mb-8 p-6 rounded-3xl bg-yellow-500/10 border-2 border-dashed border-yellow-500 text-center">
+            <h3 class="text-lg font-bold mb-3">تفعيل الخطوة 10 النهائية 🚀</h3>
+            <p class="text-sm opacity-80 mb-4">اضغطي هنا لإرسال عملية 1 Pi (Testnet) وتأكيد تطبيقك رسمياً</p>
+            <button onclick="transferPi()" class="btn-pi text-white px-8 py-3 rounded-full font-bold w-full">
+                <i class="fa-solid fa-check-double ml-2"></i> تفعيل الآن
+            </button>
+            <p id="pi-status" class="text-xs mt-2 font-bold text-yellow-500"></p>
+        </div>
 
-        <section id="azkar-section" class="mt-8">
-            <h2 class="text-xl font-bold mb-4 text-yellow-400 border-b border-yellow-400 pb-2">الأذكار والأدعية</h2>
-            <div class="card" onclick="alert('أذكار الصباح تفتح هنا')">أذكار الصباح</div>
-            <div class="card" onclick="alert('أذكار المساء تفتح هنا')">أذكار المساء</div>
-            <div class="card" onclick="alert('أدعية من الكتاب والسنة')">أدعية مختارة</div>
-        </section>
+        <div id="quran-tab" class="tab-content active-content">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-book-quran text-yellow-500"></i> القرآن الكريم</h2>
+            <div id="quran-grid" class="grid grid-cols-2 gap-4">
+                </div>
+        </div>
+
+        <div id="azkar-tab" class="tab-content">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-heart text-yellow-500"></i> الأذكار اليومية</h2>
+            <div class="space-y-4">
+                <div class="nav-card p-5 cursor-pointer flex justify-between items-center" onclick="showZikr('أذكار الصباح')">
+                    <span>أذكار الصباح</span> <i class="fa-solid fa-sun text-orange-400"></i>
+                </div>
+                <div class="nav-card p-5 cursor-pointer flex justify-between items-center" onclick="showZikr('أذكار المساء')">
+                    <span>أذكار المساء</span> <i class="fa-solid fa-moon text-blue-400"></i>
+                </div>
+                <div class="nav-card p-5 cursor-pointer flex justify-between items-center" onclick="showZikr('أدعية مختارة')">
+                    <span>أدعية نبوية</span> <i class="fa-solid fa-star text-yellow-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="tasbih-tab" class="tab-content">
+            <div class="text-center py-10">
+                <h2 class="text-2xl font-bold mb-6">المسبحة الإلكترونية</h2>
+                <div id="counter" class="text-7xl font-bold mb-8 text-yellow-500">0</div>
+                <button onclick="countUp()" class="w-40 h-40 rounded-full btn-pi text-white text-3xl shadow-2xl active:scale-95 transition mx-auto flex items-center justify-center">سبّح</button>
+                <button onclick="resetCount()" class="mt-8 text-sm opacity-50 underline">إعادة ضبط</button>
+            </div>
+        </div>
     </main>
 
+    <div id="reader-modal" class="fixed inset-0 bg-black/90 z-[200] hidden p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h2 id="modal-title" class="text-xl font-bold text-yellow-500"></h2>
+            <button onclick="closeModal()" class="text-3xl">&times;</button>
+        </div>
+        <div class="overflow-y-auto quran-font text-center text-2xl leading-loose" id="modal-content">
+            جارِ تحميل المحتوى...
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button onclick="switchTab('quran')" class="flex flex-col items-center gap-1 opacity-100"><i class="fa-solid fa-book-open text-xl"></i><span class="text-xs">القرآن</span></button>
+        <button onclick="switchTab('azkar')" class="flex flex-col items-center gap-1 opacity-50"><i class="fa-solid fa-hand-holding-heart text-xl"></i><span class="text-xs">الأذكار</span></button>
+        <button onclick="switchTab('tasbih')" class="flex flex-col items-center gap-1 opacity-50"><i class="fa-solid fa-beads text-xl"></i><span class="text-xs">المسبحة</span></button>
+    </nav>
+
     <script>
-        // 1. إعداد الـ Pi SDK
+        // 1. تشغيل الـ Pi SDK
         const Pi = window.Pi;
-        Pi.init({ version: "1.5", sandbox: true }); // Sandbox true للتجربة
+        Pi.init({ version: "1.5", sandbox: true });
 
         async function transferPi() {
-            document.getElementById('status').innerText = "جاري الاتصال بالمحفظة...";
+            const status = document.getElementById('pi-status');
+            status.innerText = "جاري فتح المحفظة...";
             try {
                 const payment = await Pi.createPayment({
                     amount: 1,
-                    memo: "تفعيل تطبيق نورك - الخطوة 10",
-                    metadata: { app: "norak" },
+                    memo: "تفعيل تطبيق نورك - ياسمين",
+                    metadata: { step: 10 },
                 }, {
-                    onReadyForServerApproval: (paymentId) => { console.log("Approved", paymentId); },
-                    onReadyForServerCompletion: (paymentId, txid) => { 
-                        document.getElementById('status').innerText = "تمت العملية بنجاح! مبروك الخطوة 10";
-                        alert("مبروك! العملية تمت بنجاح، اذهبي الآن للـ Checklist");
+                    onReadyForServerApproval: (id) => console.log("Approved:", id),
+                    onReadyForServerCompletion: (id, txid) => {
+                        status.innerText = "✅ تم الدفع! الخطوة 10 كملت بنجاح.";
+                        alert("مبروك يا ياسمين! العملية تمت، الخطوة 10 هتسمّع دلوقتي في الـ Checklist.");
                     },
-                    onCancel: (paymentId) => { document.getElementById('status').innerText = "تم إلغاء العملية"; },
-                    onError: (error, payment) => { document.getElementById('status').innerText = "خطأ: " + error.message; },
+                    onCancel: () => status.innerText = "❌ العملية اتلغت.",
+                    onError: (err) => status.innerText = "⚠️ خطأ: " + err.message
                 });
-            } catch (err) {
-                console.error(err);
-                document.getElementById('status').innerText = "تأكدي من فتح التطبيق داخل Pi Browser";
+            } catch (e) { status.innerText = "افتحي التطبيق من داخل Pi Browser"; }
+        }
+
+        // 2. إدارة القرآن والأذكار
+        function loadQuran() {
+            const grid = document.getElementById('quran-grid');
+            for(let i=1; i<=30; i++) {
+                grid.innerHTML += `
+                    <div class="nav-card p-4 text-center cursor-pointer shadow-sm border-b-4 border-yellow-500/30" onclick="readJuz(${i})">
+                        <div class="text-xs opacity-50">الجزء</div>
+                        <div class="text-2xl font-bold text-yellow-500">${i}</div>
+                    </div>`;
             }
         }
 
-        // 2. تحميل القرآن (مثال للأجزاء)
-        const quranContainer = document.getElementById('quran-container');
-        for (let i = 1; i <= 30; i++) {
-            const div = document.createElement('div');
-            div.className = 'card cursor-pointer hover:bg-gray-700';
-            div.innerHTML = `<h3 class="font-bold text-lg">الجزء ${i}</h3><p class="text-sm text-gray-400">اضغط للقراءة</p>`;
-            quranContainer.appendChild(div);
+        function readJuz(n) {
+            document.getElementById('modal-title').innerText = "الجزء رقم " + n;
+            document.getElementById('modal-content').innerText = "هنا يتم عرض نص الجزء رقم " + n + " بالكامل من المصحف الشريف.. (يتم الربط مع API المصحف لاحقاً)";
+            document.getElementById('reader-modal').classList.remove('hidden');
         }
+
+        function showZikr(title) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-content').innerText = "اللهم بك أصبحنا وبك أمسينا... (النص الكامل للذكر هنا)";
+            document.getElementById('reader-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('reader-modal').classList.add('hidden'); }
+
+        // 3. المسبحة والإضاءة والتابات
+        let count = 0;
+        function countUp() { count++; document.getElementById('counter').innerText = count; }
+        function resetCount() { count = 0; document.getElementById('counter').innerText = 0; }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            icon.className = document.body.classList.contains('light-mode') ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-content'));
+            document.getElementById(tab + '-tab').classList.add('active-content');
+            document.querySelectorAll('.bottom-nav button').forEach(b => b.style.opacity = "0.5");
+            event.currentTarget.style.opacity = "1";
+        }
+
+        window.onload = loadQuran;
     </script>
 </body>
 </html>

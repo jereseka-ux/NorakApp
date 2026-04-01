@@ -3,85 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نورك - Norak App</title>
+    <title>نورك - Norak Super App</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root { --main: #673ab7; --bg: #f8f9fa; --card: #ffffff; --text: #333; }
         .dark-mode { --bg: #121212; --card: #1e1e1e; --text: #f1f1f1; }
         body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding-bottom: 80px; transition: 0.3s; }
-        .header { background: linear-gradient(135deg, var(--main), #9575cd); color: white; padding: 20px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .top-tools { padding: 15px; position: sticky; top: 0; background: var(--bg); z-index: 100; }
-        #mainSearch { width: 100%; padding: 12px; border: 2px solid var(--main); border-radius: 12px; outline: none; box-sizing: border-box; }
-        
-        /* زرار التفعيل الرسمي للربط بالبلوكشين */
-        .pay-banner { background: #ffc107; color: #000; margin: 10px 0; padding: 18px; border-radius: 15px; font-weight: bold; cursor: pointer; text-align: center; border: 2px solid #ffa000; width: 100%; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
+        .header { background: linear-gradient(135deg, var(--main), #9575cd); color: white; padding: 20px; text-align: center; border-radius: 0 0 25px 25px; }
+        .pay-banner { background: #ffc107; color: #000; margin: 15px; padding: 18px; border-radius: 15px; font-weight: bold; cursor: pointer; text-align: center; border: 2px solid #ffa000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 1.1rem; }
         .container { padding: 15px; display: grid; gap: 15px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-right: 8px solid var(--main); }
-        .action-btn { background: var(--main); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
-        
-        /* شاشة القراءة (القارئ الذكي) */
+        .action-btn { background: var(--main); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
         .reader-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .reader-content { line-height: 2.5; font-size: 1.6rem; text-align: center; margin-top: 20px; }
-        .close-btn { background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; float: left; font-weight: bold; }
-
+        .reader-content { line-height: 2.5; font-size: 1.5rem; text-align: center; margin-top: 20px; white-space: pre-wrap; }
         .footer-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
-        .nav-item { cursor: pointer; opacity: 0.6; font-size: 0.9rem; }
-        .nav-item.active { opacity: 1; color: var(--main); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="reader" class="reader-overlay">
-        <button class="close-btn" onclick="closeReader()">إغلاق</button>
+        <button onclick="document.getElementById('reader').style.display='none'" style="background:#e91e63; color:white; border:none; padding:10px 20px; border-radius:8px; float:left;">إغلاق</button>
         <h2 id="r-title" style="text-align:center;"></h2>
-        <div id="r-body" class="reader-content">جاري التحميل...</div>
+        <div id="r-body" class="reader-content"></div>
     </div>
 
-    <div class="header">
-        <h1>نُورك</h1>
-        <p>تطبيق إسلامي نافع - نسخة شبكة باي</p>
-    </div>
-
-    <div class="top-tools">
-        <input type="text" id="mainSearch" onkeyup="search()" placeholder="ابحث عن سورة...">
-        <button class="pay-banner" onclick="startPiPayment()">💎 تفعيل النسخة الكاملة (1 Pi)</button>
-    </div>
+    <div class="header"><h1>نُورك</h1><p>رفيقك المسلم في شبكة باي</p></div>
+    
+    <div class="pay-banner" onclick="startPiPayment()">💎 تفعيل النسخة الاحترافية (1 Pi)</div>
 
     <div id="content-area" class="container"></div>
 
     <div class="footer-nav">
-        <div class="nav-item active" id="nav-q" onclick="showTab('quran')">📖 القرآن</div>
-        <div class="nav-item" id="nav-a" onclick="showTab('azkar')">📿 الأذكار</div>
-        <div class="nav-item" onclick="document.body.classList.toggle('dark-mode')">🌙 ليلي</div>
+        <div onclick="showTab('quran')">📖 القرآن</div>
+        <div onclick="showTab('azkar')">📿 الأذكار</div>
+        <div onclick="document.body.classList.toggle('dark-mode')">🌙 ليلي</div>
     </div>
 
 <script>
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
-    window.onload = () => {
-        try { 
-            // تهيئة الـ SDK للعمل داخل Pi Browser
-            Pi.init({ version: "2.0", sandbox: true }); 
-        } catch (e) { console.error("SDK Initialization failed"); }
-        showTab('quran');
+    const azkarData = {
+        "أذكار الصباح": "• أصبحنا وأصبح الملك لله والحمد لله.\n• رضيت بالله رباً وبالإسلام ديناً وبمحمد صلى الله عليه وسلم نبياً.\n• يا حي يا قيوم برحمتك أستغيث.",
+        "أذكار المساء": "• أمسينا وأمسى الملك لله والحمد لله.\n• اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت.\n• أعوذ بكلمات الله التامات من شر ما خلق.",
+        "أذكار الصلاة": "• أستغفر الله (3 مرات).\n• اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام.\n• سبحان الله (33)، الحمد لله (33)، الله أكبر (33)."
     };
 
+    window.onload = () => { try { Pi.init({ version: "2.0", sandbox: true }); } catch (e) {} showTab('quran'); };
+
     function showTab(tab) {
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById(tab === 'quran' ? 'nav-q' : 'nav-a').classList.add('active');
         const area = document.getElementById('content-area');
         area.innerHTML = '';
         if(tab === 'quran') {
             surahNames.forEach((s, i) => {
-                area.innerHTML += `<div class="card"><h3>${s}</h3><p>سورة رقم ${i+1}</p><button class="action-btn" onclick="fetchSurah(${i+1}, '${s}')">قراءة السورة</button></div>`;
+                area.innerHTML += `<div class="card"><h3>سورة ${s}</h3><button class="action-btn" onclick="fetchSurah(${i+1}, '${s}')">قراءة</button></div>`;
             });
         } else {
-            area.innerHTML = `<div class="card"><h3>أذكار الصباح</h3><p>حصن المسلم</p><button class="action-btn" onclick="openAzkar()">قراءة الذكر</button></div>`;
+            Object.keys(azkarData).forEach(a => {
+                area.innerHTML += `<div class="card"><h3>${a}</h3><button class="action-btn" onclick="openAzkar('${a}')">قراءة</button></div>`;
+            });
         }
     }
 
-    // 2. دالة جلب القرآن - لغة عربية 100% (ar.alafasy)
     async function fetchSurah(id, name) {
         document.getElementById('reader').style.display = 'block';
         document.getElementById('r-title').innerText = "سورة " + name;
@@ -91,45 +73,25 @@
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/ar.alafasy`);
             const data = await res.json();
             body.innerText = data.data.ayahs.map(a => a.text + " ﴿" + a.numberInSurah + "﴾").join(" ");
-        } catch (e) { body.innerText = "تأكدي من الاتصال بالإنترنت."; }
+        } catch (e) { body.innerText = "تأكدي من الإنترنت."; }
     }
 
-    function openAzkar() {
+    function openAzkar(title) {
         document.getElementById('reader').style.display = 'block';
-        document.getElementById('r-title').innerText = "أذكار الصباح";
-        document.getElementById('r-body').innerText = "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.";
+        document.getElementById('r-title').innerText = title;
+        document.getElementById('r-body').innerText = azkarData[title];
     }
 
-    function closeReader() { document.getElementById('reader').style.display = 'none'; }
-
-    // 3. الخطوة 10: كود الربط الرسمي بـ Pi Network
     async function startPiPayment() {
         try {
-            const payment = await Pi.createPayment({
-                amount: 1.0,
-                memo: "تفعيل ميزات تطبيق نورك المميزة",
-                metadata: { orderId: "norak_premium_" + Date.now() }
+            await Pi.createPayment({
+                amount: 1.0, memo: "تفعيل نسخة نُورك الكاملة", metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: function(paymentId) {
-                    console.log("Payment Ready:", paymentId);
-                    alert("تم إنشاء طلب الدفع بنجاح.");
-                },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    alert("🎉 تم التفعيل بنجاح! التطبيق الآن كامل الميزات.");
-                },
-                onCancel: function(paymentId) { },
-                onError: function(error, payment) { 
-                    alert("حدث خطأ في الربط: " + error.message);
-                }
+                onReadyForServerApproval: (id) => alert("تم إنشاء الطلب: " + id),
+                onReadyForServerCompletion: (id, tx) => alert("🎉 تم التفعيل بنجاح!"),
+                onCancel: (id) => {}, onError: (e) => alert("خطأ: " + e.message)
             });
-        } catch (e) {
-            alert("يرجى فتح التطبيق من Pi Browser لتفعيل الربط بالبلوكشين.");
-        }
-    }
-
-    function search() {
-        let v = document.getElementById('mainSearch').value.toLowerCase();
-        document.querySelectorAll('.card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(v) ? 'block' : 'none');
+        } catch (e) { alert("افتحي من Pi Browser"); }
     }
 </script>
 </body>

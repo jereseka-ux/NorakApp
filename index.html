@@ -1,69 +1,42 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نورك - القرآن الكريم</title>
+  <meta charset="UTF-8">
+  <title>تطبيق نورك</title>
+
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <style>
-    body {font-family: Arial; margin:0; background:#0f172a; color:#fff;}
-    header {padding:15px; text-align:center; background:#1e293b;}
-    button {padding:10px; margin:5px; border:none; border-radius:8px; cursor:pointer;}
-    .card {background:#1e293b; margin:10px; padding:15px; border-radius:12px;}
-  </style>
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<header>
-  <h2>تطبيق نورك</h2>
-  <div id="userName">جاري التحميل...</div>
-</header><div class="card">
-  <button onclick="loginPi()">تسجيل الدخول عبر Pi</button>
-  <button onclick="dailyReward()">مكافأة يومية</button>
-  <button onclick="toggleDarkMode()">تغيير الوضع</button>
-</div><div class="card">
-  <h3>النقاط: <span id="points">0</span></h3>
-</div><div class="card">
-  <h3>القرآن الكريم</h3>
-  <button onclick="loadQuran()">عرض القرآن</button>
-  <div id="quran"></div>
-</div><div class="card">
-  <h3>الإعدادات</h3>
-  <button onclick="resetData()">إعادة ضبط</button>
-</div><script>
-let points = localStorage.getItem('points') || 0;
-document.getElementById('points').innerText = points;
 
-function loginPi(){
-  Pi.init({ version: "2.0" });
-  Pi.authenticate(['username'], function(auth){
-    document.getElementById('userName').innerText = auth.user.username;
-  });
-}
+<div class="container">
+  <h1>✨ تطبيق نورك</h1>
+  <p id="status">🔄 جاري التحميل...</p>
 
-function dailyReward(){
-  points = parseInt(points) + 10;
-  localStorage.setItem('points', points);
-  document.getElementById('points').innerText = points;
-}
+  <div class="card">
+    <button onclick="login()">🔐 تسجيل الدخول عبر Pi</button>
+    <button onclick="dailyReward()">🎁 مكافأة يومية</button>
+    <button onclick="toggleMode()">🌙 تغيير الوضع</button>
+  </div>
 
-function toggleDarkMode(){
-  document.body.style.background = document.body.style.background === 'white' ? '#0f172a' : 'white';
-}
+  <div class="card">
+    <h2>💰 النقاط: <span id="points">0</span></h2>
+  </div>
 
-function loadQuran(){
-  fetch('https://api.alquran.cloud/v1/quran/ar.alafasy')
-  .then(res => res.json())
-  .then(data => {
-    let html = '';
-    data.data.surahs.forEach(surah => {
-      html += `<p>${surah.name}</p>`;
-    });
-    document.getElementById('quran').innerHTML = html;
-  });
-}
+  <div class="card">
+    <h2>📖 القرآن الكريم</h2>
+    <button onclick="openQuran()">عرض القرآن</button>
+  </div>
 
-function resetData(){
-  localStorage.clear();
-  location.reload();
-}
-</script></body>
+  <div class="card">
+    <h2>💳 دعم التطبيق</h2>
+    <button onclick="pay()">تبرع عبر Pi</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
 </html>

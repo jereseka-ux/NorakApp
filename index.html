@@ -2,171 +2,98 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نورك - القرآن الكريم</title>
-    <script src="https://sdk.pi.network/v2/pi-sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --p: #6a1b9a; --bg: #ffffff; --txt: #2c3e50; --card: #f8f9fa; --size: 26px; }
-        body.dark { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 80px; transition: 0.3s; overflow-x: hidden; }
-        
-        header { background: var(--p); color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .icon-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px; }
-
-        /* الفهرس الجانبي */
-        .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--card); z-index: 2001; transition: 0.4s; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); }
-        .sidebar.active { right: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2000; }
-        .overlay.active { display: block; }
-        .s-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .s-item:hover { background: rgba(106, 27, 154, 0.1); }
-
-        /* منطقة القراءة */
-        .quran-container { max-width: 800px; margin: 20px auto; padding: 25px; background: var(--bg); border-radius: 15px; text-align: center; min-height: 70vh; }
-        #s-name { font-family: 'Amiri', serif; font-size: 38px; color: var(--p); border-bottom: 2px solid var(--p); display: inline-block; margin-bottom: 20px; }
-        #s-content { font-family: 'Amiri', serif; font-size: var(--size); line-height: 2.3; text-align: justify; word-spacing: 2px; }
-        .ayah-num { color: var(--p); font-weight: bold; font-size: 18px; margin: 0 5px; border: 1px solid var(--p); border-radius: 50%; padding: 0 5px; }
-
-        /* البار السفلي */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #ddd; z-index: 1000; }
-        .nav-link { text-align: center; font-size: 12px; font-weight: bold; cursor: pointer; color: var(--txt); flex: 1; }
-        .nav-link span { display: block; font-size: 24px; margin-bottom: 2px; }
-        
-        .loading-spinner { display: none; margin: 20px auto; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--p); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Norak App</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
 
-<header>
-    <button class="icon-btn" onclick="toggleM()">☰</button>
-    <strong>نورك</strong>
-    <button class="icon-btn" onclick="toggleD()">🌙</button>
-</header>
+    <div id="s-name"></div>
+    <div id="s-content"></div>
 
-<div class="overlay" id="over" onclick="toggleM()"></div>
-<div class="sidebar" id="side">
-    <div style="padding:20px; background:var(--p); color:white; font-size: 20px; text-align: center;">فهرس السور</div>
-    <div id="surah-list"></div>
-</div>
-
-<div class="quran-container">
-    <h2 id="s-name">نُورَك</h2>
-    <div class="loading-spinner" id="loader"></div>
-    <div id="s-content">أهلاً بكِ ياسمين.. افتحي الفهرس وابدئي القراءة.</div>
-</div>
-
-<div class="bottom-nav">
-    <div class="nav-link" onclick="saveM()"><span>📌</span>حفظ</div>
-    <div class="nav-link" onclick="loadM()"><span>📖</span>العودة</div>
-    <div class="nav-link" onclick="pay()" style="color: #d4af37;"><span>π</span>تبرع</div>
-</div>
-
-<script>
-    // تهيئة التطبيق
-    window.onload = function() {
+    <script>
+        // 1. تهيئة الـ SDK فور تحميل الصفحة لضمان التعرف على المتصفح
+        const Pi = window.Pi;
         try {
             Pi.init({ version: "2.0", sandbox: false });
-        } catch(e) { console.error("Pi SDK error"); }
-        getIndex();
-    };
-
-    // جلب الفهرس الحقيقي من API
-    async function getIndex() {
-        try {
-            const res = await fetch('https://api.alquran.cloud/v1/surah');
-            const data = await res.json();
-            const list = document.getElementById('surah-list');
-            list.innerHTML = "";
-            data.data.forEach(s => {
-                let d = document.createElement('div');
-                d.className = 's-item';
-                d.innerText = s.number + ". " + s.name;
-                d.onclick = () => loadS(s.number, s.name);
-                list.appendChild(d);
-            });
-        } catch(e) {
-            document.getElementById('s-content').innerText = "خطأ في الاتصال بالإنترنت.. تأكدي من الشبكة.";
+        } catch (err) {
+            console.error("SDK initialization failed", err);
         }
-    }
 
-    // تحميل السورة كاملة وبشكل حقيقي
-    async function loadS(id, name) {
-        if(document.getElementById('side').classList.contains('active')) toggleM();
-        document.getElementById('s-name').innerText = "سورة " + name;
-        const content = document.getElementById('s-content');
-        const loader = document.getElementById('loader');
-        
-        content.innerHTML = "";
-        loader.style.display = "block";
-
-        try {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
-            const data = await res.json();
-            let txt = "";
-            data.data.ayahs.forEach(a => {
-                txt += a.text + ` <span class="ayah-num">${a.numberInSurah}</span> `;
-            });
-            content.innerHTML = txt;
-            window.scrollTo(0,0);
-            
-            // حفظ تلقائي لآخر حاجة اتشافت عشان "العودة" تشتغل فوراً
-            sessionStorage.setItem('auto_save', JSON.stringify({n: name, c: txt}));
-        } catch(e) {
-            content.innerText = "تعذر تحميل السورة، يرجى المحاولة مرة أخرى.";
-        } finally {
-            loader.style.display = "none";
-        }
-    }
-
-    function toggleM() { document.getElementById('side').classList.toggle('active'); document.getElementById('over').classList.toggle('active'); }
-    function toggleD() { document.body.classList.toggle('dark'); }
-
-    // زر الحفظ (بناءً على طلب المستخدم)
-    function saveM() {
-        const name = document.getElementById('s-name').innerText;
-        const content = document.getElementById('s-content').innerHTML;
-        if(name !== "نُورَك" && content !== "") {
-            localStorage.setItem('user_mark', JSON.stringify({n: name, c: content}));
-            alert("تم حفظ مكانك في الذاكرة 📌");
-        }
-    }
-
-    // زر العودة الفعال (بدون رسايل alert مزعجة)
-    function loadM() {
-        const saved = JSON.parse(localStorage.getItem('user_mark')) || JSON.parse(sessionStorage.getItem('auto_save'));
-        if(saved) {
-            document.getElementById('s-name').innerText = saved.n.includes("سورة") ? saved.n : "سورة " + saved.n;
-            document.getElementById('s-content').innerHTML = saved.c;
-            window.scrollTo(0,0);
-        } else {
-            toggleM(); // يفتح الفهرس بسكات لو مفيش حفظ
-        }
-    }
-
-    // كود الدفع الاحترافي لخطوة 10
-    async function pay() {
-        try {
-            const onIncompletePaymentFound = (p) => { /* معالجة المدفوعات غير المكتملة */ };
-            const auth = await Pi.authenticate(['payments'], onIncompletePaymentFound);
-            
-            if (auth) {
-                Pi.createPayment({
-                    amount: 0.1,
-                    memo: "صدقة جارية لتطبيق نورك",
-                    metadata: { orderId: "nork_" + Date.now() }
-                }, {
-                    onReadyForServerApproval: (pid) => Pi.approvePayment(pid),
-                    onReadyForServerCompletion: (pid, tx) => Pi.completePayment(pid, tx),
-                    onComplete: (pid) => alert("تقبل الله منكِ!"),
-                    onError: (err) => console.error(err)
-                });
+        // 2. دالة استرجاع البيانات المحفوظة للمستخدم
+        function loadM() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('user_mark'));
+                if (saved) {
+                    const nameElem = document.getElementById('s-name');
+                    const contentElem = document.getElementById('s-content');
+                    
+                    if (nameElem) nameElem.innerText = saved.n || "";
+                    if (contentElem) contentElem.innerHTML = saved.c || "";
+                    
+                    window.scrollTo(0, 0);
+                } else {
+                    if (typeof toggleM === "function") toggleM();
+                }
+            } catch (e) {
+                console.error("Error loading saved data", e);
             }
-        } catch(e) {
-            alert("استخدمي Pi Browser لإتمام التبرع.");
         }
-    }
-</script>
+
+        // 3. نظام الدفع الذكي المتوافق مع معايير Mainnet
+        async function pay() {
+            try {
+                // تعريف الصلاحيات المطلوبة
+                const scopes = ['payments'];
+                
+                // التعامل مع أي عمليات دفع سابقة لم تكتمل (شرط أساسي لـ Pi)
+                const onIncompletePaymentFound = (payment) => {
+                    console.log("Incomplete payment found:", payment.identifier);
+                    // هنا يتم إرسال المعرف للسيرفر الخاص بك لإتمامها إذا لزم الأمر
+                };
+
+                // توثيق المستخدم داخل شبكة Pi
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                if (auth) {
+                    // تنفيذ عملية الدفع الرسمية
+                    Pi.createPayment({
+                        amount: 0.1,
+                        memo: "Support Norak App Development", // وصف رسمي وواضح
+                        metadata: { 
+                            orderId: "order_" + Date.now(),
+                            app_name: "Norak"
+                        }
+                    }, {
+                        onReadyForServerApproval: (paymentId) => {
+                            // الموافقة من طرف التطبيق
+                            return Pi.approvePayment(paymentId);
+                        },
+                        onReadyForServerCompletion: (paymentId, txid) => {
+                            // إتمام العملية بعد تأكيد الشبكة
+                            return Pi.completePayment(paymentId, txid);
+                        },
+                        onComplete: (paymentId) => {
+                            alert("تمت عملية الدفع بنجاح. شكراً لدعمكم.");
+                        },
+                        onError: (error) => {
+                            console.error("Payment Process Error:", error);
+                            alert("عذراً، تعذر إتمام العملية حالياً.");
+                        },
+                        onCancel: (paymentId) => {
+                            console.log("User cancelled payment:", paymentId);
+                        }
+                    });
+                }
+            } catch (e) {
+                // رسالة ذكية تظهر فقط في حالة وجود خطأ حقيقي في البيئة
+                console.error("Authentication failed", e);
+                alert("يرجى التأكد من استخدام متصفح Pi الرسمي لإتمام هذه العملية.");
+            }
+        }
+
+        // تشغيل الدالة الأساسية عند فتح التطبيق
+        window.onload = loadM;
+    </script>
 </body>
 </html>

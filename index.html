@@ -7,93 +7,87 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #1a1a2e; color: white; padding: 20px; }
-        .btn { background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; margin: 10px; width: 80%; max-width: 300px; }
-        .status { margin: 20px; padding: 10px; border-radius: 10px; background: #16213e; display: inline-block; }
+        body { font-family: sans-serif; text-align: center; background-color: #f4f4f4; transition: 0.3s; }
+        .dark-mode { background-color: #1a1a1a; color: white; }
+        .btn { background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border: none; padding: 12px 25px; margin: 5px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .status { margin: 20px; padding: 10px; border-radius: 10px; background: #e0e0e0; color: #333; }
+        #quran-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; padding: 20px; }
+        .surah-card { background: white; color: black; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
     </style>
 </head>
 <body>
 
     <h1>✨ تطبيق نورك ✨</h1>
-    
+
     <div id="user-info" class="status">
-        <p id="status-text">جاري التحقق من الاتصال... ⏳</p>
+        <p id="status-text">⏳ جاري التحقق من الاتصال بمحفظة باي...</p>
     </div>
 
     <div id="controls">
-        <button class="btn" onclick="login()">🔐 تسجيل الدخول عبر Pi</button>
-        <button class="btn" onclick="initiatePiPayment()">🎁 مكافأة الولاء اليومية</button>
+        <button class="btn" onclick="login()">🔐 دخول عبر Pi</button>
+        <button class="btn" onclick="startPayment()">🎁 تفعيل الخطوة 10</button>
         <button class="btn" onclick="toggleTheme()">🌓 تبديل المظهر</button>
+    </div>
+
+    <hr>
+    <h3>📖 المصحف الشريف والأذكار</h3>
+    <div id="quran-container">
+        <p>جاري تحميل محتوى القرآن من المكتبة الخارجية...</p>
     </div>
 
     <script>
         const Pi = window.Pi;
-        let currentUser = null;
-
         Pi.init({ version: "1.5", sandbox: false });
+
+        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
 
         async function login() {
             try {
                 const scopes = ['username', 'payments'];
                 const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                currentUser = auth.user;
-                document.getElementById('status-text').innerHTML = `مرحباً، ${currentUser.username} 👋 <br> متصل وجاهز ✅`;
-                Swal.fire('أهلاً بك يا ' + currentUser.username, 'تم تسجيل دخولك بنجاح في تطبيق نورك', 'success');
+                document.getElementById('status-text').innerHTML = `مرحباً ${auth.user.username} في تطبيق نورك`;
+                Swal.fire('أهلاً بك يا ' + auth.user.username);
             } catch (err) {
-                console.error(err);
-                Swal.fire('خطأ', 'تأكدي من فتح التطبيق من Pi Browser', 'error');
+                Swal.fire('خطأ في الاتصال، افتحي التطبيق من Pi Browser');
             }
         }
 
-        function onIncompletePaymentFound(payment) {
-            console.log("عملية معلقة:", payment.identifier);
-        }
+        function onIncompletePaymentFound(payment) { /* للتعامل مع العمليات المعلقة */ }
 
-        async function initiatePiPayment() {
-            if (!currentUser) {
-                Swal.fire('تنبيه', 'سجلي دخولك الأول يا بطلة', 'warning');
-                return;
-            }
-
-            const paymentData = {
-                amount: 0.01,
-                memo: "دعم تطبيق نورك 🎉",
-                metadata: { orderId: "norak_support_1" }
-            };
-
-            const callbacks = {
-                onReadyForServerApproval: async (paymentId) => {
-                    await fetch('/api/pay', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId, action: "approve" })
-                    });
-                },
-                onReadyForServerCompletion: async (paymentId, txid) => {
-                    await fetch('/api/pay', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId, txid, action: "complete" })
-                    });
-                    Swal.fire('تم بنجاح! 🎉', 'شكراً لدعمك يا ياسمين، نورتينا', 'success');
-                },
-                onCancel: (pId) => { console.log("إلغاء"); },
-                onError: (err, p) => { 
-                    console.error(err);
-                    Swal.fire('عذراً', 'حاولي مرة ثانية من جوه باي براوزر', 'error');
-                }
-            };
-
+        // --- كود الخطوة العاشرة ---
+        async function startPayment() {
             try {
-                await Pi.createPayment(paymentData, callbacks);
-            } catch (err) {
-                console.error(err);
-            }
+                const paymentData = {
+                    amount: 0.1,
+                    memo: "تفعيل الخطوة 10 - تطبيق نورك",
+                    metadata: { type: "activation" }
+                };
+
+                await Pi.createPayment(paymentData, {
+                    onReadyForServerApproval: (id) => console.log("Approved:", id),
+                    onReadyForServerCompletion: async (id, txid) => {
+                        await fetch('/api/pay', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id, txid })
+                        });
+                        Swal.fire('تمت العملية بنجاح، نورتينا يا ياسمين! الخطوة 10 اكتملت.');
+                    },
+                    onCancel: (id) => console.log("Canceled", id),
+                    onError: (err) => Swal.fire('حدث خطأ أثناء الدفع')
+                });
+            } catch (err) { console.error(err); }
         }
 
-        function toggleTheme() {
-            document.body.style.backgroundColor = document.body.style.backgroundColor === 'white' ? '#1a1a2e' : 'white';
-            document.body.style.color = document.body.style.color === 'black' ? 'white' : 'black';
+        // محاكاة ربط مكتبة القرآن (مثال لـ 114 سورة)
+        const container = document.getElementById('quran-container');
+        container.innerHTML = ""; // مسح التحميل
+        for (let i = 1; i <= 114; i++) {
+            let card = document.createElement('div');
+            card.className = 'surah-card';
+            card.innerText = `سورة رقم ${i}`;
+            card.onclick = () => Swal.fire('قريباً ستتمكن من قراءة السورة كاملة من المكتبة');
+            container.appendChild(card);
         }
     </script>
 </body>

@@ -9,150 +9,182 @@
     <style>
         :root { --p: #6a1b9a; --bg: #f9f9fb; --txt: #2c3e50; --card: #ffffff; --size: 24px; }
         body.dark { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 80px; transition: 0.3s; }
-        header { background: var(--p); color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        .icon-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--card); z-index: 2001; transition: 0.4s; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 80px; transition: 0.3s; overflow-x: hidden; }
+        header { background: var(--p); color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .icon-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px; border-radius: 50%; transition: 0.2s; }
+        .icon-btn:active { background: rgba(255,255,255,0.2); }
+        
+        /* الفهرس المطور */
+        .sidebar { position: fixed; top: 0; right: -100%; width: 300px; height: 100%; background: var(--card); z-index: 2001; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); }
         .sidebar.active { right: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2000; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2000; backdrop-filter: blur(3px); }
         .overlay.active { display: block; }
-        .s-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; font-weight: bold; }
-        .quran-container { max-width: 800px; margin: 15px auto; padding: 25px; background: var(--card); border-radius: 15px; text-align: center; }
-        #s-name { font-family: 'Amiri', serif; font-size: 32px; color: var(--p); border-bottom: 2px solid #eee; margin-bottom: 15px; }
-        #s-content { font-family: 'Amiri', serif; font-size: var(--size); line-height: 2.2; text-align: justify; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; z-index: 1000; }
-        .nav-link { text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; color: var(--txt); }
-        .nav-link span { display: block; font-size: 22px; }
+        .s-item { padding: 18px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; font-weight: bold; transition: 0.2s; display: flex; align-items: center; }
+        .s-item:hover { background: rgba(106, 27, 154, 0.05); }
+        
+        /* منطقة القراءة */
+        .quran-container { max-width: 800px; margin: 15px auto; padding: 25px; background: var(--card); border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 60vh; }
+        #s-name { font-family: 'Amiri', serif; font-size: 36px; color: var(--p); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--p); display: inline-block; }
+        #s-content { font-family: 'Amiri', serif; font-size: var(--size); line-height: 2.5; text-align: justify; padding: 10px; word-spacing: 2px; }
+        .ayah-num { color: var(--p); font-weight: bold; font-size: 0.8em; margin: 0 5px; border: 1px solid var(--p); border-radius: 50%; padding: 2px 6px; }
+
+        /* الناف بار الذكي */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.1); z-index: 1000; }
+        .nav-link { text-align: center; font-size: 12px; font-weight: bold; cursor: pointer; color: var(--txt); flex: 1; transition: 0.2s; }
+        .nav-link:active { transform: scale(0.9); }
+        .nav-link span { display: block; font-size: 24px; margin-bottom: 4px; }
     </style>
 </head>
-<body>
+<body class="light">
 
 <header>
-    <button class="icon-btn" onclick="toggleM()">☰</button>
-    <strong>نورك</strong>
-    <button class="icon-btn" onclick="toggleD()">🌙</button>
+    <button class="icon-btn" onclick="toggleM()" aria-label="Menu">☰</button>
+    <strong style="font-size: 20px; letter-spacing: 1px;">نورك</strong>
+    <button class="icon-btn" id="theme-btn" onclick="toggleD()">🌙</button>
 </header>
 
 <div class="overlay" id="over" onclick="toggleM()"></div>
 <div class="sidebar" id="side">
-    <div style="padding:20px; background:var(--p); color:white;">فهرس السور</div>
+    <div style="padding:25px; background:var(--p); color:white; font-size: 20px; font-weight: bold; text-align: center;">فهرس السور</div>
     <div id="surah-list"></div>
 </div>
 
 <div class="quran-container">
-    <h2 id="s-name">بِسْمِ اللَّهِ</h2>
-    <div id="s-content">افتح الفهرس وابدأ القراءة..</div>
+    <h2 id="s-name">نُورَك</h2>
+    <div id="s-content">أهلاً بكِ ياسمين.. افتحي الفهرس من القائمة بالأعلى وابدئي القراءة.</div>
 </div>
 
 <div class="bottom-nav">
     <div class="nav-link" onclick="saveM()"><span>📌</span>حفظ</div>
     <div class="nav-link" onclick="loadM()"><span>📖</span>العودة</div>
-    <div class="nav-link" onclick="pay()" style="color: gold;"><span>π</span>تبرع</div>
+    <div class="nav-link" onclick="pay()" style="color: #ff9800;"><span>π</span>تبرع</div>
 </div>
 
 <script>
     // تهيئة الـ SDK
     window.onload = function() {
         try {
-            // ملاحظة: Sandbox: false للـ Mainnet، و true للتجربة
             Pi.init({ version: "2.0", sandbox: false });
             getIndex();
-        } catch(e) { console.error("SDK Init failed"); }
+        } catch(e) { console.log("Pi SDK error"); }
     };
 
+    // جلب الفهرس
     async function getIndex() {
         try {
             const res = await fetch('https://api.alquran.cloud/v1/surah');
             const data = await res.json();
             const list = document.getElementById('surah-list');
-            list.innerHTML = ""; // تنظيف القائمة
+            list.innerHTML = ""; 
             data.data.forEach(s => {
                 let d = document.createElement('div');
                 d.className = 's-item';
-                d.innerText = s.number + ". " + s.name;
+                d.innerHTML = `<span style="color:var(--p); margin-left:10px;">${s.number}.</span> ${s.name}`;
                 d.onclick = () => loadS(s.number, s.name);
                 list.appendChild(d);
             });
-        } catch(e) { console.error("Error fetching index"); }
+        } catch(e) { console.error("Error fetching data"); }
     }
 
+    // تحميل السورة
     async function loadS(id, name) {
         if(document.getElementById('side').classList.contains('active')) toggleM();
-        document.getElementById('s-name').innerText = "سورة " + name;
-        document.getElementById('s-content').innerHTML = "جاري التحميل...";
+        const contentDiv = document.getElementById('s-content');
+        const nameDiv = document.getElementById('s-name');
+        
+        nameDiv.innerText = "سورة " + name;
+        contentDiv.innerHTML = "<div style='margin-top:50px;'>جاري تحميل كلام الله...</div>";
+        
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
             const data = await res.json();
             let txt = "";
-            data.data.ayahs.forEach(a => { txt += a.text + " <span style='color:var(--p)'>(" + a.numberInSurah + ")</span> "; });
-            document.getElementById('s-content').innerHTML = txt;
-            window.scrollTo(0,0);
-        } catch(e) { document.getElementById('s-content').innerHTML = "عفواً، حدث خطأ في التحميل."; }
+            // تنسيق احترافي للآيات
+            data.data.ayahs.forEach(a => { 
+                txt += `${a.text} <span class="ayah-num">${a.numberInSurah}</span> `; 
+            });
+            contentDiv.innerHTML = txt;
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            // حفظ تلقائي لآخر سورة تم فتحها كاحتياط
+            sessionStorage.setItem('last_viewed', JSON.stringify({id, name, content: txt}));
+        } catch(e) { 
+            contentDiv.innerHTML = "حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى."; 
+        }
     }
 
     function toggleM() { document.getElementById('side').classList.toggle('active'); document.getElementById('over').classList.toggle('active'); }
-    function toggleD() { document.body.classList.toggle('dark'); }
+    
+    function toggleD() { 
+        document.body.classList.toggle('dark');
+        const btn = document.getElementById('theme-btn');
+        btn.innerText = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
 
-    // تعديل زر الحفظ
+    // زر الحفظ (يدوي برغبة المستخدم)
     function saveM() {
         const sName = document.getElementById('s-name').innerText;
-        if(sName === "بِسْمِ اللَّهِ" || sName === "") {
-            alert("اختر سورة أولاً لكي تحفظها!");
+        const sContent = document.getElementById('s-content').innerHTML;
+        
+        if(sName === "نُورَك" || sContent.includes("ابدئي القراءة")) {
+            alert("فتحي سورة الأول عشان أقدر أحفظ مكانك 🌸");
             return;
         }
-        const mark = { n: sName, c: document.getElementById('s-content').innerHTML };
-        localStorage.setItem('q_mark', JSON.stringify(mark));
-        alert("تم حفظ مكانك بنجاح! 📌");
+        
+        const mark = { n: sName, c: sContent };
+        localStorage.setItem('q_mark_new', JSON.stringify(mark));
+        alert("تم حفظ مكانك بنجاح! تقدري ترجعي له في أي وقت. 📌");
     }
 
-    // تعديل زر العودة (حل المشكلة اللي في الصورة)
+    // زر العودة (الذكِي والمبهر)
     function loadM() {
-        const saved = JSON.parse(localStorage.getItem('q_mark'));
-        if(saved && saved.n !== "بِسْمِ اللَّهِ") {
+        // 1. محاولة التحميل من الحفظ اليدوي (📌)
+        const saved = JSON.parse(localStorage.getItem('q_mark_new'));
+        
+        if(saved) {
             document.getElementById('s-name').innerText = saved.n;
             document.getElementById('s-content').innerHTML = saved.c;
-            window.scrollTo(0,0);
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            return; // الخروج من الدالة لأن المهمة نجحت
+        }
+
+        // 2. لو مفيش حفظ يدوي، جرب يرجع لآخر حاجة كانت مفتوحة في الجلسة دي
+        const lastSession = JSON.parse(sessionStorage.getItem('last_viewed'));
+        if(lastSession) {
+            document.getElementById('s-name').innerText = "سورة " + lastSession.name;
+            document.getElementById('s-content').innerHTML = lastSession.content;
+            window.scrollTo({top: 0, behavior: 'smooth'});
         } else {
-            alert("لا توجد علامة محفوظة حالياً. ابدئي قراءة أي سورة ثم اضغطي 'حفظ'.");
+            // 3. لو مفيش خالص، افتح الفهرس للمستخدم عشان ميحسش إن الزرار بايخ
+            toggleM();
+            alert("مفيش علامة محفوظة.. فتحتلك الفهرس تختاري سورة ✨");
         }
     }
 
-    // كود الدفع المطور لتخطي الخطوة 10
+    // كود الدفع (الخاص بخطوة 10)
     async function pay() {
         try {
-            const scopes = ['payments'];
-            function onIncompletePaymentFound(payment) {
-                // دالة مهمة جداً لـ Pi لإنهاء المدفوعات المعلقة
-                console.log("Incomplete payment found", payment);
-            };
-
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            const auth = await Pi.authenticate(['payments'], (p) => {
+                console.log("Incomplete payment found", p);
+            });
             
             if (auth) {
                 Pi.createPayment({
                     amount: 0.1,
                     memo: "دعم تطبيق نورك - صدقة جارية",
-                    metadata: { orderId: "norak_" + Date.now() }
+                    metadata: { orderId: "p_id_" + Date.now() }
                 }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        console.log("Payment Ready for Approval", paymentId);
-                        // هنا السيستم بيعرف إنك جاهزة
-                        alert("طلب الدفع تم إرساله بنجاح!");
+                    onReadyForServerApproval: (pid) => { 
+                        console.log("Approved:", pid);
+                        alert("طلب التبرع جاهز للتأكيد!");
                     },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        console.log("Payment Ready for Completion", paymentId, txid);
-                    },
-                    onComplete: (paymentId) => {
-                        alert("تقبل الله منك! تم التبرع بنجاح.");
-                    },
-                    onCancel: (paymentId) => { console.log("Payment Cancelled"); },
-                    onError: (error, payment) => {
-                        alert("حدث خطأ: " + error.message);
-                    }
+                    onReadyForServerCompletion: (pid, tx) => { console.log("Completed:", tx); },
+                    onComplete: (pid) => { alert("شكرًا لكِ! تم التبرع بنجاح."); },
+                    onCancel: (pid) => { console.log("Cancelled"); },
+                    onError: (err) => { alert("حدث خطأ في عملية الدفع."); }
                 });
             }
         } catch(e) {
-            alert("تأكدي من فتح التطبيق داخل Pi Browser."); 
+            alert("يرجى فتح التطبيق من متصفح Pi Browser واستخدام المحفظة."); 
         }
     }
 </script>

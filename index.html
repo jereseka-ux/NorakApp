@@ -3,56 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نوراك - Norak App</title>
+    <title>تطبيق نوراك (Norak)</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        :root { --bg: #121212; --text: #ffffff; --card: #1e1e26; --accent: #f1c40f; --success: #27ae60; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 550px; margin: auto; background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-        h1 { color: var(--accent); font-size: 28px; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .section { background: #2c3e50; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #34495e; }
-        h3 { margin-top: 0; color: #ecf0f1; }
-        select, button { width: 100%; padding: 15px; margin: 12px 0; border-radius: 12px; border: none; font-size: 17px; font-weight: 600; transition: all 0.3s ease; }
-        select { background: #34495e; color: white; cursor: pointer; appearance: none; text-align: center; }
-        .btn-main { background-color: var(--success); color: white; cursor: pointer; }
-        .btn-main:hover { background-color: #2ecc71; transform: translateY(-2px); }
-        .btn-pay { background: linear-gradient(135deg, #f39c12, #d35400); color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(211, 84, 0, 0.4); }
-        .btn-pay:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(211, 84, 0, 0.6); }
-        .content-display { background: #1a1a1a; padding: 25px; border-radius: 15px; min-height: 120px; margin-top: 15px; line-height: 2; font-size: 19px; border: 1px dashed #f1c40f; color: #f1c40f; }
-        .footer { font-size: 13px; color: #bdc3c7; margin-top: 25px; border-top: 1px solid #444; padding-top: 15px; }
+        :root { --bg: #121212; --text: #ffffff; --card: #1e1e26; --accent: #f1c40f; }
+        body.light-mode { --bg: #f4f4f9; --text: #333; --card: #ffffff; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; transition: 0.3s; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-toggle { background: #6c5ce7; color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; float: left; }
+        .section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
+        select, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: none; font-size: 16px; cursor: pointer; }
+        .btn-read { background: #27ae60; color: white; }
+        .btn-pay { background: linear-gradient(45deg, #f39c12, #e67e22); color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); }
+        .content-display { background: #000; padding: 20px; border-radius: 10px; min-height: 100px; color: var(--accent); line-height: 1.8; font-size: 18px; border: 1px solid #333; white-space: pre-wrap; }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
 <div class="container">
-    <h1>📖 تطبيق نوراك (Norak)</h1>
+    <button class="btn-toggle" onclick="toggleTheme()">🌓</button>
+    <h1>تطبيق نوراك (Norak)</h1>
 
     <div class="section">
-        <h3>القرآن الكريم والأذكار</h3>
-        <select id="contentSelect">
-            <option value="">-- اختر السورة أو الذكر --</option>
-            <optgroup label="سور قرآنية">
-                <option value="q_1">سورة الفاتحة</option>
-                <option value="q_112">سورة الإخلاص</option>
-                <option value="q_113">سورة الفلق</option>
-                <option value="q_114">سورة الناس</option>
+        <h3>📖 المكتبة الإسلامية</h3>
+        <select id="mainSelect">
+            <option value="">-- اختر المحتوى --</option>
+            <optgroup label="سور القرآن">
+                <option value="1">سورة الفاتحة</option>
+                <option value="112">سورة الإخلاص</option>
+                <option value="113">سورة الفلق</option>
+                <option value="114">سورة الناس</option>
             </optgroup>
-            <optgroup label="أذكار وحصن المسلم">
-                <option value="a_1">أذكار الصباح</option>
-                <option value="a_2">أذكار المساء</option>
-                <option value="a_3">أذكار النوم</option>
+            <optgroup label="الأذكار">
+                <option value="az1">أذكار الصباح</option>
+                <option value="az2">أذكار المساء</option>
             </optgroup>
         </select>
-        <button class="btn-main" onclick="showContent()">عرض الآن</button>
-        <div class="content-display" id="displayBox">مرحباً بك في تطبيق نوراك.. اختر محتوى لبدء القراءة</div>
+        <button class="btn-read" onclick="handleDisplay()">عرض الآن</button>
+        <div class="content-display" id="outBox">مرحباً بك في نوراك.. اختر محتوى للبدء</div>
     </div>
 
     <div class="section">
         <h3>تفعيل الخطوة 10 النهائية</h3>
-        <p style="font-size: 14px; margin-bottom: 15px;">ساهم بـ 0.01 Pi لتأكيد ملكية التطبيق ودعم استمرار المشروع</p>
-        <button class="btn-pay" id="pay-button" onclick="startPiPayment()">🎁 تفعيل الخطوة 10</button>
-        <p class="footer">تنبيه: جاري الربط التلقائي بمحفظة Pi.. خليكي في الصفحة</p>
+        <p style="font-size: 13px;">دعم استمرارية المشروع (0.01 Pi)</p>
+        <button class="btn-pay" onclick="runPayment()">🎁 تفعيل الخطوة 10</button>
+        <p style="font-size: 11px; color: #888;">تأكد من فتح التطبيق عبر Pi Browser</p>
     </div>
 </div>
 
@@ -60,60 +56,63 @@
     const Pi = window.Pi;
     Pi.init({ version: "2.0", sandbox: false });
 
-    // المحتوى الكامل بدون حذف سطر واحد
-    function showContent() {
-        const val = document.getElementById('contentSelect').value;
-        const box = document.getElementById('displayBox');
-        const content = {
-            "q_1": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)",
-            "q_112": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ. قُلْ هُوَ اللَّهُ أَحَدٌ (1) اللَّهُ الصَّمَدُ (2) لَمْ يَلِدْ وَلَمْ يُولَدْ (3) وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (4)",
-            "q_113": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ. قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ (1) مِنْ شَرِّ مَا خَلَقَ (2) وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ (3) وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ (4) وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ (5)",
-            "q_114": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ. قُلْ أَعُوذُ بِرَبِّ النَّاسِ (1) مَلِكِ النَّاسِ (2) إِلَهِ النَّاسِ (3) مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ (4) الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ (5) مِنَ الْجِنَّةِ وَالنَّاسِ (6)",
-            "a_1": "أذكار الصباح: أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.",
-            "a_2": "أذكار المساء: أمسينا وأمسى الملك لله، والحمد لله، أعوذ بكلمات الله التامات من شر ما خلق، بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء.",
-            "a_3": "أذكار النوم: باسمك ربي وضعت جنبي وبك أرفعه، إن أمسكت نفسي فارحمها وإن أرسلتها فاحفظها بما تحفظ به عبادك الصالحين."
-        };
-        box.innerText = content[val] || "يرجى اختيار محتوى من القائمة أعلاه.";
+    function toggleTheme() {
+        document.getElementById('mainBody').classList.toggle('light-mode');
     }
 
-    // إصلاح مشكلة الدفع المعلق (السر في السطر ده)
+    async function handleDisplay() {
+        const val = document.getElementById('mainSelect').value;
+        const box = document.getElementById('outBox');
+        if (!val) return;
+        
+        if (val.startsWith('az')) {
+            box.innerText = val === 'az1' ? "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..." : "أمسينا وأمسى الملك لله، والحمد لله، أعوذ بكلمات الله التامات من شر ما خلق...";
+        } else {
+            box.innerText = "جاري التحميل...";
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/surah/${val}`);
+                const d = await res.json();
+                box.innerText = d.data.ayahs.map(a => a.text).join(' ');
+            } catch (e) {
+                box.innerText = "حدث خطأ في جلب المحتوى، يرجى المحاولة لاحقاً.";
+            }
+        }
+    }
+
     function onIncompletePaymentFound(payment) {
-        console.log("Incomplete payment found, resolving...");
         return axios.post('https://norak-app.vercel.app/api/incomplete', { payment });
     }
 
-    async function startPiPayment() {
+    async function runPayment() {
         try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
             
             const paymentData = {
                 amount: 0.01,
-                memo: "تفعيل ميزات تطبيق نوراك النهائية - الخطوة 10",
-                metadata: { orderId: "norak_act_" + Date.now() }
+                memo: "تفعيل الخطوة 10 - تطبيق نوراك",
+                metadata: { orderId: "norak_" + Date.now() }
             };
 
             const callbacks = {
-                onReadyForServerApproval: (paymentId) => {
-                    return axios.post('https://norak-app.vercel.app/api/approve', { paymentId });
+                onReadyForServerApproval: (id) => {
+                    return axios.post('https://norak-app.vercel.app/api/approve', { paymentId: id });
                 },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    return axios.post('https://norak-app.vercel.app/api/complete', { paymentId, txid });
+                onReadyForServerCompletion: (id, tx) => {
+                    return axios.post('https://norak-app.vercel.app/api/complete', { paymentId: id, txid: tx });
                 },
-                onCancel: (paymentId) => { console.log("Cancelled: " + paymentId); },
-                onError: (error, payment) => {
-                    console.error("Payment Error:", error);
-                    alert("تنبيه: تأكدي من رصيدك في المحفظة وافتحي التطبيق من داخل Pi Browser.");
+                onCancel: (id) => console.log("Payment Cancelled"),
+                onError: (err) => {
+                    console.error(err);
+                    alert("فشلت العملية، يرجى التأكد من رصيد المحفظة.");
                 }
             };
 
             await Pi.createPayment(paymentData, callbacks);
-        } catch (err) {
-            console.error("Auth failed:", err);
-            alert("فشل تسجيل الدخول.. يرجى المحاولة مرة أخرى.");
+        } catch (e) {
+            console.error(e);
+            alert("يرجى فتح التطبيق من داخل متصفح Pi الرسمي.");
         }
     }
 </script>
-
 </body>
 </html>

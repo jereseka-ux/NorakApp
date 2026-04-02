@@ -4,96 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نورك | Norak</title>
-    
-    <!-- Pi Network SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts for better Arabic typography -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        /* --- Base Styles & Theme Variables --- */
         :root {
-            --bg: #1a202c;
-            --card: #2d3748;
-            --text: #e2e8f0;
-            --primary: #facc15; /* Yellow */
-            --secondary-text: #a0aec0;
+            --bg: #1a202c; --card: #2d3748; --text: #e2e8f0; --primary: #facc15; --secondary-text: #a0aec0;
         }
-
-        .light {
-            --bg: #f7fafc;
-            --card: #ffffff;
-            --text: #1a202c;
-            --secondary-text: #4a5568;
+       .light {
+            --bg: #f7fafc; --card: #ffffff; --text: #1a202c; --secondary-text: #4a5568;
         }
-
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            transition: background-color 0.3s, color 0.3s;
-            padding-bottom: 80px; /* Space for bottom nav */
+            font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text);
+            transition: background-color 0.3s, color 0.3s; padding-bottom: 80px;
         }
-        
-        .card {
-            background-color: var(--card);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+       .card {
+            background-color: var(--card); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: background-color 0.3s;
         }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            background-color: var(--card);
-            padding-top: 10px;
-            padding-bottom: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(128, 128, 128, 0.2);
+       .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around;
+            background-color: var(--card); padding-top: 10px; padding-bottom: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2); border-top: 1px solid rgba(128, 128, 128, 0.2);
         }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--secondary-text);
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
+       .nav-btn {
+            background: none; border: none; color: var(--secondary-text); cursor: pointer; font-size: 14px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
-        .nav-btn.active {
-            color: var(--primary);
-            font-weight: bold;
-        }
-        
-        /* --- Table of Contents (الفهرس) --- */
+       .nav-btn.active { color: var(--primary); font-weight: bold; }
         #tocPanel {
-            position: fixed;
-            top: 60px;
-            left: 10px; /* Changed from right for better RTL layout */
-            width: 250px;
-            max-height: 70%;
-            overflow-y: auto;
-            background: var(--card);
-            color: var(--text);
-            border-radius: 10px;
-            padding: 15px;
-            z-index: 1000;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            position: fixed; top: 60px; left: 10px; width: 250px; max-height: 70%;
+            overflow-y: auto; background: var(--card); color: var(--text); border-radius: 10px;
+            padding: 15px; z-index: 1000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-
         #tocPanel.hidden { display: none; }
         #tocPanel h3 { font-size: 18px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         #tocPanel ul { list-style: none; padding: 0; }
@@ -102,9 +46,8 @@
         #tocPanel li:hover { background-color: rgba(250, 204, 21, 0.1); }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body>
 
-    <!-- Header -->
     <header class="p-4 flex justify-between items-center sticky top-0 bg-opacity-80 backdrop-blur-sm" style="background-color: var(--bg);">
         <h1 class="text-2xl font-bold" style="color: var(--primary);">نورك</h1>
         <div class="flex items-center gap-4">
@@ -113,35 +56,26 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="p-4">
-        
-        <!-- Payment Section (Step 10) -->
         <div id="paymentSection" class="card text-center">
             <h2 class="text-lg font-bold mb-2">تفعيل التطبيق</h2>
             <p class="text-sm mb-3" style="color: var(--secondary-text);">لتتمتع بكامل مميزات التطبيق، يرجى تفعيله مقابل 1 Pi.</p>
             <button onclick="pay()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg transition-all">تفعيل الآن (1 π)</button>
             <p id="status" class="mt-3 text-sm font-semibold"></p>
         </div>
-
-        <!-- Table of Contents Panel -->
         <div id="tocPanel" class="hidden">
             <h3>فهرس المحتوى</h3>
             <ul id="tocList"></ul>
         </div>
-        
-        <!-- Tabs Content -->
         <div id="quranTab" class="tab-content">
             <h2 class="text-xl font-bold mb-3">القرآن الكريم</h2>
             <div id="surahsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
         </div>
-
         <div id="azkarTab" class="tab-content hidden">
             <h2 class="text-xl font-bold mb-3">أذكار الصباح والمساء</h2>
             <div class="card">سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته. (3 مرات)</div>
             <div class="card">اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور.</div>
         </div>
-
         <div id="duaTab" class="tab-content hidden">
             <h2 class="text-xl font-bold mb-3">أدعية يومية</h2>
             <div id="duaContainer" class="card">
@@ -149,7 +83,6 @@
                 <button onclick="getNewDua()" class="bg-yellow-400 text-black text-sm px-3 py-1 rounded-md">دعاء جديد</button>
             </div>
         </div>
-        
         <div id="tasbihTab" class="tab-content hidden text-center">
             <h2 class="text-xl font-bold mb-3">المسبحة الإلكترونية</h2>
             <div class="card inline-block p-8">
@@ -160,10 +93,8 @@
                 </div>
             </div>
         </div>
-        
     </main>
 
-    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <button onclick="switchTab('quran')" class="nav-btn active">📖<br>قرآن</button>
         <button onclick="switchTab('azkar')" class="nav-btn">☀️<br>أذكار</button>
@@ -172,20 +103,131 @@
     </nav>
 
     <script>
-    /* ==========================
-       App Initialization
-    ========================== */
+    // --- Pi Network Payment Logic ---
+    async function pay() {
+        const statusEl = document.getElementById("status");
+        statusEl.innerText = "جاري تحضير عملية الدفع...";
+        statusEl.style.color = '';
+        const paymentData = { amount: 1.000, memo: "تفعيل تطبيق نورك | Norak App Activation", metadata: { purpose: "app_activation" } };
+        const callbacks = {
+            onReadyForServerApproval: (paymentId) => {
+                statusEl.innerText = "يرجى تأكيد الدفع في نافذة Pi...";
+                console.log("onReadyForServerApproval - Calling fake server to approve payment:", paymentId);
+                fetch('/approvePayment', { method: 'POST', body: JSON.stringify({ paymentId }) });
+            },
+            onReadyForServerCompletion: (paymentId, txid) => {
+                statusEl.innerText = "جاري التحقق من المعاملة...";
+                console.log("onReadyForServerCompletion - Calling fake server to complete payment:", paymentId, txid);
+                fetch('/completePayment', { method: 'POST', body: JSON.stringify({ paymentId, txid }) }).then(res => res.json()).then(serverResponse => {
+                    if(serverResponse.status === 'success'){
+                        localStorage.setItem("norakPaymentDone", "true");
+                        statusEl.innerText = "✅ تم التفعيل بنجاح! شكرًا لك.";
+                        statusEl.style.color = '#48bb78';
+                        setTimeout(() => { document.getElementById("paymentSection").style.display = 'none'; }, 3000);
+                    } else {
+                        statusEl.innerText = "حدث خطأ أثناء التحقق.";
+                        statusEl.style.color = '#f56565';
+                    }
+                });
+            },
+            onCancel: (paymentId) => { statusEl.innerText = "تم إلغاء عملية الدفع."; statusEl.style.color = '#f56565'; },
+            onError: (error) => { statusEl.innerText = `خطأ: ${error.message}.`; statusEl.style.color = '#f56565'; }
+        };
+        try { await Pi.createPayment(paymentData, callbacks); }
+        catch (err) { statusEl.innerText = "لا يمكن بدء الدفع. هل تستخدم متصفح Pi؟"; statusEl.style.color = '#f56565'; }
+    }
+
+    // --- Quran Section Logic ---
+    async function loadQuranSurahs() {
+        const surahsGrid = document.getElementById('surahsGrid');
+        surahsGrid.innerHTML = '<p>جاري تحميل السور...</p>';
+        try {
+            const response = await fetch("https://api.alquran.cloud/v1/surah");
+            const data = await response.json();
+            surahsGrid.innerHTML = '';
+            data.data.forEach(surah => {
+                const div = document.createElement("div");
+                div.className = "card text-center cursor-pointer hover:bg-yellow-400 hover:text-black transition-all";
+                div.innerHTML = `<p class="font-bold">${surah.name}</p><p class="text-xs">${surah.englishName}</p>`;
+                div.onclick = () => openSurah(surah.number);
+                surahsGrid.appendChild(div);
+            });
+        } catch (error) { surahsGrid.innerHTML = '<p>فشل تحميل السور. يرجى التحقق من اتصالك بالإنترنت.</p>'; }
+    }
+    function openSurah(id) { alert(`جاري تحميل سورة رقم ${id}...`); }
+
+    // --- Daily Dua Section ---
+    const duas = ["اللهم آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار.", "ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة إنك أنت الوهاب.", "اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً.", "يا مقلب القلوب ثبت قلبي على دينك."];
+    let currentDuaIndex = 0;
+    function getNewDua() { currentDuaIndex = (currentDuaIndex + 1) % duas.length; document.getElementById('duaText').innerText = duas[currentDuaIndex]; }
+
+    // --- Tasbih Counter Logic ---
+    let count = 0;
+    const countEl = document.getElementById('count');
+    function inc() { count++; countEl.innerText = count; }
+    function reset() { count = 0; countEl.innerText = 0; }
+
+    // --- Tab Switching Logic ---
+    const tabs = document.querySelectorAll('.tab-content');
+    const navButtons = document.querySelectorAll('.nav-btn');
+    function switchTab(tabName) {
+        tabs.forEach(tab => tab.classList.add('hidden'));
+        document.getElementById(tabName + 'Tab').classList.remove('hidden');
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.nav-btn[onclick="switchTab('${tabName}')"]`).classList.add('active');
+    }
+
+    // --- Theme Toggle Logic ---
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    themeToggleBtn.onclick = () => {
+        const isLight = document.body.classList.toggle('light');
+        localStorage.setItem('theme', isLight? 'light' : 'dark');
+        themeToggleBtn.innerText = isLight? '☀️' : '🌙';
+    };
+
+    // --- Table of Contents (TOC) Logic ---
+    const tocBtn = document.getElementById("tocBtn");
+    const tocPanel = document.getElementById("tocPanel");
+    const tocList = document.getElementById("tocList");
+    tocBtn.onclick = () => tocPanel.classList.toggle("hidden");
+    function generateTOC() {
+        const headers = document.querySelectorAll("h2");
+        tocList.innerHTML = "";
+        headers.forEach((header, index) => {
+            if(!header.id) header.id = "section-" + index;
+            const li = document.createElement("li");
+            li.textContent = header.innerText;
+            li.onclick = () => {
+                document.getElementById(header.id).scrollIntoView({ behavior: "smooth" });
+                tocPanel.classList.add("hidden");
+            };
+            tocList.appendChild(li);
+        });
+    }
+
+    // --- App Initialization ---
     document.addEventListener("DOMContentLoaded", () => {
-        // Initialize Pi SDK
         Pi.init({ version: "2.0", sandbox: true });
 
-        // Load persisted theme
         if (localStorage.getItem("theme") === "light") {
             document.body.classList.add("light");
-            document.getElementById("themeToggleBtn").innerText = '☀️';
+            themeToggleBtn.innerText = '☀️';
         } else {
-             document.getElementById("themeToggleBtn").innerText = '🌙';
+            themeToggleBtn.innerText = '🌙';
         }
 
-        // Check and restore payment status
-        
+        if (localStorage.getItem("norakPaymentDone") === "true") {
+            const statusEl = document.getElementById("status");
+            statusEl.innerText = "✅ تم تفعيل التطبيق بنجاح!";
+            statusEl.style.color = '#48bb78';
+            document.getElementById("paymentSection").style.display = 'none';
+        }
+
+        loadQuranSurahs();
+        getNewDua();
+        generateTOC();
+        switchTab('quran');
+    });
+    </script>
+</body>
+</html>

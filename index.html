@@ -1,191 +1,69 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نورك | Norak</title>
-
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Tajawal&display=swap" rel="stylesheet">
-
-<style>
-:root {
---bg:#1a202c;
---card:#2d3748;
---text:#fff;
---primary:#facc15;
-}
-.light {
---bg:#f7fafc;
---card:#fff;
---text:#000;
-}
-body{
-font-family:Tajawal;
-background:var(--bg);
-color:var(--text);
-transition:.3s;
-}
-.card{
-background:var(--card);
-border-radius:20px;
-padding:15px;
-}
-.bottom{
-position:fixed;
-bottom:0;
-width:100%;
-display:flex;
-justify-content:space-around;
-background:var(--card);
-padding:10px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نورك - القرآن الكريم</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+    body {font-family: Arial; margin:0; background:#0f172a; color:#fff;}
+    header {padding:15px; text-align:center; background:#1e293b;}
+    button {padding:10px; margin:5px; border:none; border-radius:8px; cursor:pointer;}
+    .card {background:#1e293b; margin:10px; padding:15px; border-radius:12px;}
+  </style>
 </head>
-
 <body>
+<header>
+  <h2>تطبيق نورك</h2>
+  <div id="userName">جاري التحميل...</div>
+</header><div class="card">
+  <button onclick="loginPi()">تسجيل الدخول عبر Pi</button>
+  <button onclick="dailyReward()">مكافأة يومية</button>
+  <button onclick="toggleDarkMode()">تغيير الوضع</button>
+</div><div class="card">
+  <h3>النقاط: <span id="points">0</span></h3>
+</div><div class="card">
+  <h3>القرآن الكريم</h3>
+  <button onclick="loadQuran()">عرض القرآن</button>
+  <div id="quran"></div>
+</div><div class="card">
+  <h3>الإعدادات</h3>
+  <button onclick="resetData()">إعادة ضبط</button>
+</div><script>
+let points = localStorage.getItem('points') || 0;
+document.getElementById('points').innerText = points;
 
-<header class="p-4 flex justify-between">
-<h1 class="text-xl text-yellow-400 font-bold">نورك</h1>
-<button onclick="toggleTheme()">🌙</button>
-</header>
-
-<main class="p-4">
-
-<!-- Step 10 -->
-<div class="card mb-4 text-center">
-<h3>تفعيل التطبيق</h3>
-<button onclick="pay()" class="bg-yellow-400 text-black px-4 py-2 rounded">تفعيل</button>
-<p id="status"></p>
-</div>
-
-<!-- Tabs -->
-<div id="quranTab">
-<h2>القرآن الكريم</h2>
-<div id="surahs"></div>
-</div>
-
-<div id="azkarTab" style="display:none">
-<h2>الأذكار</h2>
-<div class="card">سبحان الله ×33</div>
-<div class="card">الحمد لله ×33</div>
-<div class="card">الله أكبر ×34</div>
-</div>
-
-<div id="tasbihTab" style="display:none;text-align:center">
-<h2>المسبحة</h2>
-<h1 id="count">0</h1>
-<button onclick="inc()" class="bg-yellow-400 px-6 py-3 rounded">تسبيح</button>
-<button onclick="reset()">تصفير</button>
-</div>
-
-<div id="settingsTab" style="display:none">
-<h2>الإعدادات</h2>
-<button onclick="toggleTheme()">تغيير الوضع</button>
-</div>
-
-</main>
-
-<nav class="bottom">
-<button onclick="tab('quran')">قرآن</button>
-<button onclick="tab('azkar')">أذكار</button>
-<button onclick="tab('tasbih')">مسبحة</button>
-<button onclick="tab('settings')">⚙️</button>
-</nav>
-
-<script>
-/* ================= Pi ================= */
-const Pi = window.Pi;
-Pi.init({version:"1.5",sandbox:true});
-
-/* ================= Payment ================= */
-async function pay(){
-let s=document.getElementById("status");
-s.innerText="جاري الدفع...";
-try{
-await Pi.createPayment({
-amount:1,
-memo:"Norak Activation",
-metadata:{type:"app"}
-},{
-onReadyForServerApproval: async (id)=>{
-await fetch("https://YOUR-SERVER/approve",{method:"POST",body:JSON.stringify({id})});
-},
-onReadyForServerCompletion: async (id,txid)=>{
-await fetch("https://YOUR-SERVER/complete",{method:"POST",body:JSON.stringify({id,txid})});
-s.innerText="✅ تم التفعيل";
-},
-onCancel:()=>s.innerText="تم الإلغاء",
-onError:(e)=>s.innerText=e.message
-});
-}catch(e){
-s.innerText="افتحي من Pi Browser";
-}
+function loginPi(){
+  Pi.init({ version: "2.0" });
+  Pi.authenticate(['username'], function(auth){
+    document.getElementById('userName').innerText = auth.user.username;
+  });
 }
 
-/* ================= Quran API ================= */
-async function loadQuran(){
-let res=await fetch("https://api.alquran.cloud/v1/surah");
-let data=await res.json();
-
-let box=document.getElementById("surahs");
-data.data.forEach(s=>{
-let div=document.createElement("div");
-div.className="card mb-2";
-div.innerHTML=s.name;
-div.onclick=()=>openSurah(s.number);
-box.appendChild(div);
-});
+function dailyReward(){
+  points = parseInt(points) + 10;
+  localStorage.setItem('points', points);
+  document.getElementById('points').innerText = points;
 }
 
-async function openSurah(id){
-let res=await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
-let data=await res.json();
-
-let text="";
-data.data.ayahs.forEach(a=>{
-text+=a.text+" ";
-});
-
-alert(text.substring(0,1500));
+function toggleDarkMode(){
+  document.body.style.background = document.body.style.background === 'white' ? '#0f172a' : 'white';
 }
 
-/* ================= Tasbih ================= */
-let c=0;
-function inc(){
-c++;
-document.getElementById("count").innerText=c;
-}
-function reset(){
-c=0;
-document.getElementById("count").innerText=0;
-}
-
-/* ================= Tabs ================= */
-function tab(t){
-document.getElementById("quranTab").style.display="none";
-document.getElementById("azkarTab").style.display="none";
-document.getElementById("tasbihTab").style.display="none";
-document.getElementById("settingsTab").style.display="none";
-
-document.getElementById(t+"Tab").style.display="block";
+function loadQuran(){
+  fetch('https://api.alquran.cloud/v1/quran/ar.alafasy')
+  .then(res => res.json())
+  .then(data => {
+    let html = '';
+    data.data.surahs.forEach(surah => {
+      html += `<p>${surah.name}</p>`;
+    });
+    document.getElementById('quran').innerHTML = html;
+  });
 }
 
-/* ================= Theme ================= */
-function toggleTheme(){
-document.body.classList.toggle("light");
-localStorage.setItem("mode",document.body.classList.contains("light"));
+function resetData(){
+  localStorage.clear();
+  location.reload();
 }
-
-if(localStorage.getItem("mode")=="true"){
-document.body.classList.add("light");
-}
-
-/* ================= Start ================= */
-loadQuran();
-</script>
-
-</body>
+</script></body>
 </html>

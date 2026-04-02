@@ -5,126 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script src="library.js"></script> 
     <style>
-        :root { --bg: #ffffff; --txt: #212121; --card: #f8f9fa; --accent: #4a148c; }
-        [data-theme="dark"] { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --accent: #bb86fc; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--txt); margin: 0; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        :root { --bg: #ffffff; --txt: #212121; --card: #f9f9f9; --primary: #4a148c; }
+        [data-theme="dark"] { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --primary: #bb86fc; }
+        
+        body { font-family: sans-serif; background-color: var(--bg); color: var(--txt); margin: 0; transition: 0.3s; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* هيدر ثابت ونظيف */
         .header { width: 100%; max-width: 600px; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .content-area { width: 90%; max-width: 600px; margin: 20px 0 100px 0; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 70vh; }
-        #s-content { font-size: 22px; line-height: 2; text-align: justify; }
-        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.1); }
-        button { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        #menu { display: none; position: fixed; top: 60px; width: 100%; max-width: 600px; background: var(--card); height: calc(100vh - 60px); z-index: 900; overflow-y: auto; padding: 20px; }
-        .menu-item { padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer; }
+        
+        /* منطقة العرض */
+        .main-container { width: 90%; max-width: 600px; margin: 20px 0 100px 0; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        #s-name { color: var(--primary); font-size: 24px; margin-bottom: 15px; border-bottom: 2px solid var(--primary); display: inline-block; }
+        #s-content { font-size: 20px; line-height: 2; text-align: justify; }
+
+        /* الفهرس الجانبي */
+        #library { display: none; position: fixed; top: 60px; width: 100%; max-width: 600px; height: 100%; background: var(--bg); z-index: 999; overflow-y: auto; padding: 20px; }
+        .item { padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer; font-size: 18px; }
+
+        /* شريط التحكم السفلي */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        .btn { border: none; background: var(--primary); color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .pay-btn { background: #ffa000 !important; }
     </style>
 </head>
 <body data-theme="light">
 
     <div class="header">
-        <button onclick="toggleM()">☰ الفهرس</button>
-        <h2 style="margin:0">نورك</h2>
-        <button onclick="toggleTheme()">🌙/☀️</button>
+        <button class="btn" onclick="toggleLib()">☰ الفهرس</button>
+        <strong>نورك</strong>
+        <button class="btn" onclick="toggleMode()">☀️/🌙</button>
     </div>
 
-    <div id="menu">
+    <div id="library">
         <h3>المكتبة الخارجية</h3>
-        <div id="library-list"></div> </div>
-
-    <div class="content-area">
-        <h3 id="s-name">نورك</h3>
-        <div id="s-content">جاري تحميل مكتبة نورك...</div>
+        <div class="item" onclick="loadContent('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2)...')">سورة الفاتحة</div>
+        <div class="item" onclick="loadContent('أذكار الصباح', 'أصبحنا وأصبح الملك لله...')">أذكار الصباح</div>
     </div>
 
-    <div class="nav-bar">
-        <button onclick="saveBookmark()">📌 حفظ</button>
-        <button onclick="loadM()">🏠 العودة</button>
-        <button onclick="pay()" style="background: #ffa000;">π تبرع</button>
+    <div class="main-container">
+        <div id="s-name">مرحباً بك</div>
+        <div id="s-content">اختر محتوى من الفهرس للبدء..</div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="btn" onclick="saveB()">📌 حفظ</button>
+        <button class="btn pay-btn" onclick="startPay()">π تبرع</button>
     </div>
 
     <script>
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
-        // 1. وظيفة ربط المكتبة الخارجية بجد
-        function buildLibrary() {
-            const list = document.getElementById('library-list');
-            // بنفترض إن عندك مصفوفة اسمها libraryData جوه ملف library.js
-            if (typeof libraryData !== 'undefined') {
-                list.innerHTML = '';
-                libraryData.forEach((item, index) => {
-                    let div = document.createElement('div');
-                    div.className = 'menu-item';
-                    div.innerText = item.title;
-                    div.onclick = () => loadItem(item.title, item.content);
-                    list.appendChild(div);
-                });
-            } else {
-                list.innerHTML = '<p>تأكدي من وجود ملف library.js مربوط صح وفيه البيانات.</p>';
-            }
+        // تبديل الإضاءة
+        function toggleMode() {
+            const b = document.body;
+            const t = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            b.setAttribute('data-theme', t);
+            localStorage.setItem('t', t);
         }
 
-        function toggleM() {
-            const menu = document.getElementById('menu');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-            if (menu.style.display === 'block') buildLibrary();
+        // التحكم في الفهرس
+        function toggleLib() {
+            const lib = document.getElementById('library');
+            lib.style.display = lib.style.display === 'block' ? 'none' : 'block';
         }
 
-        function loadItem(title, content) {
-            document.getElementById('s-name').innerText = title;
-            document.getElementById('s-content').innerHTML = content;
-            toggleM();
-            window.scrollTo(0,0);
+        // تحميل المحتوى
+        function loadContent(n, c) {
+            document.getElementById('s-name').innerText = n;
+            document.getElementById('s-content').innerText = c;
+            toggleLib();
         }
 
-        // 2. الحفظ والعودة الذكية
-        function saveBookmark() {
-            const data = { n: document.getElementById('s-name').innerText, c: document.getElementById('s-content').innerHTML };
-            localStorage.setItem('user_mark', JSON.stringify(data));
-            alert("تم حفظ مكانك في نورك 📌");
+        // حفظ العلامة
+        function saveB() {
+            const d = { n: document.getElementById('s-name').innerText, c: document.getElementById('s-content').innerText };
+            localStorage.setItem('save_norak', JSON.stringify(d));
+            alert("تم الحفظ بنجاح 📌");
         }
 
-        function loadM() {
-            const saved = JSON.parse(localStorage.getItem('user_mark'));
-            if (saved) {
-                document.getElementById('s-name').innerText = saved.n;
-                document.getElementById('s-content').innerHTML = saved.c;
-            }
-        }
-
-        // 3. الدفع الرسمي (بدون أي كلام جانبي)
-        async function pay() {
+        // كود الدفع (تم إصلاحه ليعمل مباشرة)
+        async function startPay() {
             try {
-                const auth = await Pi.authenticate(['payments'], (p) => {});
+                const auth = await Pi.authenticate(['payments'], (p) => { console.log(p); });
                 if (auth) {
                     Pi.createPayment({
                         amount: 0.1,
                         memo: "Support Norak App Development",
-                        metadata: { orderId: "order_" + Date.now() }
+                        metadata: { orderId: "n_" + Date.now() }
                     }, {
                         onReadyForServerApproval: (id) => Pi.approvePayment(id),
                         onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
-                        onComplete: (id) => alert("شكراً لدعمك تطبيق نورك"),
-                        onError: (err) => console.error(err)
+                        onComplete: (id) => alert("شكراً لدعمك"),
+                        onError: (err) => alert("خطأ في الدفع")
                     });
                 }
             } catch (e) {
-                alert("افتحي التطبيق من Pi Browser.");
+                alert("افتحي التطبيق من داخل Pi Browser");
             }
         }
 
-        function toggleTheme() {
-            const body = document.body;
-            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            body.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        }
-
+        // استرجاع الإعدادات
         window.onload = () => {
-            loadM();
-            buildLibrary();
-            const savedTheme = localStorage.getItem('theme');
-            if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
+            const st = localStorage.getItem('t');
+            if(st) document.body.setAttribute('data-theme', st);
+            const sv = JSON.parse(localStorage.getItem('save_norak'));
+            if(sv) {
+                document.getElementById('s-name').innerText = sv.n;
+                document.getElementById('s-content').innerText = sv.c;
+            }
         };
     </script>
 </body>

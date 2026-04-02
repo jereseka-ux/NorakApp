@@ -103,8 +103,6 @@
             color: white;
             border: 1px solid #475569;
         }
-
-        .status-tag { font-size: 0.9rem; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -113,7 +111,7 @@
     <div class="header">
         <h1>✨ تطبيق نورك</h1>
         <div id="user-info" class="user-badge">زائر مستكشف</div>
-        <div id="status-text" class="status-tag">جاري التحقق من اتصال باي... ⏳</div>
+        <p id="status-text" style="font-size: 0.9rem;">جاري الربط مع Pi Network... ⏳</p>
     </div>
 
     <div class="card">
@@ -132,13 +130,13 @@
             <option value="">اختر السورة...</option>
         </select>
         <button onclick="fetchQuranSurah()" style="background: #059669; margin-top: 15px;">قراءة السورة</button>
-        <div id="quran-display">قريباً ستتمكن من قراءة السورة كاملة من المكتبة...</div>
+        <div id="quran-display">اختر سورة لتبدأ القراءة...</div>
     </div>
 
     <div class="card">
         <h3>💳 دعم استمرارية التطبيق</h3>
-        <p style="font-size: 0.85rem; opacity: 0.8;">ساهم بـ 0.01 Pi لتخطي الخطوة 10 وتفعيل ميزات المطور.</p>
-        <button onclick="initiatePiPayment()" style="background: linear-gradient(45deg, #f59e0b, #d97706);">تفعيل الخطوة 10 🎁</button>
+        <p style="font-size: 0.85rem; opacity: 0.8;">ساهم بـ 0.01 Pi لتفعيل النسخة المميزة واجتياز الخطوة 10.</p>
+        <button id="pay-btn" onclick="initiatePiPayment()" style="background: linear-gradient(45deg, #f59e0b, #d97706);">تفعيل الخطوة 10 🎁</button>
         <p id="pay-log" style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 10px;"></p>
     </div>
 </div>
@@ -148,39 +146,28 @@
     let userPoints = parseInt(localStorage.getItem("norak_points")) || 0;
     document.getElementById("points-val").innerText = userPoints;
 
-    // تهيئة الـ SDK مع وضع الاختبار
     Pi.init({ version: "2.0", sandbox: true });
 
-    // تحميل قائمة السور
     async function initSurahs() {
         try {
             const res = await fetch("https://api.alquran.cloud/v1/surah");
             const data = await res.json();
             const select = document.getElementById("surah-select");
-            data.data.forEach(s => {
-                select.add(new Option(`${s.number}. ${s.name}`, s.number));
-            });
+            data.data.forEach(s => { select.add(new Option(`${s.number}. ${s.name}`, s.number)); });
             document.getElementById("status-text").innerText = "متصل وجاهز ✅";
-        } catch (e) {
-            document.getElementById("status-text").innerText = "فشل تحديث البيانات ⚠️";
-        }
+        } catch (e) { document.getElementById("status-text").innerText = "خطأ في تحميل البيانات ⚠️"; }
     }
 
-    // تسجيل الدخول
     async function login() {
         try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
             currentUser = auth.user;
             document.getElementById("user-info").innerText = `نورتينا يا ${currentUser.username} 👋`;
             localStorage.setItem("norak_user", JSON.stringify(currentUser));
-            Swal.fire('نجح الدخول', `مرحباً بكِ في نورك!`, 'success');
-        } catch (err) {
-            Swal.fire('خطأ', 'يرجى استخدامه من Pi Browser', 'error');
-        }
+            Swal.fire('نجح الدخول', `مرحباً بكِ يا ياسمين!`, 'success');
+        } catch (err) { Swal.fire('خطأ', 'يرجى استخدامه من Pi Browser', 'error'); }
     }
 
-    // قراءة السور (المحتوى الحقيقي)
     async function fetchQuranSurah() {
         const id = document.getElementById("surah-select").value;
         if(!id) return;
@@ -190,62 +177,53 @@
             const response = await fetch(`https://api.alquran.cloud/v1/surah/${id}/ar.alafasy`);
             const json = await response.json();
             display.innerHTML = json.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(" ");
-        } catch (e) { display.innerHTML = "حدث خطأ في جلب السورة."; }
+        } catch (e) { display.innerHTML = "حدث خطأ في التحميل."; }
     }
 
-    // المكافأة اليومية
     function reward() {
         const today = new Date().toDateString();
         if (localStorage.getItem("last_claim") === today) {
-            Swal.fire('تنبيه', 'لقد حصلت على مكافأة اليوم بالفعل ✨', 'info');
+            Swal.fire('تنبيه', 'حصلت على مكافأة اليوم بالفعل ✨', 'info');
             return;
         }
         userPoints += 25;
         localStorage.setItem("norak_points", userPoints);
         localStorage.setItem("last_claim", today);
         document.getElementById("points-val").innerText = userPoints;
-        Swal.fire('مبروك!', 'أضيف 25 نقطة لرصيدك 🎉', 'success');
+        Swal.fire('تم!', 'أضيف 25 نقطة لرصيدك 🎉', 'success');
     }
 
-    // --- نظام الدفع المطور لتخطي الخطوة 10 نهائياً ---
     async function initiatePiPayment() {
-        if (!currentUser) {
-            Swal.fire('تنبيه', 'سجلي دخولك أولاً يا ياسمين', 'warning');
-            return;
-        }
+        if (!currentUser) { Swal.fire('تنبيه', 'سجلي دخولك أولاً يا ياسمين', 'warning'); return; }
 
         const paymentData = {
             amount: 0.01,
-            memo: "تفعيل الخطوة 10 - تطبيق نورك",
-            metadata: { type: "step_10_activation" }
+            memo: "Activation Step 10 - Norak",
+            metadata: { type: "step_10" }
         };
 
         const callbacks = {
-            onReadyForServerApproval: (paymentId) => {
-                document.getElementById("pay-log").innerText = "جاري التأكيد التلقائي... يرجى الانتظار";
-                // الموافقة الفورية لتجنب الـ Expired
-                fetch(`https://minepi.com/api/payments/${paymentId}/approve`, { method: 'POST' })
-                .catch(() => Pi.createPayment({ action: "approve", paymentId: paymentId }));
+            onReadyForServerApproval: async (paymentId) => {
+                document.getElementById("pay-log").innerText = "جاري التأكيد التلقائي... خليكي في الصفحة";
+                // نبعت أمر الموافقة وننتظره بـ await عشان نمنع الـ Expire
+                await Pi.createPayment({ action: "approve", paymentId: paymentId });
             },
-            onReadyForServerCompletion: (paymentId, txid) => {
-                Pi.createPayment({ action: "complete", paymentId: paymentId });
-                Swal.fire('تم التفعيل!', 'مبروك يا ياسمين، اجتزتِ الخطوة 10 بنجاح ✅', 'success');
+            onReadyForServerCompletion: async (paymentId, txid) => {
+                await Pi.createPayment({ action: "complete", paymentId: paymentId });
+                Swal.fire('ألف مبروك!', 'تم تفعيل الخطوة 10 بنجاح يا ياسمين ✅', 'success');
                 document.getElementById("pay-log").innerText = "الحالة: مكتمل بنجاح!";
             },
             onCancel: (pId) => { document.getElementById("pay-log").innerText = "تم إلغاء الدفع."; },
-            onError: (err, p) => { document.getElementById("pay-log").innerText = "خطأ في الاتصال بالمحفظة."; }
+            onError: (err, p) => { document.getElementById("pay-log").innerText = "خطأ: جربي من Pi Browser"; }
         };
 
         try {
             await Pi.createPayment(paymentData, callbacks);
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { console.error(e); }
     }
 
-    function onIncompletePaymentFound(payment) { console.log("Incomplete:", payment.identifier); }
+    function onIncompletePaymentFound(p) { console.log("Incomplete:", p.identifier); }
     function toggleTheme() { document.body.classList.toggle("light"); }
-
     window.onload = () => {
         initSurahs();
         const saved = localStorage.getItem("norak_user");

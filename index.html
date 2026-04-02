@@ -2,153 +2,198 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>نورك</title>
+<title>نورك - الإصدار الكامل</title>
 
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
 <style>
 body{
-font-family:Arial;
-background:linear-gradient(135deg,#020617,#0f172a);
-color:white;
-text-align:center;
-margin:0;
+  font-family: "Arial", sans-serif;
+  background: linear-gradient(135deg, #0b0c2c, #1e293b);
+  color: #fff;
+  text-align: center;
+  margin:0;
+  transition: all 0.3s ease;
+}
+
+body.light{
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+  color: #111;
 }
 
 .card{
-background:#1e293b;
-margin:15px;
-padding:20px;
-border-radius:20px;
+  background: #162447;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+body.light .card{
+  background: #fff;
+  color: #111;
 }
 
 button{
-width:90%;
-margin:10px;
-padding:14px;
-border:none;
-border-radius:12px;
-background:linear-gradient(45deg,#22c55e,#4ade80);
-color:white;
-font-size:16px;
+  width: 90%;
+  margin: 10px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #ff7e5f, #feb47b);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover{
+  opacity: 0.85;
 }
 
 #quran{
-text-align:right;
-line-height:2;
-margin-top:15px;
+  text-align: right;
+  line-height: 2;
+  margin-top: 15px;
+  min-height: 200px;
+}
+
+.loading{
+  font-size: 16px;
+  color: #facc15;
 }
 </style>
-
 </head>
-
 <body>
 
 <h1>✨ تطبيق نورك</h1>
 <p id="status">جاري التحميل...</p>
 
 <div class="card">
-<button onclick="login()">🔐 تسجيل الدخول</button>
-<button onclick="reward()">🎁 مكافأة يومية</button>
-<button onclick="toggle()">🌙 الوضع</button>
+  <button onclick="login()">🔐 تسجيل الدخول</button>
+  <button onclick="reward()">🎁 مكافأة يومية</button>
+  <button onclick="toggleTheme()">🌙 الوضع</button>
 </div>
 
 <div class="card">
-💰 النقاط: <span id="points">0</span>
+  💰 النقاط: <span id="points">0</span>
 </div>
 
 <div class="card">
-<h3>📖 القرآن الكريم</h3>
-<select id="surah"></select>
-<button onclick="loadQuran()">عرض</button>
-<div id="quran"></div>
+  <h3>📖 القرآن الكريم</h3>
+  <select id="surah"></select>
+  <button onclick="loadQuran()">عرض</button>
+  <div id="quran"></div>
+  <p id="loadingQuran" class="loading" style="display:none;">جاري تحميل السورة...</p>
 </div>
 
 <div class="card">
-<button onclick="pay()">💳 دعم التطبيق</button>
+  <button onclick="pay()">💳 دعم التطبيق</button>
+  <p id="paymentStatus" class="loading" style="display:none;"></p>
 </div>
 
 <script>
-let user=null;
-let points=0;
+let user = null;
+let points = parseInt(localStorage.getItem("points")) || 0;
+document.getElementById("points").innerText = points;
 
 // تشغيل Pi
 Pi.init({version:"2.0", sandbox:true});
 
 // تحميل السور
-fetch("https://api.alquran.cloud/v1/surah")
-.then(r=>r.json())
-.then(d=>{
-let s=document.getElementById("surah");
-d.data.forEach(x=>{
-let o=document.createElement("option");
-o.value=x.number;
-o.text=x.number+" - "+x.name;
-s.appendChild(o);
-});
-});
+async function loadSurahs(){
+  try{
+    const res = await fetch("https://api.alquran.cloud/v1/surah");
+    const data = await res.json();
+    let s = document.getElementById("surah");
+    data.data.forEach(x=>{
+      let o = document.createElement("option");
+      o.value = x.number;
+      o.text = x.number + " - " + x.name;
+      s.appendChild(o);
+    });
+    s.selectedIndex = 0;
+    document.getElementById("status").innerText = "جاهز";
+  } catch(e){
+    console.log("خطأ في تحميل السور:", e);
+    document.getElementById("status").innerText = "خطأ في التحميل";
+  }
+}
 
-document.getElementById("status").innerText="جاهز";
+loadSurahs();
 
 // تسجيل الدخول
 async function login(){
-try{
-user=await Pi.authenticate(["username"], ()=>{});
-document.getElementById("status").innerText="👤 "+user.user.username;
-}catch{
-alert("فشل تسجيل الدخول");
-}
+  try{
+    user = await Pi.authenticate(["username"], ()=>{});
+    document.getElementById("status").innerText = "👤 " + user.user.username;
+    localStorage.setItem("user", JSON.stringify(user.user));
+  } catch(e){
+    alert("فشل تسجيل الدخول");
+    console.log(e);
+  }
 }
 
-// مكافأة
+// مكافأة يومية
 function reward(){
-let last=localStorage.getItem("r");
-let t=new Date().toDateString();
-
-if(last==t){alert("أخذتيها اليوم");return;}
-
-points+=10;
-document.getElementById("points").innerText=points;
-localStorage.setItem("r",t);
+  let last = localStorage.getItem("lastReward");
+  let t = new Date().toDateString();
+  if(last == t){
+    alert("لقد حصلتِ على المكافأة اليوم");
+    return;
+  }
+  points += 10;
+  localStorage.setItem("points", points);
+  localStorage.setItem("lastReward", t);
+  document.getElementById("points").innerText = points;
+  alert("تم إضافة 10 نقاط 🎉");
 }
 
-// الوضع
-function toggle(){
-document.body.classList.toggle("light");
+// تبديل الوضع
+function toggleTheme(){
+  document.body.classList.toggle("light");
 }
 
-// القرآن
-function loadQuran(){
-let id=document.getElementById("surah").value;
-
-fetch("https://api.alquran.cloud/v1/surah/"+id+"/ar")
-.then(r=>r.json())
-.then(d=>{
-let text="";
-d.data.ayahs.forEach(a=>{
-text+=a.text+" ("+a.numberInSurah+")<br>";
-});
-document.getElementById("quran").innerHTML=text;
-});
+// عرض القرآن
+async function loadQuran(){
+  let id = document.getElementById("surah").value;
+  document.getElementById("loadingQuran").style.display = "block";
+  document.getElementById("quran").innerHTML = "";
+  try{
+    const res = await fetch("https://api.alquran.cloud/v1/surah/"+id+"/ar");
+    const data = await res.json();
+    let text = "";
+    data.data.ayahs.forEach(a=>{
+      text += a.text + " ("+a.numberInSurah+")<br>";
+    });
+    document.getElementById("quran").innerHTML = text;
+  } catch(e){
+    console.log("خطأ في تحميل السورة:", e);
+    document.getElementById("quran").innerHTML = "خطأ في التحميل";
+  } finally{
+    document.getElementById("loadingQuran").style.display = "none";
+  }
 }
 
-// الدفع (تجريبي)
+// الدفع
 function pay(){
-if(!user){alert("سجلي دخول");return;}
-
-Pi.createPayment({
-amount:0.01,
-memo:"دعم نورك",
-metadata:{}
-},{
-onReadyForServerApproval:(id)=>{console.log(id);},
-onReadyForServerCompletion:(id,tx)=>{alert("تم الدفع");},
-onCancel:()=>{alert("إلغاء");},
-onError:(e)=>{console.log(e);}
-});
-}
-
-</script>
-
-</body>
-</html>
+  if(!user){alert("سجلي دخول أولاً"); return;}
+  document.getElementById("paymentStatus").style.display = "block";
+  document.getElementById("paymentStatus").innerText = "جاري معالجة الدفع...";
+  
+  Pi.createPayment({
+    amount: 0.01,
+    memo: "دعم نورك",
+    metadata: {}
+  },{
+    onReadyForServerApproval:(id)=>{console.log("Payment ready:", id);},
+    onReadyForServerCompletion:(id,tx)=>{
+      document.getElementById("paymentStatus").innerText = "تم الدفع بنجاح 💳";
+      points += 5;
+      localStorage.setItem("points", points);
+      document.getElementById("points").innerText = points;
+      setTimeout(()=>{document.getElementById("paymentStatus").style.display="none";}, 3000);
+    },
+    onCancel:()=>{
+      document.getElementById("paymentStatus").innerText = "تم إلغاء الدفع ❌";
+      setTimeout(()=>{document.getElementById("paymentStatus").style.display="none";},

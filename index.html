@@ -7,108 +7,116 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #212121;
-            --card-bg: #f9f9f9;
-            --accent-color: #4a148c;
+            --bg: #f8f9fa; --txt: #212529; --card: #ffffff; --primary: #4a148c; --accent: #7b1fa2;
         }
         [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --card-bg: #1e1e1e;
-            --accent-color: #bb86fc;
+            --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --primary: #bb86fc; --accent: #03dac6;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--txt);
+            margin: 0; padding: 0;
             transition: 0.3s;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
         }
+        /* الهيدر */
         .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 500px;
-            margin-bottom: 20px;
+            width: 100%; max-width: 600px; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card); box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
         }
-        #s-content {
-            background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            max-width: 500px;
-            line-height: 2;
-            font-size: 20px;
-            text-align: justify;
+        /* منطقة المحتوى */
+        .content-area {
+            width: 90%; max-width: 600px; margin: 20px 0 100px 0;
+            background: var(--card); padding: 25px; border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 60vh;
         }
-        .controls {
-            margin-top: 25px;
-            display: flex;
-            gap: 10px;
+        #s-name { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        #s-content { font-size: 22px; line-height: 2; text-align: justify; margin-top: 20px; }
+
+        /* القائمة السفلية */
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; max-width: 600px;
+            background: var(--card); display: flex; justify-content: space-around;
+            padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.1);
         }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            background-color: var(--accent-color);
-            color: white;
+        .nav-item {
+            background: none; border: none; color: var(--txt);
+            display: flex; flex-direction: column; align-items: center;
+            font-size: 12px; cursor: pointer;
+        }
+        .nav-item i { font-size: 20px; margin-bottom: 5px; }
+        .pay-btn { background: #ffa000 !important; color: white !important; border-radius: 10px; padding: 5px 15px; }
+
+        /* الفهرس (المكتبة الخارجية) */
+        #menu {
+            display: none; position: fixed; top: 60px; width: 100%; max-width: 600px;
+            background: var(--card); height: calc(100vh - 60px); z-index: 90;
+            overflow-y: auto; padding: 20px;
+        }
+        .menu-item {
+            padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1);
+            cursor: pointer; font-size: 18px;
         }
     </style>
 </head>
 <body data-theme="light">
 
     <div class="header">
-        <h2 id="s-name">نورك</h2>
+        <button onclick="toggleM()">☰ الفهرس</button>
+        <h2 style="margin:0">نورك</h2>
         <button onclick="toggleTheme()">🌙/☀️</button>
     </div>
 
-    <div id="s-content">
-        جاري تحميل المحتوى...
+    <div id="menu">
+        <h3>المكتبة الخارجية</h3>
+        <div class="menu-item" onclick="loadItem('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)')">سورة الفاتحة</div>
+        <div class="menu-item" onclick="loadItem('أذكار الصباح', 'أصبحنا وأصبح الملك لله والحمد لله...')">أذكار الصباح</div>
+        </div>
+
+    <div class="content-area">
+        <h3 id="s-name">مرحباً بك في نورك</h3>
+        <div id="s-content">من فضلك اختر من الفهرس لبدء القراءة...</div>
     </div>
 
-    <div class="controls">
-        <button onclick="saveBookmark()">حفظ العلامة 📌</button>
-        <button onclick="pay()" style="background-color: #ffa000;">تبرع (Pi) π</button>
+    <div class="nav-bar">
+        <button class="nav-item" onclick="saveBookmark()">📌<span>حفظ</span></button>
+        <button class="nav-item" onclick="loadM()">🏠<span>الرئيسية</span></button>
+        <button class="nav-item pay-btn" onclick="pay()">π<span>تبرع</span></button>
     </div>
 
     <script>
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
-        // 1. نظام الـ Dark Mode
-        function toggleTheme() {
-            const current = document.body.getAttribute('data-theme');
-            const target = current === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', target);
-            localStorage.setItem('theme', target);
+        // 1. تبديل الفهرس (المكتبة الخارجية)
+        function toggleM() {
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
-        // 2. نظام الـ Bookmark (حفظ مكان القراءة)
+        // 2. تحميل محتوى معين
+        function loadItem(name, content) {
+            document.getElementById('s-name').innerText = name;
+            document.getElementById('s-content').innerHTML = content;
+            toggleM(); // اقفل المنيو بعد الاختيار
+            window.scrollTo(0,0);
+        }
+
+        // 3. نظام الحفظ (Bookmark)
         function saveBookmark() {
             const data = {
                 n: document.getElementById('s-name').innerText,
-                c: document.getElementById('s-content').innerHTML,
-                t: Date.now()
+                c: document.getElementById('s-content').innerHTML
             };
             localStorage.setItem('user_mark', JSON.stringify(data));
-            alert("تم حفظ مكانك بنجاح! 📌");
+            alert("تم حفظ مكانك في تطبيق نورك 📌");
         }
 
-        // 3. تحميل البيانات عند الفتح
+        // 4. استرجاع المحتوى (العودة الفعالة)
         function loadM() {
-            // استرجاع الثيم
-            const savedTheme = localStorage.getItem('theme');
-            if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
-
-            // استرجاع المحتوى
             const saved = JSON.parse(localStorage.getItem('user_mark'));
             if (saved) {
                 document.getElementById('s-name').innerText = saved.n;
@@ -116,13 +124,18 @@
             }
         }
 
-        // 4. كود الدفع الذكي (النسخة الاحترافية النهائية)
+        // 5. نظام الثيمات
+        function toggleTheme() {
+            const body = document.body;
+            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        // 6. كود الدفع الرسمي لشبكة Pi
         async function pay() {
             try {
-                const auth = await Pi.authenticate(['payments'], (p) => {
-                    console.log("Incomplete payment found", p);
-                });
-
+                const auth = await Pi.authenticate(['payments'], (p) => {});
                 if (auth) {
                     Pi.createPayment({
                         amount: 0.1,
@@ -131,17 +144,21 @@
                     }, {
                         onReadyForServerApproval: (id) => Pi.approvePayment(id),
                         onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
-                        onComplete: (id) => alert("تقبل الله، تم التبرع بنجاح."),
-                        onError: (err) => console.error(err),
-                        onCancel: (id) => console.log("Cancelled", id)
+                        onComplete: (id) => alert("شكراً لدعمك تطبيق نورك"),
+                        onError: (err) => console.error(err)
                     });
                 }
             } catch (e) {
-                alert("برجاء فتح التطبيق من خلال Pi Browser.");
+                alert("برجاء فتح تطبيق نورك من خلال Pi Browser");
             }
         }
 
-        window.onload = loadM;
+        // تشغيل الإعدادات عند الفتح
+        window.onload = () => {
+            loadM();
+            const savedTheme = localStorage.getItem('theme');
+            if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
+        };
     </script>
 </body>
 </html>

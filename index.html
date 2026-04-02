@@ -3,298 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - المنصة المتكاملة</title>
-    
+    <title>تطبيق نورك ✨</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #0f172a, #1e293b);
-            --accent-color: #facc15;
-            --btn-gradient: linear-gradient(45deg, #6366f1, #a855f7);
-            --card-bg: rgba(30, 41, 59, 0.7);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--primary-gradient);
-            color: #f8fafc;
-            margin: 0;
-            padding: 0;
-            transition: 0.5s;
-            min-height: 100vh;
-        }
-
-        body.light {
-            background: linear-gradient(135deg, #f1f5f9, #cbd5e1);
-            color: #0f172a;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            padding: 30px 10px;
-            animation: fadeIn 1s ease-in;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-
-        body.light .card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .user-badge {
-            background: rgba(250, 204, 21, 0.2);
-            padding: 5px 15px;
-            border-radius: 50px;
-            display: inline-block;
-            margin-bottom: 10px;
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-
-        button {
-            width: 100%;
-            margin: 8px 0;
-            padding: 15px;
-            border: none;
-            border-radius: 15px;
-            background: var(--btn-gradient);
-            color: white;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        button:active { transform: scale(0.95); }
-
-        #quran-display {
-            text-align: justify;
-            line-height: 2.2;
-            font-size: 1.2rem;
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 15px;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.2);
-        }
-
-        .loading-spinner {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: var(--accent-color);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            display: none;
-            margin: 10px auto;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            background: #1e293b;
-            color: white;
-            border: 1px solid #475569;
-            margin-bottom: 10px;
-        }
+        body { font-family: sans-serif; text-align: center; background-color: #1a1a2e; color: white; padding: 20px; }
+        .btn { background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; margin: 10px; width: 80%; max-width: 300px; }
+        .status { margin: 20px; padding: 10px; border-radius: 10px; background: #16213e; display: inline-block; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>✨ تطبيق نورك</h1>
-        <div id="user-info" class="user-badge">زائر مستكشف</div>
-        <p id="status-text">جاري فحص الاتصال بشبكة Pi...</p>
+    <h1>✨ تطبيق نورك ✨</h1>
+    
+    <div id="user-info" class="status">
+        <p id="status-text">جاري التحقق من الاتصال... ⏳</p>
     </div>
 
-    <div class="card">
-        <button onclick="login()">🔐 تسجيل الدخول عبر Pi</button>
-        <button onclick="reward()">🎁 مكافأة الولاء اليومية</button>
-        <button onclick="toggleTheme()">🌓 تبديل المظهر</button>
+    <div id="controls">
+        <button class="btn" onclick="login()">🔐 تسجيل الدخول عبر Pi</button>
+        <button class="btn" onclick="initiatePiPayment()">🎁 مكافأة الولاء اليومية</button>
+        <button class="btn" onclick="toggleTheme()">🌓 تبديل المظهر</button>
     </div>
 
-    <div class="card" style="text-align: center;">
-        <h2 style="margin:0;">💰 رصيدك: <span id="points-val" style="color:var(--accent-color)">0</span> نقطة</h2>
-    </div>
+    <script>
+        const Pi = window.Pi;
+        let currentUser = null;
 
-    <div class="card">
-        <h3>📖 المصحف الإلكتروني</h3>
-        <select id="surah-select"></select>
-        <button onclick="fetchQuranSurah()" style="background: #059669;">قراءة السورة</button>
-        <div id="loading-q" class="loading-spinner"></div>
-        <div id="quran-display"></div>
-    </div>
+        Pi.init({ version: "1.5", sandbox: false });
 
-    <div class="card">
-        <h3>💳 دعم استمرارية التطبيق</h3>
-        <p style="font-size: 0.9rem; opacity: 0.8;">ساهم بـ 0.01 Pi لدعم تطوير ميزات جديدة.</p>
-        <button onclick="initiatePiPayment()" style="background: linear-gradient(45deg, #f59e0b, #d97706);">إرسال مساهمة (0.01 Pi)</button>
-        <p id="pay-log" style="font-size: 12px; color: #94a3b8; margin-top: 10px;"></p>
-    </div>
-</div>
-
-<script>
-    // الإعدادات الأولية
-    let currentUser = null;
-    let userPoints = parseInt(localStorage.getItem("norak_points")) || 0;
-    document.getElementById("points-val").innerText = userPoints;
-
-    // تشغيل Pi SDK (تأكدي من وضع App ID في الـ Developer Portal)
-    Pi.init({ version: "2.0", sandbox: true }); 
-
-    // 1. تحميل قائمة السور عند البدء
-    async function initSurahs() {
-        try {
-            const res = await fetch("https://api.alquran.cloud/v1/surah");
-            const data = await res.json();
-            const select = document.getElementById("surah-select");
-            data.data.forEach(s => {
-                let opt = new Option(`${s.number}. ${s.name}`, s.number);
-                select.add(opt);
-            });
-            document.getElementById("status-text").innerText = "متصل وجاهز ✅";
-        } catch (e) {
-            document.getElementById("status-text").innerText = "فشل تحديث البيانات ⚠️";
-        }
-    }
-
-    // 2. تسجيل الدخول وجلب الاسم من Pi
-    async function login() {
-        try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            currentUser = auth.user;
-            
-            document.getElementById("user-info").innerText = `مرحباً، ${currentUser.username} 👋`;
-            localStorage.setItem("norak_user", JSON.stringify(currentUser));
-            
-            Swal.fire({
-                title: `أهلاً بك يا ${currentUser.username}!`,
-                text: 'تم تسجيل دخولك بنجاح في تطبيق نورك',
-                icon: 'success',
-                confirmButtonText: 'لنبدأ'
-            });
-        } catch (err) {
-            console.error(err);
-            Swal.fire('خطأ', 'فشل الربط مع شبكة Pi', 'error');
-        }
-    }
-
-    // 3. عرض القرآن بتنسيق احترافي
-    async function fetchQuranSurah() {
-        const id = document.getElementById("surah-select").value;
-        const display = document.getElementById("quran-display");
-        const loader = document.getElementById("loading-q");
-
-        display.innerHTML = "";
-        loader.style.display = "block";
-
-        try {
-            const response = await fetch(`https://api.alquran.cloud/v1/surah/${id}/ar.alafasy`);
-            const json = await response.json();
-            let content = json.data.ayahs.map(a => 
-                `<span class="ayah">${a.text} <span style="color:var(--accent-color)">﴿${a.numberInSurah}﴾</span></span>`
-            ).join(" ");
-            display.innerHTML = content;
-        } catch (e) {
-            display.innerHTML = "تعذر تحميل النص.. حاول مرة أخرى.";
-        } finally {
-            loader.style.display = "none";
-        }
-    }
-
-    // 4. المكافأة اليومية
-    function reward() {
-        const today = new Date().toDateString();
-        if (localStorage.getItem("last_claim") === today) {
-            Swal.fire('صبراً!', 'لقد حصلت على مكافأة اليوم بالفعل، عد غداً ✨', 'info');
-            return;
-        }
-        userPoints += 25;
-        localStorage.setItem("norak_points", userPoints);
-        localStorage.setItem("last_claim", today);
-        document.getElementById("points-val").innerText = userPoints;
-        Swal.fire('تمت الإضافة!', 'حصلت على 25 نقطة إضافية 🎉', 'success');
-    }
-
-    // 5. نظام الدفع المتوافق مع شروط Pi (الخطوة 10)
-    function initiatePiPayment() {
-        if (!currentUser) {
-            Swal.fire('تنبيه', 'يرجى تسجيل الدخول أولاً', 'warning');
-            return;
-        }
-
-        const paymentData = {
-            amount: 0.01,
-            memo: "Contribution to Norak App Growth",
-            metadata: { app_feature: "premium_access" }
-        };
-
-        const callbacks = {
-            onReadyForServerApproval: (paymentId) => {
-                document.getElementById("pay-log").innerText = "انتظار موافقة الخادم... (ID: " + paymentId + ")";
-                // هنا يتم إرسال PaymentId للخادم الخاص بك في الحالة الواقعية
-            },
-            onReadyForServerCompletion: (paymentId, txid) => {
-                document.getElementById("pay-log").innerText = "تمت العملية بنجاح! شكراً لدعمك.";
-                userPoints += 100;
-                document.getElementById("points-val").innerText = userPoints;
-                Swal.fire('شكراً لك!', 'تم استلام مساهمتك وزيادة رصيدك 100 نقطة', 'success');
-            },
-            onCancel: (paymentId) => {
-                document.getElementById("pay-log").innerText = "تم إلغاء الدفع.";
-            },
-            onError: (error, payment) => {
-                console.error("Payment Error:", error);
-                document.getElementById("pay-log").innerText = "خطأ في الشبكة أو العملية.";
+        async function login() {
+            try {
+                const scopes = ['username', 'payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                currentUser = auth.user;
+                document.getElementById('status-text').innerHTML = `مرحباً، ${currentUser.username} 👋 <br> متصل وجاهز ✅`;
+                Swal.fire('أهلاً بك يا ' + currentUser.username, 'تم تسجيل دخولك بنجاح في تطبيق نورك', 'success');
+            } catch (err) {
+                console.error(err);
+                Swal.fire('خطأ', 'تأكدي من فتح التطبيق من Pi Browser', 'error');
             }
-        };
-
-        Pi.createPayment(paymentData, callbacks);
-    }
-
-    // معالجة المدفوعات المعلقة (شرط أساسي للقبول)
-    function onIncompletePaymentFound(payment) {
-        console.log("Found incomplete payment:", payment);
-        // منطق إكمال الدفع المعلق هنا
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle("light");
-    }
-
-    window.onload = () => {
-        initSurahs();
-        const saved = localStorage.getItem("norak_user");
-        if (saved) {
-            currentUser = JSON.parse(saved);
-            document.getElementById("user-info").innerText = `مرحباً، ${currentUser.username} 👋`;
         }
-    };
-</script>
 
+        function onIncompletePaymentFound(payment) {
+            console.log("عملية معلقة:", payment.identifier);
+        }
+
+        async function initiatePiPayment() {
+            if (!currentUser) {
+                Swal.fire('تنبيه', 'سجلي دخولك الأول يا بطلة', 'warning');
+                return;
+            }
+
+            const paymentData = {
+                amount: 0.01,
+                memo: "دعم تطبيق نورك 🎉",
+                metadata: { orderId: "norak_support_1" }
+            };
+
+            const callbacks = {
+                onReadyForServerApproval: async (paymentId) => {
+                    await fetch('/api/pay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId, action: "approve" })
+                    });
+                },
+                onReadyForServerCompletion: async (paymentId, txid) => {
+                    await fetch('/api/pay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId, txid, action: "complete" })
+                    });
+                    Swal.fire('تم بنجاح! 🎉', 'شكراً لدعمك يا ياسمين، نورتينا', 'success');
+                },
+                onCancel: (pId) => { console.log("إلغاء"); },
+                onError: (err, p) => { 
+                    console.error(err);
+                    Swal.fire('عذراً', 'حاولي مرة ثانية من جوه باي براوزر', 'error');
+                }
+            };
+
+            try {
+                await Pi.createPayment(paymentData, callbacks);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function toggleTheme() {
+            document.body.style.backgroundColor = document.body.style.backgroundColor === 'white' ? '#1a1a2e' : 'white';
+            document.body.style.color = document.body.style.color === 'black' ? 'white' : 'black';
+        }
+    </script>
 </body>
 </html>

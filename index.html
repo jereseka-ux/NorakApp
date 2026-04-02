@@ -6,61 +6,58 @@
     <title>تطبيق نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root { --bg: #ffffff; --txt: #212121; --card: #f8f9fa; --p: #4a148c; --accent: #ffa000; }
+        :root { --bg: #ffffff; --txt: #212121; --card: #f9f9f9; --p: #4a148c; --accent: #ffa000; }
         [data-theme="dark"] { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --p: #bb86fc; --accent: #ffb300; }
         
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 90px; transition: 0.3s; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .header h2 { margin: 0; font-size: 24px; color: var(--p); }
-
-        .main-container { padding: 30px; max-width: 700px; margin: 20px auto; background: var(--card); border-radius: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-height: 65vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .main-container { padding: 30px; max-width: 700px; margin: 20px auto; background: var(--card); border-radius: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-height: 70vh; }
         #s-name { font-size: 28px; font-weight: bold; color: var(--p); border-bottom: 3px solid var(--p); padding-bottom: 12px; margin-bottom: 25px; text-align: center; }
         #s-content { font-size: 24px; line-height: 2.2; text-align: justify; white-space: pre-wrap; font-weight: 500; }
 
+        /* واجهة الفهرس */
         #lib-ui { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 2000; padding: 25px; overflow-y: auto; }
-        .lib-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--p); padding-bottom: 15px; margin-bottom: 20px; }
-        .item { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; font-size: 21px; transition: 0.2s; border-radius: 12px; margin-bottom: 5px; }
+        .item { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; font-size: 21px; border-radius: 12px; transition: 0.2s; }
         .item:active { background: var(--p); color: white; }
 
+        /* شريط التحكم السفلي */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(0,0,0,0.1); z-index: 1000; }
-        .btn { border: none; padding: 12px 25px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 17px; display: flex; flex-direction: column; align-items: center; background: #e0e0e0; color: #333; }
-        .btn-main { background: var(--p); color: white; }
+        .btn { border: none; padding: 12px 25px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 17px; background: #eee; color: #333; }
         .btn-pay { background: var(--accent); color: black; box-shadow: 0 4px 10px rgba(255,160,0,0.3); }
-        .icon { font-size: 22px; }
     </style>
 </head>
 <body data-theme="light">
 
     <div class="header">
-        <button class="btn" onclick="toggleLib(true)"><span class="icon">☰</span>الفهرس</button>
-        <h2>نورك</h2>
-        <button class="btn" onclick="toggleMode()"><span class="icon">☀️/🌙</span></button>
+        <button class="btn" onclick="toggleLib(true)">☰ الفهرس</button>
+        <h2 style="margin:0; color:var(--p)">نورك</h2>
+        <button class="btn" onclick="toggleMode()">☀️/🌙</button>
     </div>
 
     <div id="lib-ui">
-        <div class="lib-header">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid var(--p); padding-bottom:10px;">
             <h3>المكتبة الخارجية</h3>
-            <button class="btn btn-main" onclick="toggleLib(false)">إغلاق ×</button>
+            <button class="btn" style="background:var(--p); color:white;" onclick="toggleLib(false)">إغلاق ×</button>
         </div>
         <div class="item" onclick="updateContent('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)')">سورة الفاتحة</div>
         <div class="item" onclick="updateContent('آية الكرسي', 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ')">آية الكرسي</div>
         <div class="item" onclick="updateContent('أذكار الصباح', 'أصبحنا وأصبح الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، رب أسألك خير ما في هذا اليوم وخير ما بعده، وأعوذ بك من شر ما في هذا اليوم وشر ما بعده، رب أعوذ بك من الكسل وسوء الكبر، رب أعوذ بك من عذاب في النار وعذاب في القبر.')">أذكار الصباح</div>
-        <div class="item" onclick="updateContent('أذكار المساء', 'أمسينا وأمسى الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، رب أسألك خير هذه ليلة وخير ما بعدها، وأعوذ بك من شر هذه ليلة وشر ما بعدها..')">أذكار المساء</div>
-        <div class="item" onclick="updateContent('خواتيم سورة البقرة', 'آمَنَ الرَّسُولُ بِمَا أُنْزِلَ إِلَيْهِ مِنْ رَبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِنْ رُسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ...')">خواتيم سورة البقرة</div>
+        <div class="item" onclick="updateContent('أذكار المساء', 'أمسينا وأمسى الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، رب أسألك خير هذه ليلة وخير ما بعدها، وأعوذ بك من شر هذه ليلة وشر ما بعدها...')">أذكار المساء</div>
     </div>
 
     <div class="main-container">
         <div id="s-name">مرحباً بك</div>
-        <div id="s-content">تطبيق نورك جاهز لخدمتك.. اختر من الفهرس للبدء.</div>
+        <div id="s-content">تطبيق نورك جاهز لخدمتك.. يرجى اختيار محتوى من الفهرس للبدء.</div>
     </div>
 
     <div class="nav-bar">
-        <button class="btn" onclick="savePlace()"><span class="icon">📌</span>حفظ</button>
-        <button class="btn" onclick="goBack()"><span class="icon">🏠</span>العودة</button>
-        <button class="btn btn-pay" id="mainPayBtn"><span class="icon">π</span>تبرع</button>
+        <button class="btn" onclick="savePlace()">📌 حفظ</button>
+        <button class="btn" onclick="goBack()">🏠 العودة</button>
+        <button class="btn btn-pay" id="payButton">π تبرع</button>
     </div>
 
     <script>
+        // 1. تفعيل الربط الفعلي بـ Pi SDK
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
@@ -73,15 +70,16 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // 2. نظام حفظ العلامات (Bookmark)
         function savePlace() {
             const data = { n: document.getElementById('s-name').innerText, c: document.getElementById('s-content').innerText };
             if(data.n === "مرحباً بك") return alert("اختر محتوى أولاً");
-            localStorage.setItem('norak_bookmark', JSON.stringify(data));
-            alert("تم الحفظ بنجاح 📌");
+            localStorage.setItem('norak_save', JSON.stringify(data));
+            alert("تم حفظ مكانك بنجاح 📌");
         }
 
         function goBack() {
-            const saved = JSON.parse(localStorage.getItem('norak_bookmark'));
+            const saved = JSON.parse(localStorage.getItem('norak_save'));
             if(saved) {
                 document.getElementById('s-name').innerText = saved.n;
                 document.getElementById('s-content').innerText = saved.c;
@@ -92,14 +90,15 @@
             const b = document.body;
             const t = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             b.setAttribute('data-theme', t);
-            localStorage.setItem('norak_theme', t);
         }
 
-        // الربط الفعال والنهائي للدفع
-        document.getElementById('mainPayBtn').addEventListener('click', async () => {
+        // 3. تفعيل زرار الدفع (الخطوة 10) - ربط مباشر وفعال
+        document.getElementById('payButton').addEventListener('click', async () => {
             try {
-                const auth = await Pi.authenticate(['payments'], (p) => { console.log("Pending:", p); });
+                // التوثيق أولاً
+                const auth = await Pi.authenticate(['payments'], (p) => { console.log("Payment in progress", p); });
                 if (auth) {
+                    // إنشاء المعاملة
                     await Pi.createPayment({
                         amount: 0.1,
                         memo: "Support Norak App Development",
@@ -107,19 +106,17 @@
                     }, {
                         onReadyForServerApproval: (id) => Pi.approvePayment(id),
                         onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
-                        onComplete: (id) => alert("تمت العملية بنجاح!"),
-                        onError: (err) => alert("خطأ في الربط"),
+                        onComplete: (id) => alert("تمت عملية الربط والتبرع بنجاح!"),
+                        onError: (err) => alert("حدث خطأ في عملية الربط."),
                         onCancel: (id) => {}
                     });
                 }
-            } catch (e) { alert("افتحي التطبيق من داخل Pi Browser"); }
+            } catch (e) {
+                alert("برجاء فتح التطبيق من داخل Pi Browser لتفعيل ميزة الدفع.");
+            }
         });
 
-        window.onload = () => {
-            const theme = localStorage.getItem('norak_theme');
-            if(theme) document.body.setAttribute('data-theme', theme);
-            goBack();
-        };
+        window.onload = goBack;
     </script>
 </body>
 </html>

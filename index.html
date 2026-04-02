@@ -1,42 +1,154 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>تطبيق نورك</title>
+<meta charset="UTF-8">
+<title>نورك</title>
 
-  <!-- Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  <link rel="stylesheet" href="style.css">
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:white;
+text-align:center;
+margin:0;
+}
+
+.card{
+background:#1e293b;
+margin:15px;
+padding:20px;
+border-radius:20px;
+}
+
+button{
+width:90%;
+margin:10px;
+padding:14px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#22c55e,#4ade80);
+color:white;
+font-size:16px;
+}
+
+#quran{
+text-align:right;
+line-height:2;
+margin-top:15px;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="container">
-  <h1>✨ تطبيق نورك</h1>
-  <p id="status">🔄 جاري التحميل...</p>
+<h1>✨ تطبيق نورك</h1>
+<p id="status">جاري التحميل...</p>
 
-  <div class="card">
-    <button onclick="login()">🔐 تسجيل الدخول عبر Pi</button>
-    <button onclick="dailyReward()">🎁 مكافأة يومية</button>
-    <button onclick="toggleMode()">🌙 تغيير الوضع</button>
-  </div>
-
-  <div class="card">
-    <h2>💰 النقاط: <span id="points">0</span></h2>
-  </div>
-
-  <div class="card">
-    <h2>📖 القرآن الكريم</h2>
-    <button onclick="openQuran()">عرض القرآن</button>
-  </div>
-
-  <div class="card">
-    <h2>💳 دعم التطبيق</h2>
-    <button onclick="pay()">تبرع عبر Pi</button>
-  </div>
+<div class="card">
+<button onclick="login()">🔐 تسجيل الدخول</button>
+<button onclick="reward()">🎁 مكافأة يومية</button>
+<button onclick="toggle()">🌙 الوضع</button>
 </div>
 
-<script src="app.js"></script>
+<div class="card">
+💰 النقاط: <span id="points">0</span>
+</div>
+
+<div class="card">
+<h3>📖 القرآن الكريم</h3>
+<select id="surah"></select>
+<button onclick="loadQuran()">عرض</button>
+<div id="quran"></div>
+</div>
+
+<div class="card">
+<button onclick="pay()">💳 دعم التطبيق</button>
+</div>
+
+<script>
+let user=null;
+let points=0;
+
+// تشغيل Pi
+Pi.init({version:"2.0", sandbox:true});
+
+// تحميل السور
+fetch("https://api.alquran.cloud/v1/surah")
+.then(r=>r.json())
+.then(d=>{
+let s=document.getElementById("surah");
+d.data.forEach(x=>{
+let o=document.createElement("option");
+o.value=x.number;
+o.text=x.number+" - "+x.name;
+s.appendChild(o);
+});
+});
+
+document.getElementById("status").innerText="جاهز";
+
+// تسجيل الدخول
+async function login(){
+try{
+user=await Pi.authenticate(["username"], ()=>{});
+document.getElementById("status").innerText="👤 "+user.user.username;
+}catch{
+alert("فشل تسجيل الدخول");
+}
+}
+
+// مكافأة
+function reward(){
+let last=localStorage.getItem("r");
+let t=new Date().toDateString();
+
+if(last==t){alert("أخذتيها اليوم");return;}
+
+points+=10;
+document.getElementById("points").innerText=points;
+localStorage.setItem("r",t);
+}
+
+// الوضع
+function toggle(){
+document.body.classList.toggle("light");
+}
+
+// القرآن
+function loadQuran(){
+let id=document.getElementById("surah").value;
+
+fetch("https://api.alquran.cloud/v1/surah/"+id+"/ar")
+.then(r=>r.json())
+.then(d=>{
+let text="";
+d.data.ayahs.forEach(a=>{
+text+=a.text+" ("+a.numberInSurah+")<br>";
+});
+document.getElementById("quran").innerHTML=text;
+});
+}
+
+// الدفع (تجريبي)
+function pay(){
+if(!user){alert("سجلي دخول");return;}
+
+Pi.createPayment({
+amount:0.01,
+memo:"دعم نورك",
+metadata:{}
+},{
+onReadyForServerApproval:(id)=>{console.log(id);},
+onReadyForServerCompletion:(id,tx)=>{alert("تم الدفع");},
+onCancel:()=>{alert("إلغاء");},
+onError:(e)=>{console.log(e);}
+});
+}
+
+</script>
+
 </body>
 </html>

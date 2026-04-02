@@ -5,61 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script src="library.js"></script> 
     <style>
-        :root {
-            --bg: #f8f9fa; --txt: #212529; --card: #ffffff; --primary: #4a148c; --accent: #7b1fa2;
-        }
-        [data-theme="dark"] {
-            --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --primary: #bb86fc; --accent: #03dac6;
-        }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--txt);
-            margin: 0; padding: 0;
-            transition: 0.3s;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        /* الهيدر */
-        .header {
-            width: 100%; max-width: 600px; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--card); box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 100;
-        }
-        /* منطقة المحتوى */
-        .content-area {
-            width: 90%; max-width: 600px; margin: 20px 0 100px 0;
-            background: var(--card); padding: 25px; border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 60vh;
-        }
-        #s-name { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        #s-content { font-size: 22px; line-height: 2; text-align: justify; margin-top: 20px; }
-
-        /* القائمة السفلية */
-        .nav-bar {
-            position: fixed; bottom: 0; width: 100%; max-width: 600px;
-            background: var(--card); display: flex; justify-content: space-around;
-            padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.1);
-        }
-        .nav-item {
-            background: none; border: none; color: var(--txt);
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 12px; cursor: pointer;
-        }
-        .nav-item i { font-size: 20px; margin-bottom: 5px; }
-        .pay-btn { background: #ffa000 !important; color: white !important; border-radius: 10px; padding: 5px 15px; }
-
-        /* الفهرس (المكتبة الخارجية) */
-        #menu {
-            display: none; position: fixed; top: 60px; width: 100%; max-width: 600px;
-            background: var(--card); height: calc(100vh - 60px); z-index: 90;
-            overflow-y: auto; padding: 20px;
-        }
-        .menu-item {
-            padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1);
-            cursor: pointer; font-size: 18px;
-        }
+        :root { --bg: #ffffff; --txt: #212121; --card: #f8f9fa; --accent: #4a148c; }
+        [data-theme="dark"] { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --accent: #bb86fc; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--txt); margin: 0; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .header { width: 100%; max-width: 600px; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .content-area { width: 90%; max-width: 600px; margin: 20px 0 100px 0; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 70vh; }
+        #s-content { font-size: 22px; line-height: 2; text-align: justify; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.1); }
+        button { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        #menu { display: none; position: fixed; top: 60px; width: 100%; max-width: 600px; background: var(--card); height: calc(100vh - 60px); z-index: 900; overflow-y: auto; padding: 20px; }
+        .menu-item { padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer; }
     </style>
 </head>
 <body data-theme="light">
@@ -72,50 +29,61 @@
 
     <div id="menu">
         <h3>المكتبة الخارجية</h3>
-        <div class="menu-item" onclick="loadItem('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)')">سورة الفاتحة</div>
-        <div class="menu-item" onclick="loadItem('أذكار الصباح', 'أصبحنا وأصبح الملك لله والحمد لله...')">أذكار الصباح</div>
-        </div>
+        <div id="library-list"></div> </div>
 
     <div class="content-area">
-        <h3 id="s-name">مرحباً بك في نورك</h3>
-        <div id="s-content">من فضلك اختر من الفهرس لبدء القراءة...</div>
+        <h3 id="s-name">نورك</h3>
+        <div id="s-content">جاري تحميل مكتبة نورك...</div>
     </div>
 
     <div class="nav-bar">
-        <button class="nav-item" onclick="saveBookmark()">📌<span>حفظ</span></button>
-        <button class="nav-item" onclick="loadM()">🏠<span>الرئيسية</span></button>
-        <button class="nav-item pay-btn" onclick="pay()">π<span>تبرع</span></button>
+        <button onclick="saveBookmark()">📌 حفظ</button>
+        <button onclick="loadM()">🏠 العودة</button>
+        <button onclick="pay()" style="background: #ffa000;">π تبرع</button>
     </div>
 
     <script>
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
-        // 1. تبديل الفهرس (المكتبة الخارجية)
+        // 1. وظيفة ربط المكتبة الخارجية بجد
+        function buildLibrary() {
+            const list = document.getElementById('library-list');
+            // بنفترض إن عندك مصفوفة اسمها libraryData جوه ملف library.js
+            if (typeof libraryData !== 'undefined') {
+                list.innerHTML = '';
+                libraryData.forEach((item, index) => {
+                    let div = document.createElement('div');
+                    div.className = 'menu-item';
+                    div.innerText = item.title;
+                    div.onclick = () => loadItem(item.title, item.content);
+                    list.appendChild(div);
+                });
+            } else {
+                list.innerHTML = '<p>تأكدي من وجود ملف library.js مربوط صح وفيه البيانات.</p>';
+            }
+        }
+
         function toggleM() {
             const menu = document.getElementById('menu');
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            if (menu.style.display === 'block') buildLibrary();
         }
 
-        // 2. تحميل محتوى معين
-        function loadItem(name, content) {
-            document.getElementById('s-name').innerText = name;
+        function loadItem(title, content) {
+            document.getElementById('s-name').innerText = title;
             document.getElementById('s-content').innerHTML = content;
-            toggleM(); // اقفل المنيو بعد الاختيار
+            toggleM();
             window.scrollTo(0,0);
         }
 
-        // 3. نظام الحفظ (Bookmark)
+        // 2. الحفظ والعودة الذكية
         function saveBookmark() {
-            const data = {
-                n: document.getElementById('s-name').innerText,
-                c: document.getElementById('s-content').innerHTML
-            };
+            const data = { n: document.getElementById('s-name').innerText, c: document.getElementById('s-content').innerHTML };
             localStorage.setItem('user_mark', JSON.stringify(data));
-            alert("تم حفظ مكانك في تطبيق نورك 📌");
+            alert("تم حفظ مكانك في نورك 📌");
         }
 
-        // 4. استرجاع المحتوى (العودة الفعالة)
         function loadM() {
             const saved = JSON.parse(localStorage.getItem('user_mark'));
             if (saved) {
@@ -124,23 +92,15 @@
             }
         }
 
-        // 5. نظام الثيمات
-        function toggleTheme() {
-            const body = document.body;
-            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            body.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        }
-
-        // 6. كود الدفع الرسمي لشبكة Pi
+        // 3. الدفع الرسمي (بدون أي كلام جانبي)
         async function pay() {
             try {
                 const auth = await Pi.authenticate(['payments'], (p) => {});
                 if (auth) {
                     Pi.createPayment({
                         amount: 0.1,
-                        memo: "Support Norak App",
-                        metadata: { orderId: "n_" + Date.now() }
+                        memo: "Support Norak App Development",
+                        metadata: { orderId: "order_" + Date.now() }
                     }, {
                         onReadyForServerApproval: (id) => Pi.approvePayment(id),
                         onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
@@ -149,13 +109,20 @@
                     });
                 }
             } catch (e) {
-                alert("برجاء فتح تطبيق نورك من خلال Pi Browser");
+                alert("افتحي التطبيق من Pi Browser.");
             }
         }
 
-        // تشغيل الإعدادات عند الفتح
+        function toggleTheme() {
+            const body = document.body;
+            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
         window.onload = () => {
             loadM();
+            buildLibrary();
             const savedTheme = localStorage.getItem('theme');
             if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
         };

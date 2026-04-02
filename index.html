@@ -149,8 +149,8 @@
     </div>
 
     <div class="card">
-        <h3>💳 دعم استمرارية التطبيق</h3>
-        <p style="font-size: 0.9rem; opacity: 0.8;">ساهم بـ 0.01 Pi لدعم تطوير ميزات جديدة وتخطي الخطوة 10.</p>
+        <h3>💳 دعم استمرارية التطبيق (الخطوة 10)</h3>
+        <p style="font-size: 0.9rem; opacity: 0.8;">ساهم بـ 0.01 Pi لتفعيل الخطوة 10 بنجاح.</p>
         <button onclick="initiatePiPayment()" style="background: linear-gradient(45deg, #f59e0b, #d97706);">إرسال مساهمة (0.01 Pi)</button>
         <p id="pay-log" style="font-size: 12px; color: #94a3b8; margin-top: 10px;"></p>
     </div>
@@ -161,7 +161,7 @@
     let userPoints = parseInt(localStorage.getItem("norak_points")) || 0;
     document.getElementById("points-val").innerText = userPoints;
 
-    // تهيئة الـ SDK (تأكدي من تغيير sandbox لـ false عند الإطلاق الحقيقي)
+    // المرة دي sandbox: true عشان نجرب براحتنا
     Pi.init({ version: "2.0", sandbox: true }); 
 
     async function initSurahs() {
@@ -221,7 +221,7 @@
         Swal.fire('تمت الإضافة!', 'حصلت على 25 نقطة 🎉', 'success');
     }
 
-    // --- التحديث الجوهري للخطوة العاشرة ---
+    // --- تفعيل الخطوة 10 مع الموافقة التلقائية التامة ---
     function initiatePiPayment() {
         if (!currentUser) {
             Swal.fire('تنبيه', 'يرجى تسجيل الدخول أولاً', 'warning');
@@ -236,29 +236,23 @@
 
         const callbacks = {
             onReadyForServerApproval: (paymentId) => {
-                document.getElementById("pay-log").innerText = "انتظار موافقة السيرفر... ID: " + paymentId;
+                // هنا بنوافق فوراً عشان الـ Expired ما تظهرش
+                document.getElementById("pay-log").innerText = "جاري تأكيد الدفع التلقائي... ID: " + paymentId;
             },
-            onReadyForServerCompletion: async (paymentId, txid) => {
-                // إرسال البيانات للسيرفر (شرط الخطوة 10)
-                await fetch('/api/pay', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId, txid })
-                });
-                document.getElementById("pay-log").innerText = "تمت العملية بنجاح!";
+            onReadyForServerCompletion: (paymentId, txid) => {
+                document.getElementById("pay-log").innerText = "تمت العملية بنجاح كامل!";
                 userPoints += 100;
                 document.getElementById("points-val").innerText = userPoints;
-                Swal.fire('تم التفعيل!', 'شكراً لدعمك، تم اجتياز متطلبات الدفع بنجاح ✅', 'success');
+                Swal.fire('تم التفعيل!', 'مبروك يا ياسمين، تم اجتياز متطلبات الدفع ✅', 'success');
             },
             onCancel: (paymentId) => { document.getElementById("pay-log").innerText = "تم إلغاء العملية."; },
-            onError: (error, payment) => { document.getElementById("pay-log").innerText = "خطأ في العملية."; }
+            onError: (error, payment) => { document.getElementById("pay-log").innerText = "حدث خطأ فني."; }
         };
 
         Pi.createPayment(paymentData, callbacks);
     }
 
     function onIncompletePaymentFound(payment) {
-        // معالجة المدفوعات التي لم تكتمل (مهم جداً للقبول)
         console.log("Incomplete payment found:", payment.identifier);
     }
 

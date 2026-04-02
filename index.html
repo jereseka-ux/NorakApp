@@ -3,96 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Norak App</title>
+    <title>نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #212121;
+            --card-bg: #f9f9f9;
+            --accent-color: #4a148c;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --accent-color: #bb86fc;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: 0.3s;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        #s-content {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+            line-height: 2;
+            font-size: 20px;
+            text-align: justify;
+        }
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: var(--accent-color);
+            color: white;
+        }
+    </style>
 </head>
-<body>
+<body data-theme="light">
 
-    <div id="s-name"></div>
-    <div id="s-content"></div>
+    <div class="header">
+        <h2 id="s-name">نورك</h2>
+        <button onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+
+    <div id="s-content">
+        جاري تحميل المحتوى...
+    </div>
+
+    <div class="controls">
+        <button onclick="saveBookmark()">حفظ العلامة 📌</button>
+        <button onclick="pay()" style="background-color: #ffa000;">تبرع (Pi) π</button>
+    </div>
 
     <script>
-        // 1. تهيئة الـ SDK فور تحميل الصفحة لضمان التعرف على المتصفح
         const Pi = window.Pi;
-        try {
-            Pi.init({ version: "2.0", sandbox: false });
-        } catch (err) {
-            console.error("SDK initialization failed", err);
+        Pi.init({ version: "2.0", sandbox: false });
+
+        // 1. نظام الـ Dark Mode
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const target = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
         }
 
-        // 2. دالة استرجاع البيانات المحفوظة للمستخدم
+        // 2. نظام الـ Bookmark (حفظ مكان القراءة)
+        function saveBookmark() {
+            const data = {
+                n: document.getElementById('s-name').innerText,
+                c: document.getElementById('s-content').innerHTML,
+                t: Date.now()
+            };
+            localStorage.setItem('user_mark', JSON.stringify(data));
+            alert("تم حفظ مكانك بنجاح! 📌");
+        }
+
+        // 3. تحميل البيانات عند الفتح
         function loadM() {
-            try {
-                const saved = JSON.parse(localStorage.getItem('user_mark'));
-                if (saved) {
-                    const nameElem = document.getElementById('s-name');
-                    const contentElem = document.getElementById('s-content');
-                    
-                    if (nameElem) nameElem.innerText = saved.n || "";
-                    if (contentElem) contentElem.innerHTML = saved.c || "";
-                    
-                    window.scrollTo(0, 0);
-                } else {
-                    if (typeof toggleM === "function") toggleM();
-                }
-            } catch (e) {
-                console.error("Error loading saved data", e);
+            // استرجاع الثيم
+            const savedTheme = localStorage.getItem('theme');
+            if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
+
+            // استرجاع المحتوى
+            const saved = JSON.parse(localStorage.getItem('user_mark'));
+            if (saved) {
+                document.getElementById('s-name').innerText = saved.n;
+                document.getElementById('s-content').innerHTML = saved.c;
             }
         }
 
-        // 3. نظام الدفع الذكي المتوافق مع معايير Mainnet
+        // 4. كود الدفع الذكي (النسخة الاحترافية النهائية)
         async function pay() {
             try {
-                // تعريف الصلاحيات المطلوبة
-                const scopes = ['payments'];
-                
-                // التعامل مع أي عمليات دفع سابقة لم تكتمل (شرط أساسي لـ Pi)
-                const onIncompletePaymentFound = (payment) => {
-                    console.log("Incomplete payment found:", payment.identifier);
-                    // هنا يتم إرسال المعرف للسيرفر الخاص بك لإتمامها إذا لزم الأمر
-                };
+                const auth = await Pi.authenticate(['payments'], (p) => {
+                    console.log("Incomplete payment found", p);
+                });
 
-                // توثيق المستخدم داخل شبكة Pi
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
                 if (auth) {
-                    // تنفيذ عملية الدفع الرسمية
                     Pi.createPayment({
                         amount: 0.1,
-                        memo: "Support Norak App Development", // وصف رسمي وواضح
-                        metadata: { 
-                            orderId: "order_" + Date.now(),
-                            app_name: "Norak"
-                        }
+                        memo: "Support Norak App",
+                        metadata: { orderId: "n_" + Date.now() }
                     }, {
-                        onReadyForServerApproval: (paymentId) => {
-                            // الموافقة من طرف التطبيق
-                            return Pi.approvePayment(paymentId);
-                        },
-                        onReadyForServerCompletion: (paymentId, txid) => {
-                            // إتمام العملية بعد تأكيد الشبكة
-                            return Pi.completePayment(paymentId, txid);
-                        },
-                        onComplete: (paymentId) => {
-                            alert("تمت عملية الدفع بنجاح. شكراً لدعمكم.");
-                        },
-                        onError: (error) => {
-                            console.error("Payment Process Error:", error);
-                            alert("عذراً، تعذر إتمام العملية حالياً.");
-                        },
-                        onCancel: (paymentId) => {
-                            console.log("User cancelled payment:", paymentId);
-                        }
+                        onReadyForServerApproval: (id) => Pi.approvePayment(id),
+                        onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
+                        onComplete: (id) => alert("تقبل الله، تم التبرع بنجاح."),
+                        onError: (err) => console.error(err),
+                        onCancel: (id) => console.log("Cancelled", id)
                     });
                 }
             } catch (e) {
-                // رسالة ذكية تظهر فقط في حالة وجود خطأ حقيقي في البيئة
-                console.error("Authentication failed", e);
-                alert("يرجى التأكد من استخدام متصفح Pi الرسمي لإتمام هذه العملية.");
+                alert("برجاء فتح التطبيق من خلال Pi Browser.");
             }
         }
 
-        // تشغيل الدالة الأساسية عند فتح التطبيق
         window.onload = loadM;
     </script>
 </body>

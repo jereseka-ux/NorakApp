@@ -3,82 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق نورك - المصحف الكامل</title>
-    
+    <title>نورك - القرآن الكريم</title>
     <script src="https://sdk.pi.network/v2/pi-sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
         :root { --p: #6a1b9a; --bg: #f9f9fb; --txt: #2c3e50; --card: #ffffff; --size: 24px; }
         body.dark { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; }
-        
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 80px; transition: 0.3s; overflow-x: hidden; }
-
-        /* الهيدر */
-        header { background: var(--p); color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .icon-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px; }
-
-        /* الفهرس (Sidebar) */
-        .sidebar { position: fixed; top: 0; right: -100%; width: 80%; max-width: 300px; height: 100%; background: var(--card); z-index: 2001; transition: 0.4s; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 80px; transition: 0.3s; }
+        header { background: var(--p); color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .icon-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        /* الفهرس */
+        .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--card); z-index: 2001; transition: 0.4s; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.3); }
         .sidebar.active { right: 0; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2000; }
         .overlay.active { display: block; }
-        .s-header { padding: 20px; background: var(--p); color: white; font-weight: bold; }
-        .s-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
-
-        /* الإعدادات (Settings Panel) */
-        .settings-panel { padding: 20px; background: var(--card); margin: 10px; border-radius: 10px; display: none; border: 1px solid var(--p); }
-        .settings-panel.active { display: block; }
-
-        /* منطقة القراءة */
-        .quran-container { max-width: 800px; margin: 15px auto; padding: 25px; background: var(--card); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .s-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; font-weight: bold; }
+        /* القراءة */
+        .quran-container { max-width: 800px; margin: 15px auto; padding: 25px; background: var(--card); border-radius: 15px; text-align: center; }
         #s-name { font-family: 'Amiri', serif; font-size: 32px; color: var(--p); border-bottom: 2px solid #eee; margin-bottom: 15px; }
         #s-content { font-family: 'Amiri', serif; font-size: var(--size); line-height: 2.2; text-align: justify; }
-        .ayah-num { color: var(--p); font-size: 0.7em; font-weight: bold; margin: 0 3px; border: 1px solid #ccc; border-radius: 50%; padding: 2px 5px; }
-
-        /* بار التحكم السفلي */
+        /* الناف بار */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; z-index: 1000; }
         .nav-link { text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; color: var(--txt); }
-        .nav-link span { display: block; font-size: 22px; margin-bottom: 2px; }
-
-        /* لودر التحميل */
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--p); border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #status-msg { font-size: 10px; text-align: center; background: #eee; color: #666; }
+        .nav-link span { display: block; font-size: 22px; }
     </style>
 </head>
 <body>
 
-<div id="status-msg">Pi SDK: Initializing...</div>
-
 <header>
     <button class="icon-btn" onclick="toggleM()">☰</button>
     <strong>نورك</strong>
-    <button class="icon-btn" onclick="toggleS()">⚙️</button>
+    <button class="icon-btn" onclick="toggleD()">🌙</button>
 </header>
 
-<div class="overlay" id="over" onclick="closeAll()"></div>
-
+<div class="overlay" id="over" onclick="toggleM()"></div>
 <div class="sidebar" id="side">
-    <div class="s-header">فهرس القرآن (114 سورة)</div>
+    <div style="padding:20px; background:var(--p); color:white;">فهرس السور</div>
     <div id="surah-list"></div>
 </div>
 
-<div class="settings-panel" id="settings">
-    <strong>الإعدادات</strong>
-    <hr>
-    <div style="margin:10px 0;">
-        الوضع الليلي: <button onclick="toggleD()">تبديل 🌙/☀️</button>
-    </div>
-    <div style="margin:10px 0;">
-        حجم الخط: 
-        <button onclick="changeFont(-2)">-</button>
-        <button onclick="changeFont(2)">+</button>
-    </div>
-</div>
-
 <div class="quran-container">
-    <div id="loading-spinner" style="display:none;"><div class="loader"></div> جاري التحميل...</div>
     <h2 id="s-name">بِسْمِ اللَّهِ</h2>
     <div id="s-content">افتح الفهرس وابدأ القراءة..</div>
 </div>
@@ -90,100 +54,77 @@
 </div>
 
 <script>
-    // 1. Pi SDK Setup (صحيح 100% للقبول)
-    try {
-        Pi.init({ version: "2.0", sandbox: true });
-        document.getElementById('status-msg').innerText = "تم الاتصال بـ Pi Network بنجاح";
-    } catch(e) { 
-        document.getElementById('status-msg').innerText = "يرجى الفتح من Pi Browser"; 
-    }
+    // تهيئة الـ SDK مع التأكد من البيئة
+    window.onload = function() {
+        try {
+            Pi.init({ version: "2.0", sandbox: true });
+            getIndex();
+        } catch(e) { console.error("SDK Init failed"); }
+    };
 
-    // 2. تحميل الفهرس (114 سورة حقيقية)
     async function getIndex() {
-        try {
-            const res = await fetch('https://api.alquran.cloud/v1/surah');
-            const data = await res.json();
-            const list = document.getElementById('surah-list');
-            data.data.forEach(s => {
-                let d = document.createElement('div');
-                d.className = 's-item';
-                d.innerHTML = `<span>${s.number}. ${s.name}</span> <small>${s.numberOfAyahs} آية</small>`;
-                d.onclick = () => loadS(s.number, s.name);
-                list.appendChild(d);
-            });
-        } catch(e) { console.error("Index Error"); }
+        const res = await fetch('https://api.alquran.cloud/v1/surah');
+        const data = await res.json();
+        const list = document.getElementById('surah-list');
+        data.data.forEach(s => {
+            let d = document.createElement('div');
+            d.className = 's-item';
+            d.innerText = s.number + ". " + s.name;
+            d.onclick = () => loadS(s.number, s.name);
+            list.appendChild(d);
+        });
     }
 
-    // 3. تحميل السورة (داتا حقيقية)
     async function loadS(id, name) {
-        closeAll();
-        document.getElementById('loading-spinner').style.display = 'block';
+        toggleM();
         document.getElementById('s-name').innerText = "سورة " + name;
-        try {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
-            const data = await res.json();
-            let txt = "";
-            data.data.ayahs.forEach(a => {
-                txt += `${a.text} <span class="ayah-num">${a.numberInSurah}</span> `;
-            });
-            document.getElementById('s-content').innerHTML = txt;
-            window.scrollTo(0,0);
-        } catch(e) { alert("خطأ في جلب البيانات"); }
-        document.getElementById('loading-spinner').style.display = 'none';
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
+        const data = await res.json();
+        let txt = "";
+        data.data.ayahs.forEach(a => { txt += a.text + " (" + a.numberInSurah + ") "; });
+        document.getElementById('s-content').innerHTML = txt;
+        window.scrollTo(0,0);
     }
 
-    // 4. التحكم (إضاءة، منيو، سيتنجس)
     function toggleM() { document.getElementById('side').classList.toggle('active'); document.getElementById('over').classList.toggle('active'); }
-    function toggleS() { document.getElementById('settings').classList.toggle('active'); }
-    function closeAll() { 
-        document.getElementById('side').classList.remove('active'); 
-        document.getElementById('over').classList.remove('active');
-        document.getElementById('settings').classList.remove('active');
-    }
-    function toggleD() { 
-        document.body.classList.toggle('dark');
-        localStorage.setItem('mode', document.body.classList.contains('dark') ? 'dark' : 'light');
-    }
-    function changeFont(v) {
-        let s = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--size'));
-        document.documentElement.style.setProperty('--size', (s + v) + 'px');
-    }
+    function toggleD() { document.body.classList.toggle('dark'); }
 
-    // 5. البوكمارك (حفظ واستعادة)
     function saveM() {
         const mark = { n: document.getElementById('s-name').innerText, c: document.getElementById('s-content').innerHTML };
         localStorage.setItem('q_mark', JSON.stringify(mark));
         alert("تم حفظ مكانك!");
     }
+
     function loadM() {
         const saved = JSON.parse(localStorage.getItem('q_mark'));
         if(saved) {
             document.getElementById('s-name').innerText = saved.n;
             document.getElementById('s-content').innerHTML = saved.c;
-            closeAll();
-        } else { alert("لا توجد علامة"); }
+        }
     }
 
-    // 6. زر الدفع (Pi Payment) - شغال بموافقة السيرفر
+    // حل مشكلة "افتح المتصفح" المزعجة
     async function pay() {
         try {
-            const auth = await Pi.authenticate(['payments'], (p) => { console.log(p); });
-            Pi.createPayment({
-                amount: 0.1,
-                memo: "دعم تطبيق نورك",
-                metadata: { orderId: "1001" }
-            }, {
-                onReadyForServerApproval: (id) => Pi.approvePayment(id),
-                onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
-                onComplete: () => alert("تقبل الله منك!"),
-                onError: (e) => alert("خطأ في العملية: " + e.message)
-            });
-        } catch(e) { alert("يرجى الفتح من Pi Browser"); }
+            // انتظار بسيط للتأكد من استقرار الـ SDK
+            const auth = await Pi.authenticate(['payments'], (p) => {});
+            if (auth) {
+                Pi.createPayment({
+                    amount: 0.1,
+                    memo: "دعم تطبيق نورك",
+                    metadata: { orderId: "123" }
+                }, {
+                    onReadyForServerApproval: (id) => Pi.approvePayment(id),
+                    onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
+                    onComplete: () => alert("تقبل الله منك!"),
+                    onError: (e) => alert("خطأ: " + e.message)
+                });
+            }
+        } catch(e) {
+            // الرسالة دي هي اللي ظهرتلك في الصورة
+            alert("يرجى التأكد من الدخول عبر Pi Browser وتفعيل المحفظة"); 
+        }
     }
-
-    // التشغيل التلقائي
-    if(localStorage.getItem('mode') === 'dark') document.body.classList.add('dark');
-    getIndex();
 </script>
 </body>
 </html>

@@ -1,118 +1,215 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نوراك (Norak)</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        :root { --bg: #121212; --text: #ffffff; --card: #1e1e26; --accent: #f1c40f; }
-        body.light-mode { --bg: #f4f4f9; --text: #333; --card: #ffffff; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; transition: 0.3s; margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 500px; margin: auto; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn-toggle { background: #6c5ce7; color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; float: left; }
-        .section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
-        select, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: none; font-size: 16px; cursor: pointer; }
-        .btn-read { background: #27ae60; color: white; }
-        .btn-pay { background: linear-gradient(45deg, #f39c12, #e67e22); color: white; font-weight: bold; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); }
-        .content-display { background: #000; padding: 20px; border-radius: 10px; min-height: 100px; color: var(--accent); line-height: 1.8; font-size: 18px; border: 1px solid #333; white-space: pre-wrap; }
-    </style>
+<meta charset="UTF-8">
+<title>نورك - الإصدار الكامل</title>
+
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+body{
+  font-family: "Arial", sans-serif;
+  background: linear-gradient(135deg, #0b0c2c, #1e293b);
+  color: #fff;
+  text-align: center;
+  margin:0;
+  transition: all 0.3s ease;
+}
+
+body.light{
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+  color: #111;
+}
+
+.card{
+  background: #162447;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+body.light .card{
+  background: #fff;
+  color: #111;
+}
+
+button{
+  width: 90%;
+  margin: 10px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #ff7e5f, #feb47b);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover{
+  opacity: 0.85;
+}
+
+#quran{
+  text-align: right;
+  line-height: 2;
+  margin-top: 15px;
+  min-height: 200px;
+}
+
+.loading{
+  font-size: 16px;
+  color: #facc15;
+}
+</style>
 </head>
-<body id="mainBody">
+<body>
 
-<div class="container">
-    <button class="btn-toggle" onclick="toggleTheme()">🌓</button>
-    <h1>تطبيق نوراك (Norak)</h1>
+<h1>✨ تطبيق نورك</h1>
+<p id="status">جاري التحميل...</p>
 
-    <div class="section">
-        <h3>📖 المكتبة الإسلامية</h3>
-        <select id="mainSelect">
-            <option value="">-- اختر المحتوى --</option>
-            <optgroup label="سور القرآن">
-                <option value="1">سورة الفاتحة</option>
-                <option value="112">سورة الإخلاص</option>
-                <option value="113">سورة الفلق</option>
-                <option value="114">سورة الناس</option>
-            </optgroup>
-            <optgroup label="الأذكار">
-                <option value="az1">أذكار الصباح</option>
-                <option value="az2">أذكار المساء</option>
-            </optgroup>
-        </select>
-        <button class="btn-read" onclick="handleDisplay()">عرض الآن</button>
-        <div class="content-display" id="outBox">مرحباً بك في نوراك.. اختر محتوى للبدء</div>
-    </div>
+<div class="card">
+  <button onclick="login()">🔐 تسجيل الدخول</button>
+  <button onclick="reward()">🎁 مكافأة يومية</button>
+  <button onclick="toggleTheme()">🌙 الوضع</button>
+</div>
 
-    <div class="section">
-        <h3>تفعيل الخطوة 10 النهائية</h3>
-        <p style="font-size: 13px;">دعم استمرارية المشروع (0.01 Pi)</p>
-        <button class="btn-pay" onclick="runPayment()">🎁 تفعيل الخطوة 10</button>
-        <p style="font-size: 11px; color: #888;">تأكد من فتح التطبيق عبر Pi Browser</p>
-    </div>
+<div class="card">
+  💰 النقاط: <span id="points">0</span>
+</div>
+
+<div class="card">
+  <h3>📖 القرآن الكريم</h3>
+  <select id="surah"></select>
+  <button onclick="loadQuran()">عرض</button>
+  <div id="quran"></div>
+  <p id="loadingQuran" class="loading" style="display:none;">جاري تحميل السورة...</p>
+</div>
+
+<div class="card">
+  <button onclick="pay()">💳 دعم التطبيق</button>
+  <p id="paymentStatus" class="loading" style="display:none;"></p>
 </div>
 
 <script>
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: false });
+let user = null;
+let points = parseInt(localStorage.getItem("points")) || 0;
+document.getElementById("points").innerText = points;
 
-    function toggleTheme() {
-        document.getElementById('mainBody').classList.toggle('light-mode');
-    }
+// تشغيل Pi بوضع العمل الحقيقي
+Pi.init({version:"2.0", sandbox: false});
 
-    async function handleDisplay() {
-        const val = document.getElementById('mainSelect').value;
-        const box = document.getElementById('outBox');
-        if (!val) return;
-        
-        if (val.startsWith('az')) {
-            box.innerText = val === 'az1' ? "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له..." : "أمسينا وأمسى الملك لله، والحمد لله، أعوذ بكلمات الله التامات من شر ما خلق...";
-        } else {
-            box.innerText = "جاري التحميل...";
-            try {
-                const res = await fetch(`https://api.alquran.cloud/v1/surah/${val}`);
-                const d = await res.json();
-                box.innerText = d.data.ayahs.map(a => a.text).join(' ');
-            } catch (e) {
-                box.innerText = "حدث خطأ في جلب المحتوى، يرجى المحاولة لاحقاً.";
-            }
-        }
-    }
+// تحميل السور كما هي في كودك الأصلي
+async function loadSurahs(){
+  try{
+    const res = await fetch("https://api.alquran.cloud/v1/surah");
+    const data = await res.json();
+    let s = document.getElementById("surah");
+    data.data.forEach(x=>{
+      let o = document.createElement("option");
+      o.value = x.number;
+      o.text = x.number + " - " + x.name;
+      s.appendChild(o);
+    });
+    s.selectedIndex = 0;
+    document.getElementById("status").innerText = "جاهز";
+  } catch(e){
+    document.getElementById("status").innerText = "خطأ في الاتصال";
+  }
+}
+loadSurahs();
 
-    function onIncompletePaymentFound(payment) {
-        return axios.post('https://norak-app.vercel.app/api/incomplete', { payment });
-    }
+// الوظيفة السحرية اللي هتحل مشكلة الـ Expired
+function onIncompletePaymentFound(payment) {
+  return axios.post('https://norak-app.vercel.app/api/incomplete', { payment });
+}
 
-    async function runPayment() {
-        try {
-            const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-            
-            const paymentData = {
-                amount: 0.01,
-                memo: "تفعيل الخطوة 10 - تطبيق نوراك",
-                metadata: { orderId: "norak_" + Date.now() }
-            };
+// تسجيل الدخول مع الربط الصحيح
+async function login(){
+  try{
+    user = await Pi.authenticate(["username", "payments"], onIncompletePaymentFound);
+    document.getElementById("status").innerText = "👤 " + user.user.username;
+    localStorage.setItem("user", JSON.stringify(user.user));
+  } catch(e){
+    alert("يرجى فتح التطبيق من Pi Browser وتسجيل الدخول");
+  }
+}
 
-            const callbacks = {
-                onReadyForServerApproval: (id) => {
-                    return axios.post('https://norak-app.vercel.app/api/approve', { paymentId: id });
-                },
-                onReadyForServerCompletion: (id, tx) => {
-                    return axios.post('https://norak-app.vercel.app/api/complete', { paymentId: id, txid: tx });
-                },
-                onCancel: (id) => console.log("Payment Cancelled"),
-                onError: (err) => {
-                    console.error(err);
-                    alert("فشلت العملية، يرجى التأكد من رصيد المحفظة.");
-                }
-            };
+// المكافأة اليومية
+function reward(){
+  let last = localStorage.getItem("lastReward");
+  let t = new Date().toDateString();
+  if(last == t){
+    alert("لقد حصلتِ على المكافأة اليوم");
+    return;
+  }
+  points += 10;
+  localStorage.setItem("points", points);
+  localStorage.setItem("lastReward", t);
+  document.getElementById("points").innerText = points;
+  alert("تم إضافة 10 نقاط 🎉");
+}
 
-            await Pi.createPayment(paymentData, callbacks);
-        } catch (e) {
-            console.error(e);
-            alert("يرجى فتح التطبيق من داخل متصفح Pi الرسمي.");
-        }
-    }
+function toggleTheme(){
+  document.body.classList.toggle("light");
+}
+
+// عرض القرآن
+async function loadQuran(){
+  let id = document.getElementById("surah").value;
+  document.getElementById("loadingQuran").style.display = "block";
+  document.getElementById("quran").innerHTML = "";
+  try{
+    const res = await fetch("https://api.alquran.cloud/v1/surah/"+id+"/ar");
+    const data = await res.json();
+    let text = "";
+    data.data.ayahs.forEach(a=>{
+      text += a.text + " ("+a.numberInSurah+")<br>";
+    });
+    document.getElementById("quran").innerHTML = text;
+  } catch(e){
+    document.getElementById("quran").innerHTML = "خطأ في التحميل";
+  } finally{
+    document.getElementById("loadingQuran").style.display = "none";
+  }
+}
+
+// وظيفة الدفع الاحترافية
+async function pay(){
+  if(!user){alert("سجلي دخول أولاً"); return;}
+  document.getElementById("paymentStatus").style.display = "block";
+  document.getElementById("paymentStatus").innerText = "جاري معالجة الدفع...";
+  
+  try {
+    await Pi.createPayment({
+      amount: 0.01,
+      memo: "دعم تطبيق نورك - الخطوة 10",
+      metadata: { orderId: "order_" + Date.now() }
+    }, {
+      onReadyForServerApproval: (id) => axios.post('https://norak-app.vercel.app/api/approve', { paymentId: id }),
+      onReadyForServerCompletion: (id, tx) => {
+        document.getElementById("paymentStatus").innerText = "تم الدفع بنجاح 💳";
+        points += 5;
+        localStorage.setItem("points", points);
+        document.getElementById("points").innerText = points;
+        setTimeout(() => { document.getElementById("paymentStatus").style.display = "none"; }, 3000);
+        return axios.post('https://norak-app.vercel.app/api/complete', { paymentId: id, txid: tx });
+      },
+      onCancel: () => {
+        document.getElementById("paymentStatus").innerText = "تم إلغاء الدفع ❌";
+        setTimeout(() => { document.getElementById("paymentStatus").style.display = "none"; }, 2000);
+      },
+      onError: (err) => {
+        alert("تأكدي من الرصيد وحاولي مرة أخرى");
+        document.getElementById("paymentStatus").style.display = "none";
+      }
+    });
+  } catch (err) {
+    alert("حدث خطأ تقني في الدفع");
+  }
+}
 </script>
 </body>
 </html>

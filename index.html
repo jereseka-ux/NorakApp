@@ -3,117 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نورك - Norak</title>
+    <title>تطبيق نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root { --bg: #ffffff; --txt: #212121; --card: #f9f9f9; --primary: #4a148c; }
-        [data-theme="dark"] { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --primary: #bb86fc; }
+        :root { --bg: #ffffff; --txt: #212121; --card: #f8f9fa; --p: #4a148c; --accent: #ffa000; }
+        [data-theme="dark"] { --bg: #121212; --txt: #e0e0e0; --card: #1e1e1e; --p: #bb86fc; --accent: #ffb300; }
         
-        body { font-family: sans-serif; background-color: var(--bg); color: var(--txt); margin: 0; transition: 0.3s; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 80px; transition: 0.3s; overflow-x: hidden; }
         
-        /* هيدر ثابت ونظيف */
-        .header { width: 100%; max-width: 600px; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--card); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        
-        /* منطقة العرض */
-        .main-container { width: 90%; max-width: 600px; margin: 20px 0 100px 0; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        #s-name { color: var(--primary); font-size: 24px; margin-bottom: 15px; border-bottom: 2px solid var(--primary); display: inline-block; }
-        #s-content { font-size: 20px; line-height: 2; text-align: justify; }
+        /* الهيدر */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header h2 { margin: 0; font-size: 22px; color: var(--p); }
 
-        /* الفهرس الجانبي */
-        #library { display: none; position: fixed; top: 60px; width: 100%; max-width: 600px; height: 100%; background: var(--bg); z-index: 999; overflow-y: auto; padding: 20px; }
-        .item { padding: 15px; border-bottom: 1px solid #ddd; cursor: pointer; font-size: 18px; }
+        /* منطقة المحتوى */
+        .main-container { padding: 25px; max-width: 600px; margin: 20px auto; background: var(--card); border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 60vh; }
+        #s-name { font-size: 26px; font-weight: bold; color: var(--p); border-bottom: 2px solid var(--p); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        #s-content { font-size: 22px; line-height: 2; text-align: justify; white-space: pre-wrap; }
+
+        /* الفهرس (المكتبة الخارجية) */
+        #lib-ui { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 2000; padding: 20px; overflow-y: auto; }
+        .lib-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--p); padding-bottom: 10px; margin-bottom: 20px; }
+        .item { padding: 18px; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: pointer; font-size: 19px; transition: 0.2s; border-radius: 10px; }
+        .item:active { background: var(--card); transform: scale(0.98); }
 
         /* شريط التحكم السفلي */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
-        .btn { border: none; background: var(--primary); color: white; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .pay-btn { background: #ffa000 !important; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.1); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        .btn { border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 5px; background: transparent; color: var(--txt); }
+        .btn-main { background: var(--p); color: white; }
+        .btn-pay { background: var(--accent); color: black; }
+        
+        /* أيقونات بسيطة بالرموز */
+        .icon { font-size: 20px; }
     </style>
 </head>
 <body data-theme="light">
 
     <div class="header">
-        <button class="btn" onclick="toggleLib()">☰ الفهرس</button>
-        <strong>نورك</strong>
-        <button class="btn" onclick="toggleMode()">☀️/🌙</button>
+        <button class="btn" onclick="toggleLib(true)"><span class="icon">☰</span>الفهرس</button>
+        <h2>نورك</h2>
+        <button class="btn" onclick="toggleMode()"><span class="icon">☀️/🌙</span></button>
     </div>
 
-    <div id="library">
-        <h3>المكتبة الخارجية</h3>
-        <div class="item" onclick="loadContent('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2)...')">سورة الفاتحة</div>
-        <div class="item" onclick="loadContent('أذكار الصباح', 'أصبحنا وأصبح الملك لله...')">أذكار الصباح</div>
+    <div id="lib-ui">
+        <div class="lib-header">
+            <h3>المكتبة الخارجية</h3>
+            <button class="btn btn-main" onclick="toggleLib(false)">إغلاق ×</button>
+        </div>
+        <div class="item" onclick="updateContent('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)')">سورة الفاتحة</div>
+        <div class="item" onclick="updateContent('أذكار الصباح', 'أصبحنا وأصبح الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير...')">أذكار الصباح</div>
+        <div class="item" onclick="updateContent('أذكار المساء', 'أمسينا وأمسى الملك لله والحمد لله...')">أذكار المساء</div>
     </div>
 
     <div class="main-container">
         <div id="s-name">مرحباً بك</div>
-        <div id="s-content">اختر محتوى من الفهرس للبدء..</div>
+        <div id="s-content">من فضلك اختر سورة أو ذكراً من الفهرس لبدء القراءة في تطبيق نورك.</div>
     </div>
 
-    <div class="bottom-nav">
-        <button class="btn" onclick="saveB()">📌 حفظ</button>
-        <button class="btn pay-btn" onclick="startPay()">π تبرع</button>
+    <div class="nav-bar">
+        <button class="btn" onclick="savePlace()"><span class="icon">📌</span>حفظ</button>
+        <button class="btn" onclick="goBack()"><span class="icon">🏠</span>العودة</button>
+        <button class="btn btn-pay" onclick="payWithPi()"><span class="icon">π</span>تبرع</button>
     </div>
 
     <script>
+        // تهيئة SDK باي
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: false });
+        try {
+            Pi.init({ version: "2.0", sandbox: false });
+        } catch(e) { console.error("Pi SDK Init Error"); }
 
-        // تبديل الإضاءة
+        // 1. الفهرس والربط بالمحتوى
+        function toggleLib(show) {
+            document.getElementById('lib-ui').style.display = show ? 'block' : 'none';
+        }
+
+        function updateContent(name, text) {
+            document.getElementById('s-name').innerText = name;
+            document.getElementById('s-content').innerText = text;
+            toggleLib(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 2. نظام الحفظ (📌)
+        function savePlace() {
+            const currentData = {
+                title: document.getElementById('s-name').innerText,
+                body: document.getElementById('s-content').innerText
+            };
+            if(currentData.title === "مرحباً بك") {
+                alert("برجاء اختيار محتوى أولاً لحفظه.");
+                return;
+            }
+            localStorage.setItem('norak_bookmark', JSON.stringify(currentData));
+            alert("تم حفظ مكانك في تطبيق نورك بنجاح 📌");
+        }
+
+        // 3. زرار العودة (🏠)
+        function goBack() {
+            const saved = JSON.parse(localStorage.getItem('norak_bookmark'));
+            if(saved) {
+                document.getElementById('s-name').innerText = saved.title;
+                document.getElementById('s-content').innerText = saved.body;
+            } else {
+                alert("لا يوجد مكان محفوظ للعودة إليه.");
+            }
+        }
+
+        // 4. الوضع الليلي (☀️/🌙)
         function toggleMode() {
-            const b = document.body;
-            const t = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            b.setAttribute('data-theme', t);
-            localStorage.setItem('t', t);
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('norak_theme', newTheme);
         }
 
-        // التحكم في الفهرس
-        function toggleLib() {
-            const lib = document.getElementById('library');
-            lib.style.display = lib.style.display === 'block' ? 'none' : 'block';
-        }
-
-        // تحميل المحتوى
-        function loadContent(n, c) {
-            document.getElementById('s-name').innerText = n;
-            document.getElementById('s-content').innerText = c;
-            toggleLib();
-        }
-
-        // حفظ العلامة
-        function saveB() {
-            const d = { n: document.getElementById('s-name').innerText, c: document.getElementById('s-content').innerText };
-            localStorage.setItem('save_norak', JSON.stringify(d));
-            alert("تم الحفظ بنجاح 📌");
-        }
-
-        // كود الدفع (تم إصلاحه ليعمل مباشرة)
-        async function startPay() {
+        // 5. كود الدفع الرسمي (خالي من الكلمات غير المهنية)
+        async function payWithPi() {
             try {
-                const auth = await Pi.authenticate(['payments'], (p) => { console.log(p); });
+                const auth = await Pi.authenticate(['payments'], (payment) => {
+                    console.log("Incomplete payment found", payment);
+                });
+
                 if (auth) {
-                    Pi.createPayment({
+                    await Pi.createPayment({
                         amount: 0.1,
                         memo: "Support Norak App Development",
                         metadata: { orderId: "n_" + Date.now() }
                     }, {
-                        onReadyForServerApproval: (id) => Pi.approvePayment(id),
-                        onReadyForServerCompletion: (id, tx) => Pi.completePayment(id, tx),
-                        onComplete: (id) => alert("شكراً لدعمك"),
-                        onError: (err) => alert("خطأ في الدفع")
+                        onReadyForServerApproval: (paymentId) => Pi.approvePayment(paymentId),
+                        onReadyForServerCompletion: (paymentId, txid) => Pi.completePayment(paymentId, txid),
+                        onComplete: (paymentId) => alert("تمت العملية بنجاح. شكراً لدعمكم تطبيق نورك."),
+                        onError: (error) => alert("تعذر إتمام الدفع، يرجى المحاولة لاحقاً."),
+                        onCancel: (paymentId) => console.log("Payment Cancelled")
                     });
                 }
             } catch (e) {
-                alert("افتحي التطبيق من داخل Pi Browser");
+                alert("يرجى فتح التطبيق داخل Pi Browser لتفعيل ميزة التبرع.");
             }
         }
 
-        // استرجاع الإعدادات
+        // تحميل الإعدادات عند البدء
         window.onload = () => {
-            const st = localStorage.getItem('t');
-            if(st) document.body.setAttribute('data-theme', st);
-            const sv = JSON.parse(localStorage.getItem('save_norak'));
-            if(sv) {
-                document.getElementById('s-name').innerText = sv.n;
-                document.getElementById('s-content').innerText = sv.c;
+            // استرجاع الثيم
+            const savedTheme = localStorage.getItem('norak_theme');
+            if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
+            
+            // محاولة استرجاع آخر مكان
+            const saved = JSON.parse(localStorage.getItem('norak_bookmark'));
+            if(saved) {
+                document.getElementById('s-name').innerText = saved.title;
+                document.getElementById('s-content').innerText = saved.body;
             }
         };
     </script>

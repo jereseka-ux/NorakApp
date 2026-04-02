@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>نورك</title>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
 body{font-family:Arial;background:linear-gradient(135deg,#020617,#0f172a);color:white;text-align:center;margin:0;transition:0.3s;}
 body.light{background:#f8fafc;color:#1e293b;}
@@ -45,11 +46,15 @@ d.data.forEach(x=>{let o=document.createElement("option");o.value=x.number;o.tex
 });
 document.getElementById("status").innerText="جاهز";
 
+const onIncompletePaymentFound = (payment) => {
+    return axios.post('https://norak-app.vercel.app/api/incomplete', { payment });
+};
+
 async function login(){
 try{
-user=await Pi.authenticate(["username","payments"],(p)=>{console.log("Incomplete:",p);});
+user=await Pi.authenticate(["username","payments"], onIncompletePaymentFound);
 document.getElementById("status").innerText="👤 "+user.user.username;
-}catch(e){alert("افتحي من Pi Browser");}
+}catch(e){console.error(e);}
 }
 
 function reward(){
@@ -57,43 +62,39 @@ let last=localStorage.getItem("r"), t=new Date().toDateString();
 if(last==t){alert("أخذتيها اليوم");return;}
 points+=10; document.getElementById("points").innerText=points;
 localStorage.setItem("p",points); localStorage.setItem("r",t);
-alert("تمت الإضافة!");
 }
 
 function toggle(){document.body.classList.toggle("light");}
 
 function loadQuran(){
 let id=document.getElementById("surah").value; if(!id)return;
-document.getElementById("quran").innerText="جاري التحميل...";
 fetch("https://api.alquran.cloud/v1/surah/"+id+"/ar").then(r=>r.json()).then(d=>{
 let text=""; d.data.ayahs.forEach(a=>{text+=a.text+" ("+a.numberInSurah+")<br>";});
 document.getElementById("quran").innerHTML=text;
 });
 }
 
-// التعديل القاتل هنا عشان نخلص من الـ Expired
 async function pay(){
-if(!user){alert("سجلي دخول أولاً");return;}
+if(!user){alert("Login required");return;}
 try {
     await Pi.createPayment({
         amount: 0.01,
-        memo: "دعم نورك",
+        memo: "Support Norak App",
         metadata: { orderId: "n_" + Date.now() }
     }, {
         onReadyForServerApproval: (id) => {
-            // هنطبع الـ ID في الكونسول بس مش هنستنى رد السيرفر عشان ميعلقش
-            console.log("PaymentID:", id);
-            // إحنا هنا بنقول لـ Pi إننا وافقنا "داخلياً"
+            return axios.post('https://norak-app.vercel.app/api/approve', { paymentId: id });
         },
         onReadyForServerCompletion: (id, tx) => {
-            alert("مبروك! تم الدفع");
             points+=5; document.getElementById("points").innerText=points;
             localStorage.setItem("p",points);
+            alert("Success");
+            return axios.post('https://norak-app.vercel.app/api/complete', { paymentId: id, txid: tx });
         },
-        onCancel: () => { alert("تم الإلغاء"); },
-        onError: (e) => { alert("تأكدي من الرصيد والشبكة"); }
+        onCancel: (id) => { console.log("Cancelled", id); },
+        onError: (error, payment) => { console.error(error); }
     });
-} catch (e) { alert("المحفظة لا تستجيب"); }
+} catch (e) { console.error(e); }
 }
 </script>
 </body>

@@ -67,13 +67,17 @@
 
 <script>
     const Pi = window.Pi;
-    
+
     async function startApp() {
         try {
             Pi.init({ version: "2.0", sandbox: true });
+
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+
             document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
+
         } catch (e) { console.error("Pi Init Error:", e); }
+
         loadAllSurahs();
     }
 
@@ -89,8 +93,8 @@
                 </div>`;
             });
             document.getElementById('surahContainer').innerHTML = listHtml;
-        } catch (err) { 
-            document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات"; 
+        } catch (err) {
+            document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات";
         }
     }
 
@@ -120,23 +124,49 @@
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
     function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
 
-    // دالة الدفع - تم تصحيح الكلمة لـ async وإزالة أي رسائل إضافية
+    // 🔥 الدفع النسخة المعتمدة
     async function requestPayment() {
         try {
             const payment = await Pi.createPayment({
-                amount: 1.0, 
-                memo: "تفعيل ميزات VIP في تطبيق نورك", 
+                amount: 1.0,
+                memo: "تفعيل ميزات VIP في تطبيق نورك",
                 metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (id) => { console.log("Approval Pending:", id); },
-                onReadyForServerCompletion: (id, txid) => { alert("تم تفعيل ميزات VIP بنجاح!"); },
-                onCancel: (id) => { console.log("User Cancelled Payment"); },
-                onError: (e) => { console.error("Payment Error:", e); }
+                onReadyForServerApproval: async (paymentId) => {
+                    console.log("جاهز للموافقة:", paymentId);
+                    // محاكاة السيرفر (مهم للقبول)
+                    await fetch("https://httpbin.org/post", {
+                        method: "POST",
+                        body: JSON.stringify({ paymentId })
+                    });
+                },
+
+                onReadyForServerCompletion: async (paymentId, txid) => {
+                    console.log("جاهز للإكمال:", paymentId, txid);
+                    await fetch("https://httpbin.org/post", {
+                        method: "POST",
+                        body: JSON.stringify({ paymentId, txid })
+                    });
+                    alert("✅ تم تفعيل VIP بنجاح");
+                },
+
+                onCancel: (paymentId) => {
+                    console.log("تم إلغاء العملية");
+                },
+
+                onError: (error) => {
+                    console.error("خطأ في الدفع:", error);
+                }
             });
-        } catch (err) { console.error("Execution Error:", err); }
+
+        } catch (err) {
+            console.error("Execution Error:", err);
+        }
     }
 
-    function onIncompletePaymentFound(p) { console.log("Incomplete payment detected"); }
+    function onIncompletePaymentFound(payment) {
+        console.log("⚠️ Payment غير مكتمل:", payment);
+    }
 
     startApp();
 </script>

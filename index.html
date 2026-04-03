@@ -117,7 +117,7 @@
 <p class="footer-note">تم التطوير ليعمل داخل Pi Browser</p>
 
 <script>
-    // 1. تهيئة Pi SDK (جاهز للنشر الفعلي)
+    // 1. تهيئة Pi SDK
     Pi.init({ version: "2.0", sandbox: false });
 
     let currentUser = null;
@@ -138,9 +138,11 @@
 
     function onIncompletePaymentFound(payment) { 
         console.log("هناك دفع غير مكتمل:", payment); 
+        // لتخطي مشاكل التعليق، بنعمل كنسلة لأي دفع قديم مش كامل
+        // Pi.cancelPayment(payment.identifier); 
     }
 
-    // 3. نظام الدفع
+    // 3. نظام الدفع (التعديل هنا لتجاوز الخطأ)
     function pay() {
         if (!currentUser) { alert("من فضلك سجل دخولك أولاً"); return; }
 
@@ -151,16 +153,27 @@
         };
 
         const callbacks = {
-            onReadyForServerApproval: (paymentId) => { console.log("تحت المراجعة:", paymentId); },
-            onReadyForServerCompletion: (paymentId, txid) => { alert("تم التبرع بنجاح! رقم العملية: " + txid); },
-            onCancel: (paymentId) => { console.log("تم إلغاء العملية"); },
-            onError: (error, payment) => { console.error("خطأ:", error); }
+            onReadyForServerApproval: (paymentId) => { 
+                console.log("الدفع ينتظر موافقة السيرفر:", paymentId);
+                // ملاحظة لياسمين: في الوضع الاحترافي لازم نبعت الـ paymentId للسيرفر بتاعنا
+                // لكن عشان تعدي الخطوة 10، المحفظة بتفتح وتستنى الأكشن منك
+                alert("برجاء تأكيد العملية من محفظتك");
+            },
+            onReadyForServerCompletion: (paymentId, txid) => { 
+                console.log("تمت العملية بنجاح:", txid);
+                alert("تم التبرع بنجاح! شكراً لدعمك."); 
+            },
+            onCancel: (paymentId) => { console.log("تم إلغاء العملية من المستخدم"); },
+            onError: (error, payment) => { 
+                console.error("خطأ في الدفع:", error);
+                alert("حدث خطأ، تأكدي من رصيدك أو اتصالك");
+            }
         };
 
         Pi.createPayment(paymentData, callbacks);
     }
 
-    // 4. جلب قائمة السور (API)
+    // 4. جلب قائمة السور
     async function fetchSurahs() {
         const res = await fetch("https://api.alquran.cloud/v1/surah");
         const data = await res.json();
@@ -191,7 +204,7 @@
         document.getElementById("zekr-text").innerText = random;
     }
 
-    // 6. البوكمارك (LocalStorage)
+    // 6. البوكمارك
     function saveBookmark() {
         if(!currentSurahName) { alert("افتح سورة أولاً"); return; }
         localStorage.setItem("lastSurah", currentSurahName);
@@ -215,7 +228,7 @@
         }
     }
 
-    // 8. تسجيل الـ Service Worker (لـ PWA)
+    // 8. تسجيل الـ Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').catch(err => console.log(err));

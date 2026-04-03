@@ -1,96 +1,166 @@
-<!DOCTYPE html><html lang="ar">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NorakApp</title>  <!-- Manifest -->  <link rel="manifest" href="manifest.json">  <!-- Pi SDK -->  <script src="https://sdk.minepi.com/pi-sdk.js"></script>  <script>
-    Pi.init({ version: "2.0" });
-  </script>  <style>
-    body {
-      font-family: Arial;
-      background: #0a0a0a;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      border: none;
-      border-radius: 10px;
-      background: #f4c542;
-      color: black;
-      font-size: 16px;
-      cursor: pointer;
-    }
+<title>NorakApp</title>
 
-    .card {
-      background: #1a1a1a;
-      padding: 15px;
-      border-radius: 15px;
-      margin-top: 20px;
-    }
-  </style></head><body>  <h1>📖 NorakApp</h1>
-  <p>تطبيق القرآن والأذكار مع دعم الدفع عبر Pi</p>  <!-- Login Button --><button onclick="login()">تسجيل الدخول بـ Pi</button>
+<!-- Pi SDK -->
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  <!-- Payment Button --><button onclick="pay()">تبرع عبر Pi</button>
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0d0d0d;
+    color: white;
+    text-align: center;
+}
 
-  <div class="card">
-    <h2>📚 المحتوى</h2>
-    <p>✔ القرآن الكريم كامل</p>
-    <p>✔ أذكار الصباح والمساء</p>
-    <p>✔ حفظ العلامات (Bookmark)</p>
-  </div>  <script>
-    let currentUser = null;
+header {
+    padding: 20px;
+    font-size: 22px;
+    font-weight: bold;
+}
 
-    async function login() {
-      try {
-        const scopes = ['username', 'payments'];
-        const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-        currentUser = auth.user;
-        alert("تم تسجيل الدخول: " + currentUser.username);
-      } catch (err) {
-        console.error(err);
+button {
+    background: gold;
+    border: none;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    width: 80%;
+}
+
+.card {
+    background: #1c1c1c;
+    margin: 15px;
+    padding: 20px;
+    border-radius: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>📖 NorakApp</header>
+
+<!-- تسجيل -->
+<button onclick="login()">🔐 تسجيل دخول Pi</button>
+
+<!-- دفع -->
+<button onclick="pay()">💰 تبرع بـ Pi</button>
+
+<div class="card">
+<h2>📚 المحتوى</h2>
+<p>✔ القرآن كامل</p>
+<p>✔ الأذكار</p>
+<p>✔ المفضلة</p>
+</div>
+
+<!-- القرآن -->
+<div class="card">
+<h2>📖 القرآن</h2>
+
+<select id="surahSelect"></select>
+<button onclick="loadSurah()">عرض السورة</button>
+
+<p id="quran"></p>
+</div>
+
+<!-- الأذكار -->
+<div class="card">
+<h2>📿 الأذكار</h2>
+
+<p id="zekr">سبحان الله - الحمد لله - الله أكبر</p>
+<button onclick="nextZekr()">ذكر جديد</button>
+
+</div>
+
+<!-- البوكمارك -->
+<div class="card">
+<h2>🔖 Bookmark</h2>
+
+<button onclick="saveBookmark()">حفظ</button>
+<button onclick="showBookmark()">عرض</button>
+
+<p id="bookmark"></p>
+</div>
+
+<script>
+// ================= PI INIT =================
+Pi.init({
+    version: "2.0",
+    sandbox: true   // مهم جداً لخطوة 10
+});
+
+let currentUser = null;
+
+// ================= LOGIN =================
+async function login() {
+    try {
+        const scopes = ['username'];
+        currentUser = await Pi.authenticate(scopes);
+        alert("تم تسجيل الدخول: " + currentUser.user.username);
+    } catch (e) {
         alert("فشل تسجيل الدخول");
-      }
     }
+}
 
-    function onIncompletePaymentFound(payment) {
-      console.log("Incomplete payment:", payment);
-    }
+// ================= PAYMENT =================
+function pay() {
 
-    async function pay() {
-      if (!currentUser) {
+    if (!currentUser) {
         alert("سجل الدخول الأول");
         return;
-      }
-
-      try {
-        const payment = {
-          amount: 1,
-          memo: "Support NorakApp",
-          metadata: { type: "donation" }
-        };
-
-        const callbacks = {
-          onReadyForServerApproval: function(paymentId) {
-            console.log("Ready for approval", paymentId);
-          },
-          onReadyForServerCompletion: function(paymentId, txid) {
-            console.log("Ready for completion", paymentId, txid);
-          },
-          onCancel: function(paymentId) {
-            console.log("Payment cancelled", paymentId);
-          },
-          onError: function(error, payment) {
-            console.error(error);
-          }
-        };
-
-        Pi.createPayment(payment, callbacks);
-      } catch (err) {
-        console.error(err);
-      }
     }
-  </script></body>
-</html>
+
+    const payment = {
+        amount: 1,
+        memo: "Support NorakApp",
+        metadata: { type: "donation" }
+    };
+
+    const callbacks = {
+
+        onReadyForServerApproval: function(paymentId) {
+            console.log("approval", paymentId);
+
+            // fake server approval (sandbox)
+            setTimeout(() => {
+                console.log("approved");
+            }, 1000);
+        },
+
+        onReadyForServerCompletion: function(paymentId, txid) {
+            console.log("complete", txid);
+        },
+
+        onCancel: function() {
+            alert("تم إلغاء الدفع");
+        },
+
+        onError: function(err) {
+            console.error(err);
+        }
+    };
+
+    Pi.createPayment(payment, callbacks);
+}
+
+// ================= LOAD SURAHS =================
+let surahs = [];
+
+async function loadSurahsList() {
+    const res = await fetch("https://api.alquran.cloud/v1/surah");
+    const data = await res.json();
+
+    surahs = data.data;
+
+    const select = document.getElementById("surahSelect");
+
+    surahs.forEach(s => {
+        let option = document.createElement("option");
+        option.value

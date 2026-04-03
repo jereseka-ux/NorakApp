@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق نورك - Norak</title>
-    <link rel="manifest" href="/public/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #bb86fc; --gold: #ffd700; }
@@ -31,12 +31,10 @@
 <div class="container">
     <div class="user-card">
         <img src="logo.png" alt="Norak Logo" class="logo">
-        <div id="userName" class="welcome-text">أهلاً بك في تطبيق نورك</div>
+        <div id="userName" class="welcome-text">مرحباً بك في تطبيق نورك</div>
         <small id="status" style="color:var(--gold)">نورك متصل بالشبكة ✅</small>
     </div>
-
     <button class="btn-vip" onclick="requestPayment()">تفعيل ميزات VIP بـ 1 Pi</button>
-
     <div class="tools">
         <div class="tool-box">
             <span id="tally" class="count-num">0</span>
@@ -51,7 +49,6 @@
             <button class="btn-sm" style="width:100%; margin-top:5px;" onclick="toggleDark()">تغيير الثيم 🌓</button>
         </div>
     </div>
-
     <div class="main-content">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h3 id="title">فهرس السور</h3>
@@ -67,19 +64,14 @@
 
 <script>
     const Pi = window.Pi;
-
     async function startApp() {
         try {
-            // التعديل 2: تهيئة الـ SDK للربط الحقيقي مع Pi Browser
-            Pi.init({ version: "2.0", sandbox: false });
+            Pi.init({ version: "2.0", sandbox: true });
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
             document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
-        } catch (e) {
-            console.error("SDK Init failed", e);
-        }
+        } catch (e) { console.error(e); }
         loadAllSurahs();
     }
-
     async function loadAllSurahs() {
         try {
             const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -92,58 +84,43 @@
                 </div>`;
             });
             document.getElementById('surahContainer').innerHTML = listHtml;
-        } catch (err) { document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات."; }
+        } catch (err) { document.getElementById('surahContainer').innerText = "خطأ في التحميل"; }
     }
-
     async function openSurah(id, name) {
         document.getElementById('surahContainer').style.display = 'none';
         document.getElementById('readingView').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('title').innerText = name;
-        document.getElementById('quranContent').innerText = "جاري تحميل الآيات...";
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
             const data = await res.json();
             document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(' ');
             window.scrollTo(0,0);
-        } catch (e) { alert("تعذر تحميل السورة."); }
+        } catch (e) { alert("تعذر التحميل"); }
     }
-
     function backToMenu() {
         document.getElementById('surahContainer').style.display = 'block';
         document.getElementById('readingView').style.display = 'none';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('title').innerText = "فهرس السور";
     }
-
     function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
     function resetTasbih() { document.getElementById('tally').innerText = 0; }
     function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
-
-    // التعديل 3: دالة الدفع "الحقيقية" والمقفولة صح لفتح المحفظة
     async function requestPayment() {
         try {
             const payment = await Pi.createPayment({
-                amount: 1.0,
-                memo: "تفعيل ميزات VIP في تطبيق نورك",
-                metadata: { orderId: "norak_" + Date.now() }
+                amount: 1.0, memo: "تفعيل VIP", metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (paymentId) => { console.log("Waiting for approval"); },
-                onReadyForServerCompletion: (paymentId, txid) => { alert("تم تفعيل ميزات VIP بنجاح!"); },
-                onCancel: (paymentId) => { console.log("Cancelled"); },
-                onError: (error) => { 
-                    console.error(error);
-                    alert("تأكدي من توثيق الدومين في Pi Developer Portal أولاً.");
-                }
+                onReadyForServerApproval: (id) => { console.log(id); },
+                onReadyForServerCompletion: (id, txid) => { alert("تم التفعيل!"); },
+                onCancel: (id) => { },
+                onError: (e) => { alert("تأكدي من توثيق الدومين"); }
             });
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { }
     }
-
-    function onIncompletePaymentFound(payment) { console.log("Pending payment", payment); }
-
+    function onIncompletePaymentFound(p) { }
     startApp();
 </script>
 </body>

@@ -31,11 +31,11 @@
 <div class="container">
     <div class="user-card">
         <img src="logo.png" alt="Norak Logo" class="logo">
-        <div id="userName" class="welcome-text">جاري الربط بشبكة Pi...</div>
+        <div id="userName" class="welcome-text">أهلاً بك في تطبيق نورك</div>
         <small id="status" style="color:var(--gold)">نورك متصل بالشبكة ✅</small>
     </div>
 
-    <button class="btn-vip" onclick="requestPayment()">دفع Pi 1 للتفعيل</button>
+    <button class="btn-vip" onclick="requestPayment()">تفعيل ميزات VIP بـ 1 Pi</button>
 
     <div class="tools">
         <div class="tool-box">
@@ -46,20 +46,19 @@
             </div>
         </div>
         <div class="tool-box">
-            <div style="display:flex; flex-direction:column; gap:5px;">
-                <button class="btn-sm" onclick="toggleDark()">تبديل المظهر 🌙</button>
-                <button class="btn-sm" onclick="saveBookmark()">حفظ التطبيق 🔖</button>
-            </div>
+            <label style="font-size: 0.8rem;">حجم الخط</label>
+            <input type="range" min="18" max="45" value="24" style="width:100%" oninput="updateFont(this.value)">
+            <button class="btn-sm" style="width:100%; margin-top:5px;" onclick="toggleDark()">تغيير الثيم 🌓</button>
         </div>
     </div>
 
     <div class="main-content">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 id="title">الفهرس الشريف</h3>
+            <h3 id="title">فهرس السور</h3>
             <button id="backBtn" onclick="backToMenu()" style="display:none;" class="btn-sm">عودة للفهرس</button>
         </div>
         <hr style="opacity:0.1">
-        <div id="surahContainer">جاري تحميل المصحف...</div>
+        <div id="surahContainer">جاري تحميل المصحف الشريف...</div>
         <div id="readingView" class="reading-view">
             <div id="quranContent" class="quran-text"></div>
         </div>
@@ -68,18 +67,15 @@
 
 <script>
     const Pi = window.Pi;
-    let username = "ياسمين";
 
-    // التعديل 2: تشغيل الـ SDK بشكل يضمن قبول Vercel والـ Pi Browser
     async function startApp() {
         try {
-            Pi.init({ version: "2.0", sandbox: true }); 
+            // التعديل 2: تهيئة الـ SDK مع وضع الاختبار sandbox
+            Pi.init({ version: "2.0", sandbox: true });
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-            username = auth.user.username;
-            document.getElementById('userName').innerText = `مرحباً بكِ يا ${username}`;
+            document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
         } catch (e) {
-            document.getElementById('userName').innerText = "مرحباً بكِ في تطبيق نورك";
-            console.error("Auth failed", e);
+            console.error("SDK Init failed", e);
         }
         loadAllSurahs();
     }
@@ -91,14 +87,12 @@
             let listHtml = '';
             result.data.forEach(s => {
                 listHtml += `<div class="surah-list-item" onclick="openSurah(${s.number}, '${s.name}')">
-                    <span><strong>${s.number}.</strong> ${s.name}</span>
+                    <span>${s.number}. ${s.name}</span>
                     <small style="color:var(--gold)">${s.numberOfAyahs} آية</small>
                 </div>`;
             });
             document.getElementById('surahContainer').innerHTML = listHtml;
-        } catch (err) { 
-            document.getElementById('surahContainer').innerText = "خطأ في جلب البيانات"; 
-        }
+        } catch (err) { document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات."; }
     }
 
     async function openSurah(id, name) {
@@ -112,35 +106,35 @@
             const data = await res.json();
             document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(' ');
             window.scrollTo(0,0);
-        } catch (e) { alert("خطأ في الاتصال بالمكتبة"); }
+        } catch (e) { alert("تعذر تحميل السورة."); }
     }
 
     function backToMenu() {
         document.getElementById('surahContainer').style.display = 'block';
         document.getElementById('readingView').style.display = 'none';
         document.getElementById('backBtn').style.display = 'none';
-        document.getElementById('title').innerText = "الفهرس الشريف";
+        document.getElementById('title').innerText = "فهرس السور";
     }
 
     function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
     function resetTasbih() { document.getElementById('tally').innerText = 0; }
+    function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
-    function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين ✨'); }
 
-    // التعديل 3: دالة الدفع الاحترافية لفتح المحفظة فوراً
+    // التعديل 3: دالة الدفع "الحقيقية" والموثقة لفتح المحفظة
     async function requestPayment() {
         try {
             const payment = await Pi.createPayment({
                 amount: 1.0,
-                memo: "دعم تطبيق نورك لتطوير المحتوى",
+                memo: "تفعيل حساب VIP في تطبيق نورك",
                 metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (paymentId) => { console.log("Waiting Approval", paymentId); },
-                onReadyForServerCompletion: (paymentId, txid) => { alert("تم الدفع بنجاح 🎉"); },
+                onReadyForServerApproval: (paymentId) => { console.log("Waiting for approval"); },
+                onReadyForServerCompletion: (paymentId, txid) => { alert("تم تفعيل ميزات VIP بنجاح!"); },
                 onCancel: (paymentId) => { console.log("Cancelled"); },
                 onError: (error) => { 
                     console.error(error);
-                    alert("تأكدي من توثيق الدومين في Pi Developer Portal.");
+                    alert("تأكدي من توثيق الدومين في Pi Developer Portal أولاً.");
                 }
             });
         } catch (err) {
@@ -148,7 +142,7 @@
         }
     }
 
-    function onIncompletePaymentFound(payment) { console.log("Pending", payment); }
+    function onIncompletePaymentFound(payment) { console.log("Pending payment", payment); }
 
     startApp();
 </script>

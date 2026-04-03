@@ -1,78 +1,197 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - Norak</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; margin: 0; padding: 0; text-align: center; }
-        .header { background-color: #4a148c; color: white; padding: 20px; font-size: 24px; font-weight: bold; }
-        .container { padding: 20px; }
-        .content-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 20px auto; max-width: 600px; min-height: 300px; }
-        .footer-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-primary { background-color: #4a148c; color: white; }
-        .btn-accent { background-color: #ffa000; color: white; }
-        #library-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; }
-        .menu-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 18px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نورك - Norak</title>
+
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+:root { --primary:#ecc94b; --bg:#1a202c; --card:#2d3748; --text:#fff;}
+.light-mode { --primary:#d69e2e; --bg:#f7fafc; --card:#fff; --text:#2d3748;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);margin:0;padding-bottom:80px;}
+.quran-font{font-family:'Amiri',serif;}
+.nav-card{background:var(--card);border-radius:20px;padding:15px;text-align:center;cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);display:flex;justify-content:space-around;padding:15px;}
+.tab-content{display:none;}
+.active-content{display:block;}
+</style>
 </head>
+
 <body>
 
-    <div class="header">نورك - Norak</div>
+<header style="padding:10px;display:flex;justify-content:space-between;">
+<h2>نورك</h2>
+<button onclick="toggleTheme()">🌙</button>
+</header>
 
-    <div class="container">
-        <div class="content-box">
-            <h2 id="display-title">مرحباً بك</h2>
-            <p id="display-text">يرجى اختيار محتوى من الفهرس للبدء في القراءة.</p>
-        </div>
-    </div>
+<main style="padding:15px;">
 
-    <div id="library-menu">
-        <button class="btn btn-primary" onclick="toggleLibrary(false)">إغلاق الفهرس</button>
-        <h3>الفهرس</h3>
-        <div class="menu-item" onclick="loadContent('سورة الفاتحة', 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2) الرَّحْمَنِ الرَّحِيمِ (3) مَالِكِ يَوْمِ الدِّينِ (4) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (5) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (6) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (7)')">سورة الفاتحة</div>
-        <div class="menu-item" onclick="loadContent('أذكار الصباح', 'أصبحنا وأصبح الملك لله والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير...')">أذكار الصباح</div>
-        <div class="menu-item" onclick="loadContent('آية الكرسي', 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ...')">آية الكرسي</div>
-    </div>
+<button onclick="transferPi()">🔥 تفعيل التطبيق</button>
+<p id="pi-status"></p>
 
-    <div class="footer-nav">
-        <button class="btn btn-primary" onclick="toggleLibrary(true)">الفهرس</button>
-        <button class="btn btn-accent" id="pay-button">تبرع باى</button>
-    </div>
+<div id="quran-tab" class="tab-content active-content">
+<h3>القرآن الكريم</h3>
+<div id="quran-grid"></div>
+</div>
 
-    <script>
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: false });
+<div id="azkar-tab" class="tab-content">
+<h3>الأذكار</h3>
+<button onclick="showZikr('صباح')">أذكار الصباح</button>
+<button onclick="showZikr('مساء')">أذكار المساء</button>
+</div>
 
-        function toggleLibrary(show) {
-            document.getElementById('library-menu').style.display = show ? 'block' : 'none';
-        }
+<div id="tasbih-tab" class="tab-content">
+<h3 id="counter">0</h3>
+<button onclick="countUp()">سبّح</button>
+</div>
 
-        function loadContent(title, text) {
-            document.getElementById('display-title').innerText = title;
-            document.getElementById('display-text').innerText = text;
-            toggleLibrary(false);
-        }
+</main>
 
-        document.getElementById('pay-button').onclick = function() {
-            Pi.authenticate(['payments'], (payment) => {
-                console.log("Payment", payment);
-            }).then((auth) => {
-                Pi.createPayment({
-                    amount: 0.1,
-                    memo: "Support Norak App",
-                    metadata: { orderId: 123 }
-                }, {
-                    onReadyForServerApproval: (id) => console.log("Approved", id),
-                    onReadyForServerCompletion: (id, txid) => console.log("Completed", id, txid),
-                    onComplete: (id) => alert("شكراً لك!"),
-                    onError: (error) => console.error(error),
-                    onCancel: (id) => console.log("Cancelled", id)
-                });
-            });
-        };
-    </script>
+<div id="reader-modal" style="display:none;">
+<h3 id="modal-title"></h3>
+<p id="modal-content"></p>
+<button onclick="closeModal()">إغلاق</button>
+</div>
+
+<nav class="bottom-nav">
+<button onclick="switchTab('quran')">قرآن</button>
+<button onclick="switchTab('azkar')">أذكار</button>
+<button onclick="switchTab('tasbih')">مسبحة</button>
+</nav>
+
+<script>
+
+/* =========================
+🔥 Pi Setup + Login
+========================= */
+const Pi = window.Pi;
+Pi.init({ version:"1.5", sandbox:true });
+
+let currentUser = null;
+
+async function loginPi(){
+try{
+currentUser = await Pi.authenticate(['username','payments']);
+console.log(currentUser);
+}catch(e){
+console.log(e);
+}
+}
+loginPi();
+
+/* =========================
+🔥 Payment
+========================= */
+async function transferPi(){
+const status=document.getElementById('pi-status');
+
+if(!currentUser){
+status.innerText="اعملي تسجيل دخول من Pi Browser";
+return;
+}
+
+status.innerText="جاري الدفع...";
+
+try{
+await Pi.createPayment({
+amount:1,
+memo:"Norak App",
+metadata:{user:currentUser.username}
+},{
+onReadyForServerApproval:(id)=>console.log("approve",id),
+onReadyForServerCompletion:(id,txid)=>{
+status.innerText="✅ تم الدفع بنجاح";
+},
+onCancel:()=>status.innerText="❌ تم الإلغاء",
+onError:(err)=>status.innerText="⚠️ "+err.message
+});
+}catch(e){
+status.innerText="افتحي من Pi Browser";
+}
+}
+
+/* =========================
+🔥 Quran API
+========================= */
+function loadQuran(){
+const grid=document.getElementById('quran-grid');
+
+for(let i=1;i<=30;i++){
+grid.innerHTML+=`<div class="nav-card" onclick="readJuz(${i})">الجزء ${i}</div>`;
+}
+}
+
+async function readJuz(n){
+document.getElementById('modal-title').innerText="الجزء "+n;
+document.getElementById('modal-content').innerText="جارِ التحميل...";
+document.getElementById('reader-modal').style.display="block";
+
+try{
+const res=await fetch(`https://api.alquran.cloud/v1/juz/${n}/ar.alafasy`);
+const data=await res.json();
+
+let text="";
+data.data.ayahs.forEach(a=>text+=a.text+" ");
+
+document.getElementById('modal-content').innerText=text;
+localStorage.setItem("lastJuz",n);
+
+}catch(e){
+document.getElementById('modal-content').innerText="خطأ في التحميل";
+}
+}
+
+/* =========================
+🔥 Azkar
+========================= */
+function showZikr(type){
+let text="";
+
+if(type==="صباح"){
+text="اللهم بك أصبحنا وبك أمسينا...";
+}else{
+text="أمسينا وأمسى الملك لله...";
+}
+
+document.getElementById('modal-title').innerText="الأذكار";
+document.getElementById('modal-content').innerText=text;
+document.getElementById('reader-modal').style.display="block";
+}
+
+function closeModal(){
+document.getElementById('reader-modal').style.display="none";
+}
+
+/* =========================
+🔥 Tasbih
+========================= */
+let count=0;
+function countUp(){
+count++;
+document.getElementById('counter').innerText=count;
+}
+
+/* =========================
+🔥 UI
+========================= */
+function toggleTheme(){
+document.body.classList.toggle('light-mode');
+}
+
+function switchTab(tab){
+document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active-content'));
+document.getElementById(tab+'-tab').classList.add('active-content');
+}
+
+window.onload=loadQuran;
+
+</script>
+
 </body>
 </html>

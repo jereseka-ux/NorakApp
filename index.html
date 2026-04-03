@@ -1,166 +1,75 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Norak App</title>
 
-<title>NorakApp</title>
+  <!-- Theme & Manifest -->
+  <meta name="theme-color" content="#22c55e">
+  <link rel="manifest" href="manifest.json">
 
-<!-- Pi SDK -->
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #0d0d0d;
-    color: white;
-    text-align: center;
-}
-
-header {
-    padding: 20px;
-    font-size: 22px;
-    font-weight: bold;
-}
-
-button {
-    background: gold;
-    border: none;
-    padding: 15px;
-    margin: 10px;
-    border-radius: 10px;
-    font-size: 16px;
-    width: 80%;
-}
-
-.card {
-    background: #1c1c1c;
-    margin: 15px;
-    padding: 20px;
-    border-radius: 15px;
-}
-</style>
+  <!-- CSS أساسي -->
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f3f4f6; color: #111827; margin: 0; padding: 0; }
+    header { background-color: #22c55e; color: #fff; padding: 15px; text-align: center; font-size: 1.5rem; }
+    main { padding: 10px; }
+    button { padding: 10px 15px; margin: 5px; background-color: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background-color: #16a34a; }
+  </style>
 </head>
-
 <body>
 
-<header>📖 NorakApp</header>
+<header>Norak App</header>
 
-<!-- تسجيل -->
-<button onclick="login()">🔐 تسجيل دخول Pi</button>
+<main>
+  <h2>القرآن الكريم - 30 جزء</h2>
+  <p>هنا محتوى التطبيق + المكتبة الخارجية + الأدعية والأذكار والبوكمارك.</p>
 
-<!-- دفع -->
-<button onclick="pay()">💰 تبرع بـ Pi</button>
-
-<div class="card">
-<h2>📚 المحتوى</h2>
-<p>✔ القرآن كامل</p>
-<p>✔ الأذكار</p>
-<p>✔ المفضلة</p>
-</div>
-
-<!-- القرآن -->
-<div class="card">
-<h2>📖 القرآن</h2>
-
-<select id="surahSelect"></select>
-<button onclick="loadSurah()">عرض السورة</button>
-
-<p id="quran"></p>
-</div>
-
-<!-- الأذكار -->
-<div class="card">
-<h2>📿 الأذكار</h2>
-
-<p id="zekr">سبحان الله - الحمد لله - الله أكبر</p>
-<button onclick="nextZekr()">ذكر جديد</button>
-
-</div>
-
-<!-- البوكمارك -->
-<div class="card">
-<h2>🔖 Bookmark</h2>
-
-<button onclick="saveBookmark()">حفظ</button>
-<button onclick="showBookmark()">عرض</button>
-
-<p id="bookmark"></p>
-</div>
+  <button onclick="toggleDarkMode()">تغيير الإضاءة</button>
+  <button onclick="showBookmarks()">البوكمارك</button>
+  <button onclick="initPayment()">ادفع الآن</button>
+</main>
 
 <script>
-// ================= PI INIT =================
-Pi.init({
-    version: "2.0",
-    sandbox: true   // مهم جداً لخطوة 10
-});
+  // === الوضع الليلي / النهاري ===
+  function toggleDarkMode() {
+    document.body.style.backgroundColor =
+      document.body.style.backgroundColor === 'black' ? '#f3f4f6' : 'black';
+    document.body.style.color =
+      document.body.style.color === 'white' ? '#111827' : 'white';
+  }
 
-let currentUser = null;
+  // === البوكمارك ===
+  function showBookmarks() {
+    alert('هذه البوكمارك الخاصة بك!');
+  }
 
-// ================= LOGIN =================
-async function login() {
-    try {
-        const scopes = ['username'];
-        currentUser = await Pi.authenticate(scopes);
-        alert("تم تسجيل الدخول: " + currentUser.user.username);
-    } catch (e) {
-        alert("فشل تسجيل الدخول");
+  // === ربط Pi Network الدفع ===
+  function initPayment() {
+    if(window.Pi) {
+      window.Pi.requestPayment({
+        amount: 0.1, // مثال
+        memo: "دفع لمحتوى Norak App"
+      }).then(tx => {
+        alert("تم الدفع بنجاح! TxID: " + tx.transactionId);
+      }).catch(err => {
+        alert("فشل الدفع: " + err.message);
+      });
+    } else {
+      alert("Pi Network غير متاح. افتح التطبيق من Pi Browser.");
     }
-}
+  }
 
-// ================= PAYMENT =================
-function pay() {
+  // === Service Worker PWA ===
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker مسجل: ', reg))
+        .catch(err => console.log('فشل تسجيل SW: ', err));
+    });
+  }
+</script>
 
-    if (!currentUser) {
-        alert("سجل الدخول الأول");
-        return;
-    }
-
-    const payment = {
-        amount: 1,
-        memo: "Support NorakApp",
-        metadata: { type: "donation" }
-    };
-
-    const callbacks = {
-
-        onReadyForServerApproval: function(paymentId) {
-            console.log("approval", paymentId);
-
-            // fake server approval (sandbox)
-            setTimeout(() => {
-                console.log("approved");
-            }, 1000);
-        },
-
-        onReadyForServerCompletion: function(paymentId, txid) {
-            console.log("complete", txid);
-        },
-
-        onCancel: function() {
-            alert("تم إلغاء الدفع");
-        },
-
-        onError: function(err) {
-            console.error(err);
-        }
-    };
-
-    Pi.createPayment(payment, callbacks);
-}
-
-// ================= LOAD SURAHS =================
-let surahs = [];
-
-async function loadSurahsList() {
-    const res = await fetch("https://api.alquran.cloud/v1/surah");
-    const data = await res.json();
-
-    surahs = data.data;
-
-    const select = document.getElementById("surahSelect");
-
-    surahs.forEach(s => {
-        let option = document.createElement("option");
-        option.value
+</body>
+</html>

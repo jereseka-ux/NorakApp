@@ -66,99 +66,81 @@
 </div>
 
 <script>
-const Pi = window.Pi;
+    const Pi = window.Pi;
 
-async function startApp() {
-    try {
-        Pi.init({ version: "2.0", sandbox: true });
-        const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-        document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
-    } catch (e) { console.error("Pi Init Error:", e); }
-    loadAllSurahs();
-}
-
-// تحميل السور
-async function loadAllSurahs() {
-    try {
-        const res = await fetch('https://api.alquran.cloud/v1/surah');
-        const result = await res.json();
-        let listHtml = '';
-        result.data.forEach(s => {
-            listHtml += `<div class="surah-list-item" onclick="openSurah(${s.number}, '${s.name}')">
-                <span>${s.number}. ${s.name}</span>
-                <small style="color:var(--gold)">${s.numberOfAyahs} آية</small>
-            </div>`;
-        });
-        document.getElementById('surahContainer').innerHTML = listHtml;
-    } catch (err) { 
-        document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات"; 
+    async function startApp() {
+        try {
+            Pi.init({ version: "2.0", sandbox: true });
+            const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+            document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
+        } catch (e) { console.error("Pi Init Error:", e); }
+        loadAllSurahs();
     }
-}
 
-// فتح السورة
-async function openSurah(id, name) {
-    document.getElementById('surahContainer').style.display = 'none';
-    document.getElementById('readingView').style.display = 'block';
-    document.getElementById('backBtn').style.display = 'block';
-    document.getElementById('title').innerText = name;
-    try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
-        const data = await res.json();
-        document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(' ');
-        window.scrollTo(0,0);
-    } catch (e) { alert("تعذر تحميل السورة"); }
-}
+    async function loadAllSurahs() {
+        try {
+            const res = await fetch('https://api.alquran.cloud/v1/surah');
+            const result = await res.json();
+            let listHtml = '';
+            result.data.forEach(s => {
+                listHtml += `<div class="surah-list-item" onclick="openSurah(${s.number}, '${s.name}')">
+                    <span>${s.number}. ${s.name}</span>
+                    <small style="color:var(--gold)">${s.numberOfAyahs} آية</small>
+                </div>`;
+            });
+            document.getElementById('surahContainer').innerHTML = listHtml;
+        } catch (err) { 
+            document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات"; 
+        }
+    }
 
-function backToMenu() {
-    document.getElementById('surahContainer').style.display = 'block';
-    document.getElementById('readingView').style.display = 'none';
-    document.getElementById('backBtn').style.display = 'none';
-    document.getElementById('title').innerText = "فهرس السور";
-}
+    async function openSurah(id, name) {
+        document.getElementById('surahContainer').style.display = 'none';
+        document.getElementById('readingView').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('title').innerText = name;
+        try {
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
+            const data = await res.json();
+            document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(' ');
+            window.scrollTo(0,0);
+        } catch (e) { alert("تعذر تحميل السورة"); }
+    }
 
-function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
-function resetTasbih() { document.getElementById('tally').innerText = 0; }
-function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
-function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
-function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
+    function backToMenu() {
+        document.getElementById('surahContainer').style.display = 'block';
+        document.getElementById('readingView').style.display = 'none';
+        document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('title').innerText = "فهرس السور";
+    }
 
-// 🔥 الدفع + ربط Vercel Backend
-async function requestPayment() {
-    if (!Pi) { alert("فتح التطبيق من Pi Browser فقط"); return; }
+    function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
+    function resetTasbih() { document.getElementById('tally').innerText = 0; }
+    function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
+    function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
+    function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
 
-    try {
-        const payment = await Pi.createPayment({
-            amount: 1.0, 
-            memo: "تفعيل ميزات VIP في تطبيق نورك", 
-            metadata: { orderId: "norak_" + Date.now() }
-        }, {
-            onReadyForServerApproval: async (id) => {
-                // 🔗 backend approval
-                await fetch("/api/payment", {
-                    method:"POST",
-                    headers: { "Content-Type":"application/json" },
-                    body: JSON.stringify({ action:"approve", paymentId:id })
-                });
-                console.log("Approval sent to server:", id);
-            },
-            onReadyForServerCompletion: async (id, txid) => {
-                // 🔗 backend complete
-                await fetch("/api/payment", {
-                    method:"POST",
-                    headers: { "Content-Type":"application/json" },
-                    body: JSON.stringify({ action:"complete", paymentId:id })
-                });
-                alert("✅ تم تفعيل ميزات VIP بنجاح!");
-            },
-            onCancel: (id) => { console.log("User cancelled payment:", id); },
-            onError: (e) => { console.error("Payment error:", e); }
-        });
-    } catch (err) { console.error("Payment execution error:", err); }
-}
+    // دالة الدفع - نسخة نهائية مع console.log للتتبع
+    async function requestPayment() {
+        console.log("زرار الدفع اتضغط");
+        try {
+            const payment = await Pi.createPayment({
+                amount: 1.0,
+                memo: "تفعيل ميزات VIP في تطبيق نورك",
+                metadata: { orderId: "norak_" + Date.now() }
+            }, {
+                onReadyForServerApproval: (id) => { console.log("Approval Pending:", id); },
+                onReadyForServerCompletion: (id, txid) => { alert("تم تفعيل ميزات VIP بنجاح!"); },
+                onCancel: (id) => { console.log("User Cancelled Payment"); },
+                onError: (e) => { console.error("Payment Error:", e); }
+            });
+            console.log("Payment object:", payment);
+        } catch (err) { console.error("Execution Error:", err); }
+    }
 
-function onIncompletePaymentFound(p) { console.log("Incomplete payment detected"); }
+    function onIncompletePaymentFound(p) { console.log("Incomplete payment detected"); }
 
-startApp();
+    startApp();
 </script>
 </body>
 </html>

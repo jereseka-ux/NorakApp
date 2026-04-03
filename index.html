@@ -73,7 +73,7 @@
             Pi.init({ version: "2.0", sandbox: true });
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
             document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
-        } catch (e) { console.error("Pi Init Error:", e); }
+        } catch (e) { console.error("Pi Init Error:", e); alert("تعذر الاتصال بـ Pi Network"); }
         loadAllSurahs();
     }
 
@@ -120,7 +120,7 @@
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
     function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
 
-    // ✅ زر الدفع الذكي مع console.log كامل
+    // ✅ زر الدفع النهائي الذكي مع التحقق من Pi Browser
     async function requestPayment() {
         console.log("زرار الدفع اتضغط");
         if (!Pi || !Pi.createPayment) {
@@ -129,6 +129,13 @@
             return;
         }
         try {
+            // تحقق من المصادقة
+            const auth = await Pi.authenticate(['username','payments']);
+            if(!auth || !auth.user) {
+                alert("تعذر التحقق من الحساب. تأكدي أنك مسجلة ومفعلة في Pi Network");
+                return;
+            }
+            // إنشاء الدفع
             const payment = await Pi.createPayment({
                 amount: 1.0,
                 memo: "تفعيل ميزات VIP في تطبيق نورك",

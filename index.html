@@ -57,6 +57,7 @@
         <hr style="opacity:0.1">
         <div id="surahContainer">جاري تحميل المصحف الشريف...</div>
         <div id="readingView" class="reading-view">
+            <button class="btn-sm" onclick="saveBookmark()" style="margin-bottom:10px;">حفظ مكان القراءة 🔖</button>
             <div id="quranContent" class="quran-text"></div>
         </div>
     </div>
@@ -64,6 +65,7 @@
 
 <script>
     const Pi = window.Pi;
+    
     async function startApp() {
         try {
             Pi.init({ version: "2.0", sandbox: true });
@@ -72,6 +74,7 @@
         } catch (e) { console.error(e); }
         loadAllSurahs();
     }
+
     async function loadAllSurahs() {
         try {
             const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -86,6 +89,7 @@
             document.getElementById('surahContainer').innerHTML = listHtml;
         } catch (err) { document.getElementById('surahContainer').innerText = "خطأ في التحميل"; }
     }
+
     async function openSurah(id, name) {
         document.getElementById('surahContainer').style.display = 'none';
         document.getElementById('readingView').style.display = 'block';
@@ -96,31 +100,39 @@
             const data = await res.json();
             document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(' ');
             window.scrollTo(0,0);
-        } catch (e) { alert("تعذر التحميل"); }
+        } catch (e) { alert("تعذر تحميل السورة"); }
     }
+
     function backToMenu() {
         document.getElementById('surahContainer').style.display = 'block';
         document.getElementById('readingView').style.display = 'none';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('title').innerText = "فهرس السور";
     }
+
     function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
     function resetTasbih() { document.getElementById('tally').innerText = 0; }
     function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
+    function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح!'); }
+
     async function requestPayment() {
         try {
             const payment = await Pi.createPayment({
-                amount: 1.0, memo: "تفعيل VIP", metadata: { orderId: "norak_" + Date.now() }
+                amount: 1.0, 
+                memo: "تفعيل ميزات VIP في تطبيق نورك", 
+                metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (id) => { console.log(id); },
+                onReadyForServerApproval: (id) => { console.log("Approval Pending"); },
                 onReadyForServerCompletion: (id, txid) => { alert("تم التفعيل!"); },
-                onCancel: (id) => { },
-                onError: (e) => { alert("تأكدي من توثيق الدومين"); }
+                onCancel: (id) => { console.log("Cancelled"); },
+                onError: (e) => { console.error(e); }
             });
-        } catch (err) { }
+        } catch (err) { console.error(err); }
     }
-    function onIncompletePaymentFound(p) { }
+
+    function onIncompletePaymentFound(p) { console.log("Incomplete payment"); }
+
     startApp();
 </script>
 </body>

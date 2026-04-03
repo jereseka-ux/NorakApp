@@ -120,9 +120,14 @@
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
     function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
 
-    // دالة الدفع - نسخة نهائية مع console.log للتتبع
+    // ✅ زر الدفع الذكي مع console.log كامل
     async function requestPayment() {
         console.log("زرار الدفع اتضغط");
+        if (!Pi || !Pi.createPayment) {
+            console.error("Pi SDK غير متوفر، افتحي Pi Browser");
+            alert("زر الدفع يعمل فقط في Pi Browser");
+            return;
+        }
         try {
             const payment = await Pi.createPayment({
                 amount: 1.0,
@@ -130,15 +135,15 @@
                 metadata: { orderId: "norak_" + Date.now() }
             }, {
                 onReadyForServerApproval: (id) => { console.log("Approval Pending:", id); },
-                onReadyForServerCompletion: (id, txid) => { alert("تم تفعيل ميزات VIP بنجاح!"); },
-                onCancel: (id) => { console.log("User Cancelled Payment"); },
-                onError: (e) => { console.error("Payment Error:", e); }
+                onReadyForServerCompletion: (id, txid) => { alert("تم تفعيل ميزات VIP بنجاح!"); console.log("Transaction Completed:", txid); },
+                onCancel: (id) => { console.log("User Cancelled Payment"); alert("تم إلغاء الدفع"); },
+                onError: (e) => { console.error("Payment Error:", e); alert("حدث خطأ أثناء الدفع"); }
             });
             console.log("Payment object:", payment);
-        } catch (err) { console.error("Execution Error:", err); }
+        } catch (err) { console.error("Execution Error:", err); alert("حدث خطأ في تنفيذ الدفع"); }
     }
 
-    function onIncompletePaymentFound(p) { console.log("Incomplete payment detected"); }
+    function onIncompletePaymentFound(p) { console.log("Incomplete payment detected:", p); }
 
     startApp();
 </script>

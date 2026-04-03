@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق نورك - Norak</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/public/manifest.json">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #bb86fc; --gold: #ffd700; }
@@ -70,8 +70,8 @@
 
     async function startApp() {
         try {
-            // التعديل 2: تهيئة الـ SDK مع وضع الاختبار sandbox
-            Pi.init({ version: "2.0", sandbox: true });
+            // التعديل 2: تهيئة الـ SDK للربط الحقيقي مع Pi Browser
+            Pi.init({ version: "2.0", sandbox: false });
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
             document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
         } catch (e) {
@@ -121,12 +121,12 @@
     function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
 
-    // التعديل 3: دالة الدفع "الحقيقية" والموثقة لفتح المحفظة
+    // التعديل 3: دالة الدفع "الحقيقية" والمقفولة صح لفتح المحفظة
     async function requestPayment() {
         try {
             const payment = await Pi.createPayment({
                 amount: 1.0,
-                memo: "تفعيل حساب VIP في تطبيق نورك",
+                memo: "تفعيل ميزات VIP في تطبيق نورك",
                 metadata: { orderId: "norak_" + Date.now() }
             }, {
                 onReadyForServerApproval: (paymentId) => { console.log("Waiting for approval"); },

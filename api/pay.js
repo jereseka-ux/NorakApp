@@ -10,8 +10,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
-        // هنا ممكن تضيفي قاعدة بيانات صغيرة أو Google Sheets أو Firebase
-        // لتسجيل الدفع وحالته (approved / completed)
+        // تسجيل الدفع في Console (يمكن تطويره لاحقًا لقواعد بيانات حقيقية)
         console.log(`Payment action: ${action}, Payment ID: ${paymentId}`);
 
         return res.status(200).json({ message: `Payment ${action} registered successfully` });

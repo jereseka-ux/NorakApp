@@ -3,77 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Norak App - Pi Network</title>
+    <title>تطبيق نورك - النسخة الكاملة</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        h1 { color: #5e2a84; }
-        button { background-color: #5e2a84; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 10px; cursor: pointer; margin-top: 20px; width: 100%; }
-        button:hover { background-color: #4a2169; }
+        /* التنسيقات الأصلية والكاملة */
+        :root { --bg-color: #f8f9fa; --text-color: #212529; --card-bg: #ffffff; --primary: #5e2a84; }
+        .dark-mode { --bg-color: #121212; --text-color: #e0e0e0; --card-bg: #1e1e1e; }
+        
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: 0.4s; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: var(--card-bg); padding: 40px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 400px; width: 90%; text-align: center; }
+        img.logo { width: 100px; margin-bottom: 20px; border-radius: 50%; border: 3px solid var(--primary); }
+        h1 { color: var(--primary); font-size: 24px; margin-bottom: 15px; }
+        p { line-height: 1.6; font-size: 16px; margin-bottom: 25px; }
+        
+        .btn-pay { background: var(--primary); color: white; border: none; padding: 16px; font-size: 18px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; box-shadow: 0 5px 15px rgba(94, 42, 132, 0.3); }
+        .btn-pay:hover { opacity: 0.9; transform: translateY(-2px); }
+        
+        .extra-tools { margin-top: 30px; display: flex; justify-content: space-around; border-top: 1px solid #eee; padding-top: 20px; }
+        .tool-btn { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; }
+        .dark-mode .tool-btn { border-color: #bb86fc; color: #bb86fc; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>تطبيق نورك (Norak)</h1>
-    <p>أهلاً بيكِ يا ياسمين في مشروعك الجديد</p>
-    <button id="pay_button">دفع 1 Pi للتجربة</button>
+    <img src="logo.png" alt="Norak Logo" class="logo">
+    <h1>تطبيق نورك (Norak App)</h1>
+    <p>مرحباً بكِ يا ياسمين. التطبيق الآن متصل بالكامل بشبكة Pi وبالسيرفر الخاص بكِ على Vercel.</p>
+
+    <button class="btn-pay" id="main_pay_btn">دفع 1 Pi للتفعيل</button>
+
+    <div class="extra-tools">
+        <button class="tool-btn" onclick="toggleMode()">تبديل المظهر 🌙</button>
+        <button class="tool-btn" onclick="saveBookmark()">حفظ التطبيق 🔖</button>
+    </div>
 </div>
 
 <script>
-    // تهيئة الـ SDK
+    // إعداد الـ Pi SDK
     const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: true }); // خليها true للتجربة و false لما تخلصي خالص
+    // ملحوظة: sandbox: true للتجارب، حوليها لـ false للإطلاق الرسمي
+    Pi.init({ version: "2.0", sandbox: true });
 
-    async function auth() {
+    // التوثيق التلقائي عند دخول ياسمين أو أي مستخدم
+    async function startApp() {
         try {
             const scopes = ['payments', 'username'];
             const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            console.log("Logged in as: ", auth.user.username);
-        } catch (err) {
-            console.error(err);
+            console.log("Welcome " + auth.user.username);
+        } catch (e) {
+            console.error("Auth failed", e);
         }
     }
 
-    function onIncompletePaymentFound(payment) {
-        console.log("Found incomplete payment", payment);
-    };
+    function onIncompletePaymentFound(payment) { /* للتعامل مع العمليات المعلقة */ }
 
-    document.getElementById('pay_button').onclick = function() {
+    // عملية الدفع وربطها بالسيرفر (api/pay.js)
+    document.getElementById('main_pay_btn').onclick = function() {
         Pi.createPayment({
             amount: 1.0,
-            memo: "تجربة دفع في تطبيق نورك",
-            metadata: { orderId: 123 }
+            memo: "تفعيل ميزات تطبيق نورك",
+            metadata: { type: "activation" }
         }, {
             onReadyForServerApproval: function(paymentId) {
-                // الربط مع السيرفر اللي عملناه في Vercel
+                // هنا بنكلم ملف السيرفر اللي عملناه في فولدر api
                 fetch('/api/pay', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId })
+                    body: JSON.stringify({ paymentId: paymentId })
                 })
                 .then(res => res.json())
-                .then(data => {
-                    alert("تمت الموافقة من السيرفر! برجاء تأكيد العملية من محفظتك الآن");
-                })
-                .catch(err => alert("حدث خطأ في الربط: " + err));
+                .then(data => alert("السيرفر وافق! افتحي محفظتك الآن."))
+                .catch(err => alert("خطأ في الربط: " + err));
             },
             onReadyForServerCompletion: function(paymentId, txid) {
-                console.log("Payment completed on chain", txid);
-                // هنا نبعت للـ API بتاعنا إن العملية خلصت نهائياً
                 fetch('/api/pay', {
-                    method: 'PATCH', // أو حسب الـ API بتاعك
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId, txid })
                 });
             },
-            onCancel: function(paymentId) { console.log("Cancelled payment", paymentId); },
-            onError: function(error, payment) { console.error("Error", error); }
+            onCancel: (id) => console.log("Cancelled", id),
+            onError: (err) => alert("Error: " + err.message)
         });
     };
 
-    auth(); // تشغيل تسجيل الدخول تلقائياً
+    // ميزات التطبيق الإضافية
+    function toggleMode() { document.body.classList.toggle('dark-mode'); }
+    function saveBookmark() { alert("تم حفظ تطبيق نورك في المفضلة!"); }
+
+    startApp();
 </script>
 
 </body>

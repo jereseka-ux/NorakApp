@@ -129,7 +129,7 @@
     function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
 
-    // 5. دالة الدفع الاحترافية (تعديل الـ async والـ callbacks)
+    // 5. دالة الدفع الاحترافية
     async function requestPayment() {
         try {
             const payment = await Pi.createPayment({
@@ -137,10 +137,10 @@
                 memo: "دعم تطبيق نورك - تفعيل حساب VIP",
                 metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (paymentId) => { console.log("Approved:", paymentId); },
-                onReadyForServerCompletion: (paymentId, txid) => { console.log("Completed:", paymentId); },
-                onCancel: (paymentId) => { console.log("Cancelled"); },
-                onError: (error) => { console.error("Error:", error); }
+                onReadyForServerApproval: (paymentId) => { alert("تمت الموافقة على الدفع، جاري المعالجة..."); console.log("Approved:", paymentId); },
+                onReadyForServerCompletion: (paymentId, txid) => { alert("تم إتمام الدفع بنجاح 🎉"); console.log("Completed:", paymentId, txid); },
+                onCancel: (paymentId) => { alert("تم إلغاء الدفع"); console.log("Cancelled"); },
+                onError: (error) => { alert("حدث خطأ أثناء الدفع"); console.error("Error:", error); }
             });
         } catch (err) {
             alert("تأكدي من فتح التطبيق من متصفح Pi Browser وربط الـ Wallet.");

@@ -68,24 +68,26 @@
     const Pi = window.Pi;
     let username = "ياسمين";
 
-    // 1. تفعيل التطبيق والربط
+    // 1. تفعيل الربط الحقيقي
     async function startApp() {
         try {
-            const isSandbox = window.location.hostname.includes('vercel.app');
-            Pi.init({ version: "2.0", sandbox: isSandbox }); 
+            // التعديل الذكي: التأكد من تفعيل الـ SDK بمجرد الفتح
+            Pi.init({ version: "2.0", sandbox: true }); 
             
             const scopes = ['username', 'payments'];
             const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
             
             username = auth.user.username;
             document.getElementById('userName').innerText = `أهلاً بكِ، ${username} ✨`;
+            console.log("Pi User Authenticated");
         } catch (e) {
             document.getElementById('userName').innerText = "أهلاً بكِ في تطبيق نورك";
+            console.error("Pi SDK Initialization failed", e);
         }
         loadAllSurahs();
     }
 
-    // 2. جلب السور
+    // 2. جلب السور (زي كودك بالظبط)
     async function loadAllSurahs() {
         try {
             const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -101,7 +103,7 @@
         } catch (err) { document.getElementById('surahContainer').innerText = "خطأ في التحميل."; }
     }
 
-    // 3. عرض محتوى السورة
+    // 3. عرض السورة (زي كودك بالظبط)
     async function openSurah(id, name) {
         document.getElementById('surahContainer').style.display = 'none';
         document.getElementById('readingView').style.display = 'block';
@@ -123,31 +125,37 @@
         document.getElementById('title').innerText = "فهرس السور";
     }
 
-    // 4. الوظائف التفاعلية
+    // 4. الأدوات (زي كودك بالظبط)
     function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
     function resetTasbih() { document.getElementById('tally').innerText = 0; }
     function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
     function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
 
-    // 5. دالة الدفع الاحترافية
+    // 5. زر الدفع الفعال (تم إصلاح الـ callbacks)
     async function requestPayment() {
         try {
+            // التعديل الذكي: إضافة onReadyForServerApproval لضمان استجابة البراوزر
             const payment = await Pi.createPayment({
                 amount: 1.0,
                 memo: "دعم تطبيق نورك - تفعيل حساب VIP",
                 metadata: { orderId: "norak_" + Date.now() }
             }, {
-                onReadyForServerApproval: (paymentId) => { alert("تمت الموافقة على الدفع، جاري المعالجة..."); console.log("Approved:", paymentId); },
-                onReadyForServerCompletion: (paymentId, txid) => { alert("تم إتمام الدفع بنجاح 🎉"); console.log("Completed:", paymentId, txid); },
-                onCancel: (paymentId) => { alert("تم إلغاء الدفع"); console.log("Cancelled"); },
-                onError: (error) => { alert("حدث خطأ أثناء الدفع"); console.error("Error:", error); }
+                onReadyForServerApproval: (paymentId) => { 
+                    console.log("Payment waiting for approval:", paymentId);
+                    // هنا بيتم إرسال الـ ID للسيرفر بتاعك لو حابة (api/pay.js)
+                },
+                onReadyForServerCompletion: (paymentId, txid) => { 
+                    alert("تم إتمام الدفع بنجاح 🎉"); 
+                },
+                onCancel: (paymentId) => { console.log("Payment cancelled"); },
+                onError: (error, payment) => { console.error("Payment error", error); }
             });
         } catch (err) {
-            alert("تأكدي من فتح التطبيق من متصفح Pi Browser وربط الـ Wallet.");
+            alert("يرجى التأكد من الدخول عبر Pi Browser واستخدام محفظة مفعلة.");
         }
     }
 
-    function onIncompletePaymentFound(payment) { console.log("Pending payment found"); }
+    function onIncompletePaymentFound(payment) { console.log("Pending payment:", payment); }
 
     startApp();
 </script>

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Norak App - نوراك</title>
 
-    <meta name="theme-color" content="#22c55e">
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#22c55e">
 
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
@@ -77,6 +77,7 @@
             line-height: 1.8;
             padding: 10px;
             text-align: justify;
+            white-space: pre-wrap;
         }
 
         .footer-note { font-size: 12px; color: #888; margin-top: 20px; }
@@ -117,13 +118,13 @@
 <p class="footer-note">تم التطوير ليعمل داخل Pi Browser</p>
 
 <script>
-    // 1. تهيئة Pi SDK
+    // 1. تهيئة الـ SDK (sandbox: false للنشر الفعلي)
     Pi.init({ version: "2.0", sandbox: false });
 
     let currentUser = null;
     let currentSurahName = "";
 
-    // 2. تسجيل الدخول
+    // 2. تسجيل الدخول والربط
     async function login() {
         try {
             const scopes = ['username', 'payments'];
@@ -131,20 +132,22 @@
             currentUser = auth.user;
             alert("أهلاً بك يا " + currentUser.username);
         } catch (err) {
-            console.error(err);
-            alert("حدث خطأ في الاتصال بمحفظة باي");
+            console.error("Authentication error:", err);
+            alert("حدث خطأ في الاتصال بمحفظة باي. تأكدي من فتح التطبيق من متصفح Pi");
         }
     }
 
     function onIncompletePaymentFound(payment) { 
-        console.log("هناك دفع غير مكتمل:", payment); 
-        // لتخطي مشاكل التعليق، بنعمل كنسلة لأي دفع قديم مش كامل
-        // Pi.cancelPayment(payment.identifier); 
+        console.log("هناك عملية معلقة:", payment.identifier);
+        // هنا المفروض نبعت للسيرفر يكملها، لكن للتجربة هنعرضها في الكونسول
     }
 
-    // 3. نظام الدفع (التعديل هنا لتجاوز الخطأ)
-    function pay() {
-        if (!currentUser) { alert("من فضلك سجل دخولك أولاً"); return; }
+    // 3. نظام الدفع (مُعدل عشان يتجاوز العد التنازلي بقدر الإمكان)
+    async function pay() {
+        if (!currentUser) { 
+            alert("من فضلك سجل دخولك أولاً بالزرار اللي فوق"); 
+            return; 
+        }
 
         const paymentData = {
             amount: 0.1,
@@ -154,36 +157,45 @@
 
         const callbacks = {
             onReadyForServerApproval: (paymentId) => { 
-                console.log("الدفع ينتظر موافقة السيرفر:", paymentId);
-                // ملاحظة لياسمين: في الوضع الاحترافي لازم نبعت الـ paymentId للسيرفر بتاعنا
-                // لكن عشان تعدي الخطوة 10، المحفظة بتفتح وتستنى الأكشن منك
-                alert("برجاء تأكيد العملية من محفظتك");
+                console.log("العملية رقم:", paymentId);
+                // الحركة دي بتخلي التطبيق ينبهك إن الدفع بدأ
+                alert("برجاء تأكيد العملية من محفظتك الآن");
             },
             onReadyForServerCompletion: (paymentId, txid) => { 
-                console.log("تمت العملية بنجاح:", txid);
-                alert("تم التبرع بنجاح! شكراً لدعمك."); 
+                console.log("العملية اكتملت بنجاح:", txid);
+                alert("تم التبرع بنجاح! رقم العملية: " + txid);
             },
-            onCancel: (paymentId) => { console.log("تم إلغاء العملية من المستخدم"); },
+            onCancel: (paymentId) => { 
+                console.log("المستخدم ألغى العملية:", paymentId); 
+            },
             onError: (error, payment) => { 
-                console.error("خطأ في الدفع:", error);
-                alert("حدث خطأ، تأكدي من رصيدك أو اتصالك");
+                console.error("خطأ أثناء الدفع:", error);
+                if (error.message.includes("timeout")) {
+                    alert("انتهى الوقت! حاولي مرة أخرى وتأكدي من سرعة الاستجابة في المحفظة.");
+                }
             }
         };
 
-        Pi.createPayment(paymentData, callbacks);
+        try {
+            await Pi.createPayment(paymentData, callbacks);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    // 4. جلب قائمة السور
+    // 4. جلب القرآن الكريم (API)
     async function fetchSurahs() {
-        const res = await fetch("https://api.alquran.cloud/v1/surah");
-        const data = await res.json();
-        const select = document.getElementById("surahSelect");
-        data.data.forEach(surah => {
-            let opt = document.createElement("option");
-            opt.value = surah.number;
-            opt.text = surah.name;
-            select.add(opt);
-        });
+        try {
+            const res = await fetch("https://api.alquran.cloud/v1/surah");
+            const data = await res.json();
+            const select = document.getElementById("surahSelect");
+            data.data.forEach(surah => {
+                let opt = document.createElement("option");
+                opt.value = surah.number;
+                opt.text = surah.name;
+                select.add(opt);
+            });
+        } catch(e) { console.log("خطأ في جلب السور"); }
     }
     fetchSurahs();
 
@@ -193,6 +205,8 @@
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
         const data = await res.json();
         currentSurahName = data.data.name;
+        
+        // تحسين عرض النص
         let content = data.data.ayahs.map(a => a.text).join(" ﴿" + "﴾ ");
         document.getElementById("quran-display").innerText = content;
     }

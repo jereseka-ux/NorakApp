@@ -1,31 +1,23 @@
 export default async function handler(req, res) {
-  const { paymentId, action } = req.body;
-  const PI_API_KEY = process.env.PI_API_KEY; 
-
-  if (action === "approve") {
+  if (req.method === 'POST') {
+    const { paymentId } = req.body;
+    
     try {
+      // هنا بنبعت لـ Pi Network إننا موافقين على العملية
+      // ملحوظة: لازم تضيفي الـ API Key في إعدادات فيرسل زي ما هقولك تحت
       const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
         method: 'POST',
-        headers: { 'Authorization': `Key ${PI_API_KEY}` }
+        headers: {
+          'Authorization': `Key ${process.env.PI_API_KEY}`
+        }
       });
-      const data = await response.json();
-      return res.status(200).json(data);
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
-    }
-  }
 
-  if (action === "complete") {
-    try {
-      const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
-        method: 'POST',
-        headers: { 'Authorization': `Key ${PI_API_KEY}` },
-        body: JSON.stringify({ txid: req.body.txid })
-      });
       const data = await response.json();
-      return res.status(200).json(data);
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Approval failed" });
     }
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
   }
 }

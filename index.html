@@ -192,59 +192,65 @@
 
     // === الدفع (مربوط بباي + جاهز للـ Step 13) ===
     
-    // تشغيل التطبيق// دفع VIP باستخدام Pi Network (نسخة محسنة ونظيفة)
-async function requestPayment() {
-    console.log("✅ زرار VIP تم الضغط عليه");
+    // تشغيل التطبيق//// ====================== Pi Payment - النسخة النهائية المصححة ======================
+const onIncompletePaymentFound = (payment) => {
+  console.warn("⚠️ Incomplete payment found:", payment);
+  return payment;
+};
 
-    // التحقق من وجود Pi Browser
-    if (typeof Pi === 'undefined' || !Pi.createPayment) {
-        alert("❌ يرجى فتح التطبيق داخل Pi Browser لإتمام الدفع");
-        return;
-    }
+function requestPayment() {
+  console.log("✅ VIP الشغل عليه تم");
 
-    try {
-        const paymentData = {
-            amount: 1.0,                    // سعر الـ VIP = 1 Pi
-            memo: "ترقية VIP - قرآن كريم",
-            metadata: {
-                orderId: "norak_" + Date.now(),
-                user: "yasmine",
-                type: "vip_access"
-            }
-        };
+  if (typeof Pi === 'undefined' || !Pi.createPayment) {
+    alert("❌ يرجى فتح التطبيق داخل Pi Browser");
+    return;
+  }
 
-        const callbacks = {
-            onReadyForServerApproval: (id) => {
-                console.log("⏳ جاري الموافقة من السيرفر - Payment ID:", id);
-                // هنا ممكن ترسلي الـ id للسيرفر بتاعك لو عندك backend
-            },
+  const scopes = ['payments'];
 
-            onReadyForServerCompletion: (id, txid) => {
-                console.log("✅ تم الدفع بنجاح! TXID:", txid);
-                alert("🎉 تم الدفع بنجاح! تم تفعيل الـ VIP\nشكراً لدعمك ❤️");
-                // هنا ضيفي الكود اللي يفعل الـ VIP (مثلاً حفظ في localStorage)
-                localStorage.setItem('isVIP', 'true');
-                // يمكن تحديث الصفحة أو إظهار المحتوى المدفوع
-            },
+  Pi.authenticate(scopes, onIncompletePaymentFound)
+    .then((auth) => {
+      console.log("✅ تم المصادقة بنجاح - Scopes:", auth.scopes);
 
-            onCancel: () => {
-                alert("⚠️ تم إلغاء عملية الدفع");
-            },
+      const paymentData = {
+        amount: 1.0,
+        memo: "قرآن كريم - ترقية VIP",
+        metadata: {
+          orderId: "norak_" + Date.now(),
+          user: "yasmine",
+          type: "vip_access"
+        }
+      };
 
-            onError: (e) => {
-                console.error(e);
-                alert("❌ حدث خطأ أثناء الدفع: " + (e.message || e));
-            }
-        };
+      const callbacks = {
+        onReadyForServerApproval: (id) => {
+          console.log("✅ الموافقة من السيرفر - Payment ID:", id);
+        },
 
-        // بدء عملية الدفع
-        Pi.createPayment(paymentData, callbacks);
+        onReadyForServerCompletion: (id, txid) => {
+          console.log("✅ تم الدفع بنجاح - TXID:", txid);
+          alert("🎉 تم تفعيل VIP بنجاح ❤️");
+          localStorage.setItem('isVIP', 'true');
+        },
 
-    } catch (err) {
-        console.error(err);
-        alert("❌ حدث خطأ أثناء محاولة الدفع: " + err.message);
-    }
-}
+        onCancel: () => {
+          alert("⚠️ تم إلغاء الدفع");
+        },
+
+        onError: (e) => {
+          console.error(e);
+          alert("❌ خطأ أثناء الدفع: " + (e.message || e));
+        }
+      };
+
+      Pi.createPayment(paymentData, callbacks);
+    })
+    .catch((err) => {
+      console.error("❌ خطأ في المصادقة:", err);
+      alert("❌ فشل في بدء الدفع");
+    });
+} دفع VIP باستخدام Pi Network (نسخة محسنة ونظيفة)
+
     startApp();
 </script>
 </body>

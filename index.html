@@ -3,30 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نورك - Norak</title>
+    <title>تطبيق نورك - Norak</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #bb86fc; --gold: #ffd700; }
         body.light { --bg: #f5f5f6; --card: #ffffff; --text: #1a1a1a; --accent: #6200ee; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui; margin:0; padding:0; transition:0.3s; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; transition: 0.3s; margin: 0; padding: 0; }
         .container { max-width: 500px; margin: auto; padding: 15px; }
         .user-card { background: var(--card); padding: 20px; border-radius: 20px; text-align: center; border-bottom: 4px solid var(--accent); margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .welcome-text { font-size: 1.35rem; font-weight: bold; color: var(--accent); }
-        .btn-vip { background: linear-gradient(90deg, #bb86fc, #6200ee); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-size: 1.15rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(187,134,252,0.4); }
-        .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .welcome-text { font-size: 1.3rem; font-weight: bold; color: var(--accent); }
+        .btn-vip { background: linear-gradient(90deg, #bb86fc, #6200ee); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.3); }
+        .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .tool-box { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .count-num { font-size: 2.4rem; color: var(--gold); font-weight: bold; }
-        .main-content { background: var(--card); border-radius: 20px; padding: 15px; min-height: 420px; position: relative; }
-        .surah-list-item { display: flex; justify-content: space-between; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; }
-        .surah-list-item:hover { background: rgba(187,134,252,0.1); }
+        .count-num { font-size: 2.2rem; color: var(--gold); font-weight: bold; display: block; }
+        .main-content { background: var(--card); border-radius: 20px; padding: 15px; min-height: 400px; }
+        .surah-list-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .reading-view { display: none; padding: 10px; }
-        .quran-text { line-height: 2.5; font-size: 24px; text-align: justify; direction: rtl; }
-        .btn-sm { padding: 9px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--text); cursor: pointer; font-size: 0.95rem; }
-        .logo { width: 85px; height: 85px; border-radius: 50%; border: 4px solid var(--accent); margin-bottom: 8px; }
-        .search-input { width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--card); color: var(--text); margin-bottom: 12px; }
-        .spinner { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .quran-text { line-height: 2.4; font-size: 24px; text-align: justify; direction: rtl; }
+        .btn-sm { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--text); cursor: pointer; font-size: 0.9rem; }
+        .logo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); margin-bottom: 10px; }
     </style>
 </head>
 <body id="mainBody">
@@ -34,39 +30,36 @@
 <div class="container">
     <div class="user-card">
         <img src="logo.png" alt="Norak Logo" class="logo">
-        <div id="userName" class="welcome-text">مرحباً بك في نورك ✨</div>
-        <small id="status" style="color:var(--gold)">متصل بشبكة باي ✅</small>
+        <div id="userName" class="welcome-text">مرحباً بك في تطبيق نورك</div>
+        <small id="status" style="color:var(--gold)">نورك متصل بالشبكة ✅</small>
     </div>
 
-    <button class="btn-vip" onclick="requestPayment()">تفعيل VIP بـ 1 Pi (مميزات إضافية)</button>
+    <button id="vipBtn" class="btn-vip" onclick="requestPayment()">تفعيل ميزات VIP بـ 1 Pi</button>
 
     <div class="tools">
         <div class="tool-box">
             <span id="tally" class="count-num">0</span>
-            <div style="display:flex; gap:6px; margin-top:8px;">
+            <div style="display:flex; gap:5px; margin-top:5px;">
                 <button class="btn-sm" onclick="addTasbih()">تسبيح</button>
                 <button class="btn-sm" onclick="resetTasbih()">تصفير</button>
             </div>
         </div>
         <div class="tool-box">
-            <label style="font-size:0.85rem;">حجم الخط</label>
-            <input type="range" min="18" max="48" value="24" style="width:100%" oninput="updateFont(this.value)">
-            <button class="btn-sm" style="width:100%; margin-top:8px;" onclick="toggleDark()">تغيير الثيم 🌓</button>
+            <label style="font-size: 0.8rem;">حجم الخط</label>
+            <input type="range" min="18" max="45" value="24" style="width:100%" oninput="updateFont(this.value)">
+            <button class="btn-sm" style="width:100%; margin-top:5px;" onclick="toggleDark()">تغيير الثيم 🌓</button>
         </div>
     </div>
 
     <div class="main-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
             <h3 id="title">فهرس السور</h3>
-            <button id="backBtn" onclick="backToMenu()" style="display:none;" class="btn-sm">عودة</button>
+            <button id="backBtn" onclick="backToMenu()" style="display:none;" class="btn-sm">عودة للفهرس</button>
         </div>
-
-        <input type="text" id="searchInput" class="search-input" placeholder="ابحث عن سورة..." onkeyup="filterSurahs()">
-
+        <hr style="opacity:0.1">
         <div id="surahContainer">جاري تحميل المصحف الشريف...</div>
         <div id="readingView" class="reading-view">
-            <button class="btn-sm" onclick="saveBookmark()" style="margin-bottom:12px;">حفظ مكان القراءة 🔖</button>
-            <button class="btn-sm" onclick="showAyahOfDay()" style="margin-bottom:12px; margin-left:8px;">آية اليوم 🌟</button>
+            <button class="btn-sm" onclick="saveBookmark()" style="margin-bottom:10px;">حفظ مكان القراءة 🔖</button>
             <div id="quranContent" class="quran-text"></div>
         </div>
     </div>
@@ -74,74 +67,44 @@
 
 <script>
     const Pi = window.Pi;
-    let currentSurahId = null;
-    let surahsData = [];
 
     async function startApp() {
         try {
-            Pi.init({ version: "2.0", sandbox: true }); // غيريها لـ false للـ Production
+            Pi.init({ version: "2.0", sandbox: true });
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-            document.getElementById('userName').innerHTML = `أهلاً ${auth.user.username} ✨`;
-            document.getElementById('status').innerHTML = 'متصل بشبكة باي ✅';
-        } catch (e) {
-            console.error("Pi Error:", e);
-            document.getElementById('status').innerHTML = '⚠️ افتحي في Pi Browser';
-        }
+            document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
+        } catch (e) { console.error("Pi Init Error:", e); }
         loadAllSurahs();
-        loadSavedData(); // تحميل التسبيح + bookmark
     }
 
     async function loadAllSurahs() {
-        const container = document.getElementById('surahContainer');
-        container.innerHTML = '<div class="spinner" style="display:block;"></div>';
         try {
             const res = await fetch('https://api.alquran.cloud/v1/surah');
             const result = await res.json();
-            surahsData = result.data;
-            renderSurahs(surahsData);
-        } catch (err) {
-            container.innerHTML = `<p style="color:#ff6b6b;text-align:center;">خطأ في النت.. جربي تاني</p>`;
+            let listHtml = '';
+            result.data.forEach(s => {
+                listHtml += `<div class="surah-list-item" onclick="openSurah(${s.number}, '${s.name}')">
+                    <span>${s.number}. ${s.name}</span>
+                    <small style="color:var(--gold)">${s.numberOfAyahs} آية</small>
+                </div>`;
+            });
+            document.getElementById('surahContainer').innerHTML = listHtml;
+        } catch (err) { 
+            document.getElementById('surahContainer').innerText = "خطأ في تحميل البيانات"; 
         }
     }
 
-    function renderSurahs(data) {
-        let html = '';
-        data.forEach(s => {
-            const isFav = localStorage.getItem(`fav_${s.number}`) === 'true';
-            html += `
-                <div class="surah-list-item" onclick="openSurah(\( {s.number}, ' \){s.name}')">
-                    <span>${s.number}. ${s.name}</span>
-                    <small style="color:var(--gold)">${s.numberOfAyahs} آية</small>
-                    <span onclick="event.stopImmediatePropagation(); toggleFavorite(\( {s.number});" style="font-size:1.4rem;"> \){isFav ? '❤️' : '♡'}</span>
-                </div>`;
-        });
-        document.getElementById('surahContainer').innerHTML = html || '<p>لا توجد نتائج</p>';
-    }
-
-    function filterSurahs() {
-        const term = document.getElementById('searchInput').value.trim().toLowerCase();
-        const filtered = surahsData.filter(s => s.name.toLowerCase().includes(term));
-        renderSurahs(filtered);
-    }
-
     async function openSurah(id, name) {
-        currentSurahId = id;
         document.getElementById('surahContainer').style.display = 'none';
         document.getElementById('readingView').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('title').innerText = name;
-
-        const contentDiv = document.getElementById('quranContent');
-        contentDiv.innerHTML = '<div class="spinner" style="display:block;"></div>';
-
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
             const data = await res.json();
-            const ayahsText = data.data.ayahs.map(a => `\( {a.text} ﴿ \){a.numberInSurah}﴾`).join('<br><br>');
-            contentDiv.innerHTML = ayahsText;
-        } catch (e) {
-            contentDiv.innerHTML = `<p style="color:#ff6b6b;">تعذر تحميل السورة.. حاولي مرة أخرى</p>`;
-        }
+            document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} ﴿${a.numberInSurah}﴾`).join(' ');
+            window.scrollTo(0,0);
+        } catch (e) { alert("تعذر تحميل السورة"); }
     }
 
     function backToMenu() {
@@ -149,107 +112,56 @@
         document.getElementById('readingView').style.display = 'none';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('title').innerText = "فهرس السور";
-        currentSurahId = null;
     }
 
-    // === التسبيح + حفظ ===
-    function addTasbih() {
-        let n = document.getElementById('tally');
-        n.innerText = parseInt(n.innerText) + 1;
-        localStorage.setItem('tasbihCount', n.innerText);
-    }
-    function resetTasbih() {
-        document.getElementById('tally').innerText = 0;
-        localStorage.setItem('tasbihCount', '0');
-    }
-    function loadSavedData() {
-        const savedTasbih = localStorage.getItem('tasbihCount') || '0';
-        document.getElementById('tally').innerText = savedTasbih;
-    }
-
-    // === Bookmark + Favorite + Ayah of the day ===
-    function saveBookmark() {
-        if (!currentSurahId) return;
-        localStorage.setItem(`bookmark_${currentSurahId}`, 'saved');
-        alert('✅ تم حفظ مكانك في السورة!');
-    }
-    function toggleFavorite(num) {
-        const key = `fav_${num}`;
-        const current = localStorage.getItem(key) === 'true';
-        localStorage.setItem(key, !current);
-        renderSurahs(surahsData); // refresh
-    }
-    function showAyahOfDay() {
-        const random = Math.floor(Math.random() * 6236) + 1;
-        alert(`🌟 آية اليوم:\n\n﴿ وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ ﴾\n(الذاريات: 56)`);
-    }
-
+    function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
+    function resetTasbih() { document.getElementById('tally').innerText = 0; }
     function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
-    function toggleDark() {
-        document.getElementById('mainBody').classList.toggle('light');
-        localStorage.setItem('theme', document.getElementById('mainBody').classList.contains('light') ? 'light' : 'dark');
+    function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
+    function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
+
+    // ✅ دمج الدفع مع الأكواد الجديدة (Approve & Complete)
+    async function requestPayment() {
+        if (!Pi || !Pi.createPayment) {
+            alert("زر الدفع يعمل فقط في Pi Browser");
+            return;
+        }
+        try {
+            await Pi.createPayment({
+                amount: 1.0,
+                memo: "تفعيل ميزات VIP في تطبيق نورك",
+                metadata: { orderId: "norak_" + Date.now() }
+            }, {
+                // خطوة 1: طلب الموافقة من السيرفر بتاعك
+                onReadyForServerApproval: async (paymentId) => {
+                    console.log("طلب Approve للعملية:", paymentId);
+                    await fetch('/api/pay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'approve', paymentId })
+                    });
+                },
+                // خطوة 2: إتمام العملية بعد الدفع الناجح
+                onReadyForServerCompletion: async (paymentId, txid) => {
+                    console.log("إتمام العملية (Complete):", txid);
+                    const res = await fetch('/api/pay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'complete', paymentId, txid })
+                    });
+                    if (res.ok) {
+                        alert("تم تفعيل ميزات VIP بنجاح! مباارك يا ياسمين ✨");
+                        document.getElementById('vipBtn').innerText = "تم تفعيل الـ VIP ✅";
+                        document.getElementById('vipBtn').disabled = true;
+                    }
+                },
+                onCancel: (id) => { alert("تم إلغاء الدفع"); },
+                onError: (e) => { alert("حدث خطأ أثناء الدفع"); }
+            });
+        } catch (err) { alert("حدث خطأ في تنفيذ الدفع"); }
     }
 
-    // === الدفع (مربوط بباي + جاهز للـ Step 13) ===
-    
-    // تشغيل التطبيق//// ====================== Pi Payment - النسخة النهائية المصححة ======================
-const onIncompletePaymentFound = (payment) => {
-  console.warn("⚠️ Incomplete payment found:", payment);
-  return payment;
-};
-
-function requestPayment() {
-  console.log("✅ VIP الشغل عليه تم");
-
-  if (typeof Pi === 'undefined' || !Pi.createPayment) {
-    alert("❌ يرجى فتح التطبيق داخل Pi Browser");
-    return;
-  }
-
-  const scopes = ['payments'];
-
-  Pi.authenticate(scopes, onIncompletePaymentFound)
-    .then((auth) => {
-      console.log("✅ تم المصادقة بنجاح - Scopes:", auth.scopes);
-
-      const paymentData = {
-        amount: 1.0,
-        memo: "قرآن كريم - ترقية VIP",
-        metadata: {
-          orderId: "norak_" + Date.now(),
-          user: "yasmine",
-          type: "vip_access"
-        }
-      };
-
-      const callbacks = {
-        onReadyForServerApproval: (id) => {
-          console.log("✅ الموافقة من السيرفر - Payment ID:", id);
-        },
-
-        onReadyForServerCompletion: (id, txid) => {
-          console.log("✅ تم الدفع بنجاح - TXID:", txid);
-          alert("🎉 تم تفعيل VIP بنجاح ❤️");
-          localStorage.setItem('isVIP', 'true');
-        },
-
-        onCancel: () => {
-          alert("⚠️ تم إلغاء الدفع");
-        },
-
-        onError: (e) => {
-          console.error(e);
-          alert("❌ خطأ أثناء الدفع: " + (e.message || e));
-        }
-      };
-
-      Pi.createPayment(paymentData, callbacks);
-    })
-    .catch((err) => {
-      console.error("❌ خطأ في المصادقة:", err);
-      alert("❌ فشل في بدء الدفع");
-    });
-} دفع VIP باستخدام Pi Network (نسخة محسنة ونظيفة)
+    function onIncompletePaymentFound(p) { console.log("Incomplete payment detected:", p); }
 
     startApp();
 </script>

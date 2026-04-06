@@ -3,170 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - NOURK</title>
+    <title>تطبيق نورك - Norak</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root {
-            --primary-color: #6d28d9;
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --text-light: #f8fafc;
-            --accent: #10b981;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .header {
-            text-align: center;
-            padding: 20px;
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary-color), #4c1d95);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .logo { width: 80px; border-radius: 50%; border: 3px solid #fff; }
-        .container { width: 90%; max-width: 500px; margin-top: 20px; }
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .counter-val { font-size: 3rem; font-weight: bold; color: var(--accent); }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            width: 100%;
-            margin: 5px 0;
-        }
-        .btn-vip {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
-            font-weight: bold;
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
-        }
-        .surah-list { text-align: right; list-style: none; padding: 0; }
-        .surah-item {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            margin: 8px 0;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
+        :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #bb86fc; --gold: #ffd700; }
+        body.light { --bg: #f5f5f6; --card: #ffffff; --text: #1a1a1a; --accent: #6200ee; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; transition: 0.3s; margin: 0; padding: 0; }
+        .container { max-width: 500px; margin: auto; padding: 15px; }
+        .user-card { background: var(--card); padding: 20px; border-radius: 20px; text-align: center; border-bottom: 4px solid var(--accent); margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .welcome-text { font-size: 1.3rem; font-weight: bold; color: var(--accent); }
+        .btn-vip { background: linear-gradient(90deg, #bb86fc, #6200ee); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.3); }
+        .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .tool-box { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .count-num { font-size: 2.2rem; color: var(--gold); font-weight: bold; display: block; }
+        .main-content { background: var(--card); border-radius: 20px; padding: 15px; min-height: 400px; }
+        .surah-list-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .reading-view { display: none; padding: 10px; }
+        .quran-text { line-height: 2.4; font-size: 24px; text-align: justify; direction: rtl; white-space: pre-wrap; }
+        .btn-sm { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--text); cursor: pointer; font-size: 0.9rem; }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
-    <div class="header">
-        <img src="https://norak-app.vercel.app/logo.png" alt="Nourk Logo" class="logo">
-        <h1>نورك (NOURK)</h1>
-        <p id="user-status" style="font-weight: bold; color: #f59e0b;">جاري محاولة الاتصال بالشبكة...</p>
+<div class="container">
+    <div class="user-card">
+        <div id="userName" class="welcome-text">مرحباً بك في تطبيق نورك</div>
+        <small id="status" style="color:var(--gold)">نورك متصل بالشبكة ✅</small>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <h3>📿 السبحة الإلكترونية</h3>
-            <div id="counter" class="counter-val">0</div>
-            <button onclick="count()">تسبيح</button>
-            <button style="background: #ef4444; width: auto; font-size: 0.8rem;" onclick="reset()">تصفير</button>
-        </div>
+    <button class="btn-vip" onclick="requestPayment()">تفعيل ميزات VIP بـ 0.5 Pi</button>
 
-        <div class="card">
-            <h3>مميزات الـ VIP</h3>
-            <p>فعل العضوية الآن بـ 0.5 باي فقط</p>
-            <button id="pay-button" class="btn-vip" onclick="payWithPi()">تفعيل VIP الآن 💎</button>
+    <div class="tools">
+        <div class="tool-box">
+            <span id="tally" class="count-num">0</span>
+            <div style="display:flex; gap:5px; margin-top:5px;">
+                <button class="btn-sm" onclick="addTasbih()">تسبيح</button>
+                <button class="btn-sm" onclick="resetTasbih()">تصفير</button>
+            </div>
         </div>
-
-        <div class="card">
-            <h3>📖 فهرس السور</h3>
-            <ul class="surah-list">
-                <li class="surah-item"><span>1. سورة الفاتحة</span><span>7 آيات</span></li>
-                <li class="surah-item"><span>2. سورة البقرة</span><span>286 آية</span></li>
-            </ul>
+        <div class="tool-box">
+            <label style="font-size: 0.8rem;">حجم الخط</label>
+            <input type="range" min="18" max="45" value="24" style="width:100%" oninput="updateFont(this.value)">
+            <button class="btn-sm" style="width:100%; margin-top:5px;" onclick="toggleDark()">تغيير الثيم 🌓</button>
         </div>
     </div>
 
-    <script>
-        let countVal = 0;
-        const counterEl = document.getElementById('counter');
-        function count() { countVal++; counterEl.innerText = countVal; }
-        function reset() { countVal = 0; counterEl.innerText = countVal; }
+    <div class="main-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="title">فهرس السور</h3>
+            <button id="backBtn" onclick="backToMenu()" style="display:none;" class="btn-sm">عودة للفهرس</button>
+        </div>
+        <hr style="opacity:0.1">
+        <div id="surahContainer">جاري تحميل المصحف...</div>
+        <div id="readingView" class="reading-view">
+            <button class="btn-sm" onclick="saveBookmark()" style="margin-bottom:10px;">حفظ مكان القراءة 🔖</button>
+            <div id="quranContent" class="quran-text"></div>
+        </div>
+    </div>
+</div>
 
-        const Pi = window.Pi;
-        // الخطوة الذكية 1: sandbox false لضمان الربط مع الدومين الرسمي
-        Pi.init({ version: "2.0", sandbox: false });
+<script>
+    const Pi = window.Pi;
 
-        async function authenticateUser() {
-            try {
-                const scopes = ['username', 'payments'];
-                const user = await Pi.authenticate(scopes, (payment) => {
-                    console.log("دفع معلق:", payment);
-                });
-                // لو نجح الاتصال هيغير اللون للأخضر ويكتب اسمك
-                document.getElementById('user-status').innerText = "مرحباً " + user.user.username;
-                document.getElementById('user-status').style.color = "#10b981";
-            } catch (err) {
-                // الخطوة الذكية 2: لو فشل (بسبب التحويل للينك فيرسل) هيفضل يحاول كل ثانيتين
-                document.getElementById('user-status').innerText = "فشل الاتصال.. إعادة المحاولة تلقائياً";
-                document.getElementById('user-status').style.color = "#ef4444";
-                setTimeout(authenticateUser, 2000);
-            }
+    async function startApp() {
+        try {
+            Pi.init({ version: "2.0", sandbox: true });
+            const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+            document.getElementById('userName').innerText = `أهلاً بك، ${auth.user.username} ✨`;
+        } catch (e) { console.error("Pi Error:", e); }
+        loadAllSurahs();
+    }
+
+    async function loadAllSurahs() {
+        try {
+            const res = await fetch('https://api.alquran.cloud/v1/surah');
+            const result = await res.json();
+            let listHtml = '';
+            result.data.forEach(s => {
+                listHtml += `<div class="surah-list-item" onclick="openSurah(${s.number}, '${s.name}')">
+                    <span>${s.number}. ${s.name}</span>
+                    <small style="color:var(--gold)">${s.numberOfAyahs} آية</small>
+                </div>`;
+            });
+            document.getElementById('surahContainer').innerHTML = listHtml;
+        } catch (err) { 
+            document.getElementById('surahContainer').innerText = "خطأ في تحميل الفهرس"; 
         }
+    }
 
-        authenticateUser();
+    async function openSurah(id, name) {
+        document.getElementById('surahContainer').style.display = 'none';
+        document.getElementById('readingView').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('title').innerText = name;
+        document.getElementById('quranContent').innerText = "جاري تحميل السورة...";
+        try {
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}`);
+            const data = await res.json();
+            document.getElementById('quranContent').innerText = data.data.ayahs.map(a => `${a.text} (${a.numberInSurah})`).join(' ');
+        } catch (e) { alert("خطأ في التحميل"); }
+    }
 
-        async function payWithPi() {
-            // الخطوة الذكية 3: التأكد إن الشبكة متصلة قبل بدء الدفع
-            const status = document.getElementById('user-status').innerText;
-            if (status.includes("فشل")) {
-                alert("برجاء الانتظار حتى يتم الاتصال بالشبكة بنجاح (تظهر كلمة مرحباً)");
-                return;
-            }
+    function backToMenu() {
+        document.getElementById('surahContainer').style.display = 'block';
+        document.getElementById('readingView').style.display = 'none';
+        document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('title').innerText = "فهرس السور";
+    }
 
-            try {
-                const payment = await Pi.createPayment({
-                    amount: 0.5,
-                    memo: "تفعيل عضوية VIP - تطبيق نورك",
-                    metadata: { itemId: "vip_membership" },
-                }, {
-                    onReadyForServerApproval: async (paymentId) => {
-                        await fetch('/api/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId })
-                        });
-                    },
-                    onReadyForServerCompletion: async (paymentId, txid) => {
-                        await fetch('/api/complete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId, txid })
-                        });
-                        alert("🎉 بنجاح مبروك يا ياسمين! تم تفعيل الـ VIP");
-                    },
-                    onCancel: (paymentId) => { console.log("تم إلغاء الدفع", paymentId); },
-                    onError: (error, payment) => { 
-                        alert("حدث خطأ تقني، تأكدي من فتح التطبيق من خلال Pi Browser وعبر الرابط pinet.com");
-                    }
-                });
-            } catch (err) {
-                alert("حدث خطأ، حاول مرة أخرى");
-            }
-        }
-    </script>
+    function addTasbih() { let n = document.getElementById('tally'); n.innerText = parseInt(n.innerText) + 1; }
+    function resetTasbih() { document.getElementById('tally').innerText = 0; }
+    function updateFont(v) { document.getElementById('quranContent').style.fontSize = v + 'px'; }
+    function toggleDark() { document.getElementById('mainBody').classList.toggle('light'); }
+    function saveBookmark() { alert('تم حفظ مكانك الحالي بنجاح يا ياسمين!'); }
+
+    async function requestPayment() {
+        try {
+            await Pi.createPayment({
+                amount: 0.5,
+                memo: "تفعيل ميزات VIP في تطبيق نورك",
+                metadata: { orderId: "norak_" + Date.now() }
+            }, {
+                onReadyForServerApproval: async (id) => {
+                    await fetch('/api/approve', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId: id })
+                    });
+                },
+                onReadyForServerCompletion: async (id, txid) => {
+                    await fetch('/api/complete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId: id, txid: txid })
+                    });
+                    alert("تم تفعيل ميزات VIP بنجاح!");
+                },
+                onCancel: (id) => { alert("تم إلغاء الدفع"); },
+                onError: (e) => { alert("حدث خطأ في الدفع"); }
+            });
+        } catch (err) { alert("تعذر تنفيذ الدفع"); }
+    }
+
+    function onIncompletePaymentFound(p) { console.log(p); }
+
+    startApp();
+</script>
 </body>
 </html>

@@ -6,6 +6,7 @@
     <title>تطبيق نورك - Norak</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <link rel="stylesheet" href="path-to-your-external-quran-library.css">
     <style>
         :root {
             --bg: #121212;
@@ -19,46 +20,27 @@
             background-color: var(--bg);
             color: var(--text);
         }
-        header, footer {
-            padding: 10px;
-            text-align: center;
-            background-color: var(--card);
-        }
-        main {
-            padding: 10px;
-        }
+        header, footer { padding:10px; text-align:center; background-color:var(--card); }
+        main { padding:10px; }
         button {
-            padding: 10px 15px;
-            margin: 5px;
+            padding:10px 15px;
+            margin:5px;
             background-color: var(--highlight);
-            border: none;
-            border-radius: 5px;
-            color: #000;
-            cursor: pointer;
+            border:none;
+            border-radius:5px;
+            color:#000;
+            cursor:pointer;
         }
         .card {
             background-color: var(--card);
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 10px;
+            padding:10px;
+            margin:10px 0;
+            border-radius:10px;
         }
-        .bookmark {
-            float: left;
-            cursor: pointer;
-            color: var(--highlight);
-        }
-        #settings-panel {
-            display: none;
-            background-color: var(--card);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
+        .bookmark { float:left; cursor:pointer; color:var(--highlight); }
+        #settings-panel { display:none; background-color:var(--card); padding:10px; border-radius:10px; margin-bottom:10px; }
         .light-mode {
-            --bg: #ffffff;
-            --card: #f0f0f0;
-            --text: #000000;
-            --highlight: #f39c12;
+            --bg:#ffffff; --card:#f0f0f0; --text:#000000; --highlight:#f39c12;
         }
     </style>
 </head>
@@ -78,23 +60,13 @@
 
 <main>
     <div id="content">
-        <!-- القرآن كامل 30 جزء -->
-        <div class="card" id="quran-part-1">
-            <span class="bookmark" onclick="toggleBookmark(1)">★</span>
-            <h2>الجزء 1</h2>
-            <p>بسم الله الرحمن الرحيم ...</p>
-        </div>
-        <div class="card" id="quran-part-2">
-            <span class="bookmark" onclick="toggleBookmark(2)">★</span>
-            <h2>الجزء 2</h2>
-            <p>الحمد لله رب العالمين ...</p>
-        </div>
-        <!-- باقي الأجزاء تمت بنفس الطريقة حتى الجزء 30 -->
-        
+        <!-- القرآن كامل مرتبط بالمكتبة الخارجية -->
+        <div id="quran-container"></div>
+
         <!-- أدعية وأذكار -->
         <div class="card">
             <h2>أدعية وأذكار يومية</h2>
-            <p>اللهم صل وسلم على نبينا محمد ...</p>
+            <div id="azkar-container"></div>
         </div>
 
         <!-- زر الدفع -->
@@ -106,16 +78,13 @@
     </div>
 </main>
 
-<footer>
-    &copy; 2026 تطبيق نورك
-</footer>
+<footer>&copy; 2026 تطبيق نورك</footer>
 
+<script src="path-to-your-external-quran-library.js"></script>
 <script>
-    // تفعيل تغيير الإضاءة
+    // تغيير الإضاءة
     const toggleLightBtn = document.getElementById('toggle-light');
-    toggleLightBtn.addEventListener('click', () => {
-        document.body.classList.toggle('light-mode');
-    });
+    toggleLightBtn.addEventListener('click', () => { document.body.classList.toggle('light-mode'); });
 
     // فتح وغلق الإعدادات
     const toggleSettingsBtn = document.getElementById('toggle-settings');
@@ -130,6 +99,29 @@
         document.body.style.fontSize = fontSizeInput.value + 'px';
     });
 
+    // تحميل القرآن من المكتبة الخارجية
+    const quranContainer = document.getElementById('quran-container');
+    QuranLibrary.loadAllParts().then(parts => {
+        parts.forEach((part, index) => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.id = 'quran-part-' + (index+1);
+            div.innerHTML = `<span class="bookmark" onclick="toggleBookmark(${index+1})">★</span>
+                             <h2>الجزء ${index+1}</h2><p>${part.text}</p>`;
+            quranContainer.appendChild(div);
+        });
+    });
+
+    // تحميل الأذكار
+    const azkarContainer = document.getElementById('azkar-container');
+    AzkarLibrary.loadDaily().then(azkar => {
+        azkar.forEach(z => {
+            const p = document.createElement('p');
+            p.textContent = z;
+            azkarContainer.appendChild(p);
+        });
+    });
+
     // بوكمارك
     function toggleBookmark(part) {
         const el = document.getElementById('quran-part-' + part);
@@ -140,7 +132,6 @@
     // تفعيل الدفع عبر Pi
     const payBtn = document.getElementById('pay-button');
     const payStatus = document.getElementById('pay-status');
-
     payBtn.addEventListener('click', async () => {
         payStatus.textContent = 'جارٍ معالجة الدفع...';
         try {
@@ -149,13 +140,13 @@
                 currency: 'PI',
                 memo: 'تبرع لتطبيق نورك'
             });
-            if (payment.status === 'success') {
+            if(payment.status === 'success'){
                 payStatus.textContent = 'تم الدفع بنجاح!';
             } else {
                 payStatus.textContent = 'فشل الدفع، حاول مرة أخرى.';
             }
-        } catch (error) {
-            console.error(error);
+        } catch(e){
+            console.error(e);
             payStatus.textContent = 'حدث خطأ أثناء الدفع.';
         }
     });

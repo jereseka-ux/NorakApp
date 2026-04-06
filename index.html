@@ -3,133 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - Norak Professional</title>
+    <title>تطبيق نورك - Norak Pro</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #673ab7, #512da8); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; color: #fff; }
-        .container { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; max-width: 450px; width: 90%; color: #333; }
-        h1 { color: #673ab7; font-size: 28px; margin-bottom: 15px; }
-        .user-info { background: #f0f2f5; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; color: #512da8; display: none; }
-        .features { text-align: right; margin: 20px 0; font-size: 14px; }
-        .features li { margin-bottom: 8px; list-style: none; }
-        .features li::before { content: "✅ "; }
-        .btn-pay { background: #ff9800; color: white; border: none; padding: 18px; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .btn-pay:hover { background: #e68900; transform: translateY(-2px); }
-        .btn-pay:disabled { background: #ccc; cursor: not-allowed; }
-        .status { margin-top: 20px; font-size: 13px; color: #777; border-top: 1px solid #eee; padding-top: 15px; }
+        :root { --p-color: #673ab7; --s-color: #ff9800; --bg: #f4f7f9; --text: #333; --card-bg: #ffffff; }
+        body.dark-mode { --bg: #121212; --text: #e0e0e0; --card-bg: #1e1e1e; }
+        
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; padding-bottom: 50px; }
+        .app-bar { background: var(--p-color); color: white; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        
+        .container { padding: 15px; max-width: 600px; margin: auto; }
+        
+        /* الفهرس العلوي */
+        .nav-tabs { display: flex; justify-content: space-around; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .tab { cursor: pointer; padding: 8px 15px; border-radius: 8px; font-weight: bold; color: var(--p-color); transition: 0.2s; }
+        .tab.active { background: var(--p-color); color: white; }
+
+        .card { background: var(--card-bg); border-radius: 15px; padding: 20px; box-shadow: 0 6px 12px rgba(0,0,0,0.08); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
+        
+        /* محتوى السور والقائمة */
+        .content-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .content-item:last-child { border: 0; }
+
+        /* أزرار التحكم */
+        .btn-pay { background: linear-gradient(45deg, var(--p-color), #512da8); color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-size: 19px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.4); margin-top: 10px; }
+        .btn-pay:active { transform: scale(0.98); }
+        
+        .status-msg { text-align: center; font-size: 13px; margin-top: 15px; color: #777; font-style: italic; }
+        .hidden { display: none; }
     </style>
 </head>
-<body>
+<body class="">
+
+<div class="app-bar">نورك - Norak Application</div>
 
 <div class="container">
-    <h1>نورك - Norak App</h1>
-    <div id="user-welcome" class="user-info">أهلاً بكِ</div>
-    
-    <p>استمتعي بكافة المميزات الاحترافية عبر تفعيل العضوية الممتازة.</p>
-    
-    <ul class="features">
-        <li>وصول كامل لكافة الأدوات التقنية.</li>
-        <li>دعم فني مخصص وتحديثات حصرية.</li>
-        <li>بيئة عمل سريعة وبدون إعلانات.</li>
-    </ul>
+    <div class="nav-tabs">
+        <div class="tab active" onclick="switchTab('home', this)">📖 السور</div>
+        <div class="tab" onclick="switchTab('tools', this)">🛠 الأدوات</div>
+        <div class="tab" onclick="switchTab('settings', this)">⚙️ الإعدادات</div>
+    </div>
 
-    <button id="main-button" class="btn-pay" onclick="handlePayment()">تفعيل VIP (0.5 Pi)</button>
-    
-    <div id="status-message" class="status">جاري فحص الاتصال بالشبكة...</div>
+    <div id="home" class="tab-content">
+        <div class="card">
+            <h3>فهرس المحتوى الرقمي</h3>
+            <div class="content-item"><span>قائمة السور المرفوعة</span> <span style="color:green">محدثة ✅</span></div>
+            <div class="content-item"><span>التنظيم التلقائي</span> <span style="color:green">نشط ✅</span></div>
+            <p style="font-size: 14px; line-height: 1.6;">تم ربط المحتوى بقاعدة بيانات جيثب لضمان سرعة التحميل داخل تطبيقك.</p>
+        </div>
+    </div>
+
+    <div id="tools" class="tab-content hidden">
+        <div class="card">
+            <h3>أدوات المطور</h3>
+            <div class="content-item">
+                <span>حاسبة تحويل العملة</span>
+                <input type="number" id="piVal" placeholder="Pi" style="width: 70px; padding: 5px;">
+            </div>
+            <div class="content-item"><span>تحليل البيانات</span> <span style="color:var(--s-color)">يتطلب VIP</span></div>
+        </div>
+    </div>
+
+    <div id="settings" class="tab-content hidden">
+        <div class="card">
+            <h3>تخصيص التطبيق</h3>
+            <div class="content-item">
+                <span>الوضع الليلي / النهاري</span>
+                <button onclick="toggleTheme()" style="cursor:pointer; padding: 5px 12px; border-radius: 5px; border: 1px solid #ccc;">تبديل الإضاءة</button>
+            </div>
+            <div class="content-item"><span>إصدار التطبيق</span> <span>V 2.0.1</span></div>
+        </div>
+    </div>
+
+    <div class="card" id="vip-panel">
+        <h3 style="color: var(--p-color); margin-top:0;">💎 تفعيل العضوية الكاملة</h3>
+        <p style="font-size: 14px;">اضغطي أدناه لفتح السور كاملة وتفعيل كافة الأدوات الاحترافية برصيد Testnet.</p>
+        <button id="mainBtn" class="btn-pay" onclick="executePayment()">تفعيل الآن (0.5 Pi)</button>
+        <div id="status" class="status-msg">جاهز للربط بالمكتبة الخارجية..</div>
+    </div>
 </div>
 
 <script>
     const Pi = window.Pi;
-    let currentUser = null;
-
-    // تهيئة التطبيق وطلب التوثيق فور التحميل
+    // تهيئة المكتبة الخارجية فوراً
     Pi.init({ version: "1.5", sandbox: true });
 
-    async function authenticateUser() {
-        const statusDiv = document.getElementById('status-message');
-        const userDiv = document.getElementById('user-welcome');
-        try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            currentUser = auth.user;
-            userDiv.innerText = `مرحباً: ${currentUser.username}`;
-            userDiv.style.display = 'block';
-            statusDiv.innerText = "متصل وجاهز للعمليات.";
-        } catch (err) {
-            statusDiv.innerText = "يرجى الفتح من Pi Browser للبدء.";
-            console.error(err);
-        }
+    function switchTab(id, el) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.remove('hidden');
+        el.classList.add('active');
     }
 
-    // استكمال المدفوعات المعلقة (مهم جداً للقبول في الشبكة)
-    function onIncompletePaymentFound(payment) {
-        console.log("Incomplete payment found", payment);
-    };
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+    }
 
-    async function handlePayment() {
-        if (!currentUser) {
-            await authenticateUser();
-            if (!currentUser) return;
-        }
-
-        const statusDiv = document.getElementById('status-message');
-        const btn = document.getElementById('main-button');
+    async function executePayment() {
+        const s = document.getElementById('status');
+        const btn = document.getElementById('mainBtn');
         
-        btn.disabled = true;
-        statusDiv.innerText = "بدء عملية الدفع...";
-
         try {
+            s.innerText = "جاري استدعاء المحفظة..";
+            // خطوة التوثيق - لا يمكن الدفع بدونها
+            const auth = await Pi.authenticate(['payments', 'username'], (incomplete) => {
+                console.log("Found incomplete payment", incomplete);
+            });
+
+            s.innerText = "أهلاً " + auth.user.username + "، جاري معالجة الطلب..";
+
             const payment = await Pi.createPayment({
                 amount: 0.5,
-                memo: "VIP Membership Activation",
-                metadata: { orderId: "norak-vip-101" },
+                memo: "Norak Full App License Activation",
+                metadata: { order_type: "vip_access" }
             }, {
-                onReadyForServerApproval: function(paymentId) {
-                    statusDiv.innerText = "انتظار تأكيد السيرفر...";
+                onReadyForServerApproval: (pid) => {
+                    s.innerText = "انتظار موافقة السيرفر (Vercel)...";
                     $.ajax({
-                        url: `https://norak-app.vercel.app/api/approve`,
+                        url: 'https://norak-app.vercel.app/api/approve',
                         method: 'POST',
-                        data: JSON.stringify({ paymentId: paymentId }),
                         contentType: 'application/json',
-                        headers: { 'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' },
-                        success: function() { statusDiv.innerText = "تمت الموافقة، في انتظار التوثيق..."; }
+                        data: JSON.stringify({ paymentId: pid }),
+                        headers: { 'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' }
                     });
                 },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    statusDiv.innerText = "جاري الإنهاء...";
+                onReadyForServerCompletion: (pid, tx) => {
+                    s.innerText = "تم تأكيد المعاملة بنجاح!";
                     $.ajax({
-                        url: `https://norak-app.vercel.app/api/complete`,
+                        url: 'https://norak-app.vercel.app/api/complete',
                         method: 'POST',
-                        data: JSON.stringify({ paymentId: paymentId, txid: txid }),
                         contentType: 'application/json',
+                        data: JSON.stringify({ paymentId: pid, txid: tx }),
                         headers: { 'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' },
-                        success: function() {
-                            statusDiv.innerText = "مبروك! تم التفعيل بنجاح.";
-                            alert("تم تفعيل العضوية بنجاح!");
-                            btn.innerText = "تم التفعيل ✅";
+                        success: () => {
+                            document.getElementById('vip-panel').innerHTML = "<h3 style='color:green; text-align:center;'>✅ تم التفعيل بنجاح! السور الآن مفتوحة بالكامل.</h3>";
+                            alert("مبروك التفعيل يا ياسمين!");
                         }
                     });
                 },
-                onCancel: function(paymentId) {
-                    statusDiv.innerText = "تم إلغاء العملية من قبلك.";
-                    btn.disabled = false;
-                },
-                onError: function(error, payment) {
-                    statusDiv.innerText = "خطأ في الاتصال بالمحفظة.";
-                    console.error(error);
-                    btn.disabled = false;
-                }
+                onCancel: () => { s.innerText = "تم إلغاء الدفع."; },
+                onError: (err) => { s.innerText = "خطأ في الاتصال.. تأكدي من فتح اللينك الصحيح."; }
             });
         } catch (err) {
-            statusDiv.innerText = "فشل في معالجة الطلب.";
-            btn.disabled = false;
+            s.innerText = "خطأ أمني: يرجى الفتح من داخل Pi Browser فقط.";
+            console.error(err);
         }
     }
-
-    // بدء التوثيق تلقائياً عند فتح الصفحة
-    window.onload = authenticateUser;
 </script>
-
 </body>
 </html>

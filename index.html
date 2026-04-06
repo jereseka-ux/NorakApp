@@ -139,13 +139,16 @@
                     });
                     alert("تم تفعيل ميزات VIP بنجاح!");
                 },
-                onCancel: (id) => { alert("تم إلغاء الدفع"); },
-                onError: (e) => { alert("حدث خطأ في الدفع"); }
+                onCancel: (id) => { console.log("Payment Cancelled", id); },
+                onError: (e, payment) => { 
+                    console.error("Payment Error:", e);
+                    alert("خطأ: " + (e.message || "المحفظة لم تستجب")); 
+                }
             });
-        } catch (err) { alert("تعذر تنفيذ الدفع"); }
+        } catch (err) { alert("حدث خطأ، تأكدي من تفعيل الـ Sandbox Mode."); }
     }
 
-    function onIncompletePaymentFound(p) { console.log(p); }
+    function onIncompletePaymentFound(p) { console.log("Incomplete Payment:", p); }
 
     startApp();
 </script>

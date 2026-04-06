@@ -74,7 +74,7 @@
     <div class="header">
         <img src="https://norak-app.vercel.app/logo.png" alt="Nourk Logo" class="logo">
         <h1>نورك (NOURK)</h1>
-        <p id="user-status">جاري الاتصال بشبكة باي...</p>
+        <p id="user-status" style="font-weight: bold; color: #f59e0b;">جاري محاولة الاتصال بالشبكة...</p>
     </div>
 
     <div class="container">
@@ -88,7 +88,7 @@
         <div class="card">
             <h3>مميزات الـ VIP</h3>
             <p>فعل العضوية الآن بـ 0.5 باي فقط</p>
-            <button class="btn-vip" onclick="payWithPi()">تفعيل VIP الآن 💎</button>
+            <button id="pay-button" class="btn-vip" onclick="payWithPi()">تفعيل VIP الآن 💎</button>
         </div>
 
         <div class="card">
@@ -107,6 +107,7 @@
         function reset() { countVal = 0; counterEl.innerText = countVal; }
 
         const Pi = window.Pi;
+        // الخطوة الذكية 1: sandbox false لضمان الربط مع الدومين الرسمي
         Pi.init({ version: "2.0", sandbox: false });
 
         async function authenticateUser() {
@@ -115,15 +116,27 @@
                 const user = await Pi.authenticate(scopes, (payment) => {
                     console.log("دفع معلق:", payment);
                 });
+                // لو نجح الاتصال هيغير اللون للأخضر ويكتب اسمك
                 document.getElementById('user-status').innerText = "مرحباً " + user.user.username;
+                document.getElementById('user-status').style.color = "#10b981";
             } catch (err) {
-                document.getElementById('user-status').innerText = "فشل الاتصال بالشبكة";
+                // الخطوة الذكية 2: لو فشل (بسبب التحويل للينك فيرسل) هيفضل يحاول كل ثانيتين
+                document.getElementById('user-status').innerText = "فشل الاتصال.. إعادة المحاولة تلقائياً";
+                document.getElementById('user-status').style.color = "#ef4444";
+                setTimeout(authenticateUser, 2000);
             }
         }
 
         authenticateUser();
 
         async function payWithPi() {
+            // الخطوة الذكية 3: التأكد إن الشبكة متصلة قبل بدء الدفع
+            const status = document.getElementById('user-status').innerText;
+            if (status.includes("فشل")) {
+                alert("برجاء الانتظار حتى يتم الاتصال بالشبكة بنجاح (تظهر كلمة مرحباً)");
+                return;
+            }
+
             try {
                 const payment = await Pi.createPayment({
                     amount: 0.5,
@@ -146,10 +159,12 @@
                         alert("🎉 بنجاح مبروك يا ياسمين! تم تفعيل الـ VIP");
                     },
                     onCancel: (paymentId) => { console.log("تم إلغاء الدفع", paymentId); },
-                    onError: (error, payment) => { alert("خطأ في الدفع، تأكدي من فتح التطبيق من Pi Browser"); }
+                    onError: (error, payment) => { 
+                        alert("حدث خطأ تقني، تأكدي من فتح التطبيق من خلال Pi Browser وعبر الرابط pinet.com");
+                    }
                 });
             } catch (err) {
-                alert("حدث خطأ تقني، حاول مرة أخرى");
+                alert("حدث خطأ، حاول مرة أخرى");
             }
         }
     </script>

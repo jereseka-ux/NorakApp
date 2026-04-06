@@ -13,7 +13,6 @@ export default async function handler(req, res) {
       body: JSON.stringify({ txid })
     });
     const data = await response.json();
-    console.log("Pi Complete Response:", data);
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: "Complete Failed" });

@@ -3,113 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Norak App - تطبيق نورك</title>
-    
+    <title>تطبيق نورك - Norak Professional</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: #333;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        h1 { color: #673ab7; margin-bottom: 10px; }
-        p { font-size: 16px; line-height: 1.6; color: #666; }
-        .btn-pay {
-            background-color: #673ab7;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 20px;
-            width: 100%;
-        }
-        .btn-pay:hover { background-color: #512da8; }
-        .status { margin-top: 15px; font-size: 14px; color: #888; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #673ab7, #512da8); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; color: #fff; }
+        .container { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; max-width: 450px; width: 90%; color: #333; }
+        h1 { color: #673ab7; font-size: 28px; margin-bottom: 15px; }
+        .user-info { background: #f0f2f5; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; color: #512da8; display: none; }
+        .features { text-align: right; margin: 20px 0; font-size: 14px; }
+        .features li { margin-bottom: 8px; list-style: none; }
+        .features li::before { content: "✅ "; }
+        .btn-pay { background: #ff9800; color: white; border: none; padding: 18px; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-pay:hover { background: #e68900; transform: translateY(-2px); }
+        .btn-pay:disabled { background: #ccc; cursor: not-allowed; }
+        .status { margin-top: 20px; font-size: 13px; color: #777; border-top: 1px solid #eee; padding-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>تطبيق نورك</h1>
-        <p>أهلاً بكِ يا ياسمين! اضغطي على الزر بالأسفل لتفعيل مميزات الـ VIP والبدء في استخدام التطبيق بكامل صلاحياته.</p>
-        
-        <button class="btn-pay" onclick="transferPi()">تفعيل VIP (0.5 Pi)</button>
-        
-        <div id="status-message" class="status">التطبيق متصل بشبكة Pi (Utility Active)</div>
-    </div>
+<div class="container">
+    <h1>نورك - Norak App</h1>
+    <div id="user-welcome" class="user-info">أهلاً بكِ</div>
+    
+    <p>استمتعي بكافة المميزات الاحترافية عبر تفعيل العضوية الممتازة.</p>
+    
+    <ul class="features">
+        <li>وصول كامل لكافة الأدوات التقنية.</li>
+        <li>دعم فني مخصص وتحديثات حصرية.</li>
+        <li>بيئة عمل سريعة وبدون إعلانات.</li>
+    </ul>
 
-    <script>
-        const Pi = window.Pi;
-        // تفعيل وضع الـ Sandbox عشان إحنا لسه بنجرب
-        Pi.init({ version: "1.5", sandbox: true });
+    <button id="main-button" class="btn-pay" onclick="handlePayment()">تفعيل VIP (0.5 Pi)</button>
+    
+    <div id="status-message" class="status">جاري فحص الاتصال بالشبكة...</div>
+</div>
 
-        async function transferPi() {
-            const statusDiv = document.getElementById('status-message');
-            statusDiv.innerText = "جاري الاتصال بالمحفظة...";
+<script>
+    const Pi = window.Pi;
+    let currentUser = null;
 
-            try {
-                const payment = await Pi.createPayment({
-                    amount: 0.5,
-                    memo: "تفعيل مميزات VIP في تطبيق نورك",
-                    metadata: { type: "vip_upgrade" },
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        statusDiv.innerText = "انتظار موافقة السيرفر...";
-                        fetch(`https://norak-app.vercel.app/api/approve?paymentId=${paymentId}`, {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' 
-                            }
-                        });
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        statusDiv.innerText = "جاري تأكيد المعاملة...";
-                        fetch(`https://norak-app.vercel.app/api/complete?paymentId=${paymentId}&txid=${txid}`, {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' 
-                            }
-                        });
-                        statusDiv.innerText = "تم التفعيل بنجاح!";
-                        alert("تم الدفع بنجاح! مبروك الـ VIP يا ياسمين");
-                    },
-                    onCancel: function(paymentId) {
-                        statusDiv.innerText = "تم إلغاء العملية.";
-                    },
-                    onError: function(error, payment) {
-                        statusDiv.innerText = "حدث خطأ في الدفع.";
-                        console.error(error);
-                        alert("تأكدي من فتح التطبيق من داخل Pi Browser وتفعيل الـ Sandbox Mode");
-                    },
-                });
-            } catch (err) {
-                statusDiv.innerText = "فشل في بدء العملية.";
-                console.error(err);
-            }
+    // تهيئة التطبيق وطلب التوثيق فور التحميل
+    Pi.init({ version: "1.5", sandbox: true });
+
+    async function authenticateUser() {
+        const statusDiv = document.getElementById('status-message');
+        const userDiv = document.getElementById('user-welcome');
+        try {
+            const scopes = ['username', 'payments'];
+            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            currentUser = auth.user;
+            userDiv.innerText = `مرحباً: ${currentUser.username}`;
+            userDiv.style.display = 'block';
+            statusDiv.innerText = "متصل وجاهز للعمليات.";
+        } catch (err) {
+            statusDiv.innerText = "يرجى الفتح من Pi Browser للبدء.";
+            console.error(err);
         }
-    </script>
+    }
+
+    // استكمال المدفوعات المعلقة (مهم جداً للقبول في الشبكة)
+    function onIncompletePaymentFound(payment) {
+        console.log("Incomplete payment found", payment);
+    };
+
+    async function handlePayment() {
+        if (!currentUser) {
+            await authenticateUser();
+            if (!currentUser) return;
+        }
+
+        const statusDiv = document.getElementById('status-message');
+        const btn = document.getElementById('main-button');
+        
+        btn.disabled = true;
+        statusDiv.innerText = "بدء عملية الدفع...";
+
+        try {
+            const payment = await Pi.createPayment({
+                amount: 0.5,
+                memo: "VIP Membership Activation",
+                metadata: { orderId: "norak-vip-101" },
+            }, {
+                onReadyForServerApproval: function(paymentId) {
+                    statusDiv.innerText = "انتظار تأكيد السيرفر...";
+                    $.ajax({
+                        url: `https://norak-app.vercel.app/api/approve`,
+                        method: 'POST',
+                        data: JSON.stringify({ paymentId: paymentId }),
+                        contentType: 'application/json',
+                        headers: { 'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' },
+                        success: function() { statusDiv.innerText = "تمت الموافقة، في انتظار التوثيق..."; }
+                    });
+                },
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    statusDiv.innerText = "جاري الإنهاء...";
+                    $.ajax({
+                        url: `https://norak-app.vercel.app/api/complete`,
+                        method: 'POST',
+                        data: JSON.stringify({ paymentId: paymentId, txid: txid }),
+                        contentType: 'application/json',
+                        headers: { 'Authorization': 'key-pvyit7o8vofgh2zex3uicvunqshhff27n2fowc46on65406drtksun5v1d49k6e1' },
+                        success: function() {
+                            statusDiv.innerText = "مبروك! تم التفعيل بنجاح.";
+                            alert("تم تفعيل العضوية بنجاح!");
+                            btn.innerText = "تم التفعيل ✅";
+                        }
+                    });
+                },
+                onCancel: function(paymentId) {
+                    statusDiv.innerText = "تم إلغاء العملية من قبلك.";
+                    btn.disabled = false;
+                },
+                onError: function(error, payment) {
+                    statusDiv.innerText = "خطأ في الاتصال بالمحفظة.";
+                    console.error(error);
+                    btn.disabled = false;
+                }
+            });
+        } catch (err) {
+            statusDiv.innerText = "فشل في معالجة الطلب.";
+            btn.disabled = false;
+        }
+    }
+
+    // بدء التوثيق تلقائياً عند فتح الصفحة
+    window.onload = authenticateUser;
+</script>
+
 </body>
 </html>

@@ -12,7 +12,8 @@ export default async function handler(req, res) {
       }
     });
     const data = await response.json();
-    console.log("Pi Approve Response:", data);
+    
+    // تأكدي إن السعر هنا 0.5 عشان يوافق
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: "Approve Failed" });

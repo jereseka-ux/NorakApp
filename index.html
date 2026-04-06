@@ -11,7 +11,7 @@
             --bg-dark: #0f172a;
             --card-bg: #1e293b;
             --text-light: #f8fafc;
-            --accent: #10 b981;
+            --accent: #10b981;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -40,7 +40,7 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .counter-val { font-size: 3rem; font-weight: bold; color: var(--accent); margin: 10px 0; }
+        .counter-val { font-size: 3rem; font-weight: bold; color: var(--accent); }
         button {
             background-color: var(--primary-color);
             color: white;
@@ -72,14 +72,14 @@
 <body>
 
     <div class="header">
-        <img src="https://norak-app.vercel.app/logo.png" alt="Nourk Logo" class="logo" onerror="this.src='https://via.placeholder.com/80'">
+        <img src="https://norak-app.vercel.app/logo.png" alt="Nourk Logo" class="logo">
         <h1>نورك (NOURK)</h1>
         <p id="user-status">جاري الاتصال بشبكة باي...</p>
     </div>
 
     <div class="container">
         <div class="card">
-            <h3>السبحة الإلكترونية</h3>
+            <h3>📿 السبحة الإلكترونية</h3>
             <div id="counter" class="counter-val">0</div>
             <button onclick="count()">تسبيح</button>
             <button style="background: #ef4444; width: auto; font-size: 0.8rem;" onclick="reset()">تصفير</button>
@@ -87,15 +87,15 @@
 
         <div class="card">
             <h3>مميزات الـ VIP</h3>
-            <p>فعل العضوية الآن بـ 3.14 باي فقط</p>
+            <p>فعل العضوية الآن بـ 0.5 باي فقط</p>
             <button class="btn-vip" onclick="payWithPi()">تفعيل VIP الآن 💎</button>
         </div>
 
         <div class="card">
-            <h3>فهرس السور</h3>
+            <h3>📖 فهرس السور</h3>
             <ul class="surah-list">
-                <li class="surah-item"><span>1. سورة الفاتحة</span> <span>7 آيات</span></li>
-                <li class="surah-item"><span>2. سورة البقرة</span> <span>286 آية</span></li>
+                <li class="surah-item"><span>1. سورة الفاتحة</span><span>7 آيات</span></li>
+                <li class="surah-item"><span>2. سورة البقرة</span><span>286 آية</span></li>
             </ul>
         </div>
     </div>
@@ -107,7 +107,7 @@
         function reset() { countVal = 0; counterEl.innerText = countVal; }
 
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
+        Pi.init({ version: "2.0", sandbox: false });
 
         async function authenticateUser() {
             try {
@@ -115,17 +115,18 @@
                 const user = await Pi.authenticate(scopes, (payment) => {
                     console.log("دفع معلق:", payment);
                 });
-                document.getElementById('user-status').innerText = "مرحباً، " + user.user.username + " ✅";
+                document.getElementById('user-status').innerText = "مرحباً " + user.user.username;
             } catch (err) {
-                document.getElementById('user-status').innerText = "نورك متصل بالشبكة ✅";
+                document.getElementById('user-status').innerText = "فشل الاتصال بالشبكة";
             }
         }
+
         authenticateUser();
 
         async function payWithPi() {
             try {
                 const payment = await Pi.createPayment({
-                    amount: 3.14,
+                    amount: 0.5,
                     memo: "تفعيل عضوية VIP - تطبيق نورك",
                     metadata: { itemId: "vip_membership" },
                 }, {
@@ -142,12 +143,14 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId, txid })
                         });
-                        alert("مبروك يا ياسمين! تم تفعيل الـ VIP بنجاح 🎉");
+                        alert("🎉 بنجاح مبروك يا ياسمين! تم تفعيل الـ VIP");
                     },
-                    onCancel: (paymentId) => console.log("تم إلغاء الدفع"),
-                    onError: (error) => alert("تأكدي من فتح التطبيق من Sandbox في Pi Browser"),
+                    onCancel: (paymentId) => { console.log("تم إلغاء الدفع", paymentId); },
+                    onError: (error, payment) => { alert("خطأ في الدفع، تأكدي من فتح التطبيق من Pi Browser"); }
                 });
-            } catch (err) { alert("حدث خطأ تقني، حاول مرة أخرى"); }
+            } catch (err) {
+                alert("حدث خطأ تقني، حاول مرة أخرى");
+            }
         }
     </script>
 </body>

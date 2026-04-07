@@ -124,9 +124,8 @@
         // --- إعدادات وتوثيق Pi Network ---
         const Pi = window.Pi;
         // هام جداً: تأكدي إن Sandbox mode مطفي (false) لما تطلقي التطبيق حقيقي، بس دلوقتي خليه true للتجربة.
-        Pi.init({ version: "2.0", sandbox: true }); 
-
-        async function authUser() {
+        
+        async function Pi.init({ version: "2.0", sandbox: false })
             const userBadge = document.getElementById('username');
             try {
                 // طلب توثيق حقيقي من البيئة

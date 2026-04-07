@@ -130,9 +130,7 @@
             const userBadge = document.getElementById('username');
             try {
                 // طلب توثيق حقيقي من البيئة
-                const scopes = ['username'];
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
+                const scopes = ['username', 'payments'];
                 if (auth && auth.user) {
                     userBadge.innerText = "مرحباً: " + auth.user.username;
                     console.log("تم التوثيق بنجاح لـ:", auth.user.username);

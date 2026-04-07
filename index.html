@@ -15,25 +15,24 @@
             --bg: #121212; --text: #e0e0e0; --primary: #bb86fc; --primary-dark: #9c64e6;
             --card: #1e1e1e; --nav-bg: #1e1e1e; --shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding-bottom: 80px; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; transition: 0.3s; overflow-x: hidden; }
         .header { background: var(--card); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
-        .app-title { margin: 0; font-size: 1.4rem; font-weight: 700; color: var(--primary); }
-        .user-badge { font-size: 0.85rem; background: rgba(103, 58, 183, 0.1); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-weight: 600; }
-        .theme-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; }
+        .app-title { margin: 0; font-size: 1.4rem; color: var(--primary); }
+        .user-badge { font-size: 0.85rem; background: rgba(103, 58, 183, 0.1); color: var(--primary); padding: 5px 12px; border-radius: 20px; }
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
         .section { display: none; animation: fadeIn 0.4s; }
         .active-section { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .item-card { background: var(--card); margin-bottom: 12px; padding: 18px; border-radius: var(--border-radius); box-shadow: var(--shadow); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .item-card { background: var(--card); margin-bottom: 12px; padding: 18px; border-radius: var(--border-radius); box-shadow: var(--shadow); cursor: pointer; display: flex; justify-content: space-between; }
         .content-view { line-height: 2.3; font-size: 1.35rem; text-align: justify; background: var(--card); padding: 25px; border-radius: var(--border-radius); }
-        .ayah-num { color: var(--primary); font-weight: bold; font-size: 1rem; margin: 0 3px; }
-        .back-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; margin-bottom: 15px; cursor: pointer; width: 100%; }
-        .counter { font-size: 6rem; font-weight: 800; color: var(--primary); text-align: center; margin: 20px 0; }
-        .tap-btn { width: 180px; height: 180px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: block; margin: 0 auto; }
+        .ayah-num { color: var(--primary); font-weight: bold; margin: 0 3px; }
+        .back-btn { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 10px; margin-bottom: 15px; cursor: pointer; width: 100%; }
+        .counter { font-size: 5rem; text-align: center; color: var(--primary); margin: 20px 0; }
+        .tap-btn { width: 150px; height: 150px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 1.2rem; cursor: pointer; display: block; margin: 0 auto; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: var(--card); padding: 30px; border-radius: var(--border-radius); width: 85%; max-width: 400px; text-align: center; }
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-btn { border: none; background: none; color: #888; cursor: pointer; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .nav-btn { border: none; background: none; color: #888; cursor: pointer; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; flex: 1; }
         .nav-btn.active { color: var(--primary); font-weight: bold; }
     </style>
 </head>
@@ -42,36 +41,36 @@
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <div id="modalText" class="modal-text"></div>
-            <button onclick="closeModal()" style="margin-top:20px; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px;">تقبل الله</button>
+            <button class="back-btn" onclick="closeModal()" style="margin-top:20px;">تقبل الله</button>
         </div>
     </div>
 
     <div class="header">
         <div class="user-badge" id="username">جاري التحقق...</div>
         <h1 class="app-title">نُورك</h1>
-        <button onclick="toggleTheme()" class="theme-btn">🌓</button>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🌓</button>
     </div>
 
     <div class="container">
         <div id="quran-sec" class="section active-section">
-            <div id="juz-index">
-                <h4>فهرس الأجزاء</h4>
-                <div id="juzList"></div>
-            </div>
+            <div id="juz-index"><h4>فهرس الأجزاء</h4><div id="juzList"></div></div>
             <div id="quran-content" style="display:none;">
-                <button onclick="showJuzIndex()" class="back-btn">⬅️ الفهرس</button>
+                <button onclick="showJuzIndex()" class="back-btn">⬅️ العودة للفهرس</button>
                 <div class="content-view" id="juzText"></div>
             </div>
         </div>
+
         <div id="adhkar-sec" class="section">
-            <h4>الأذكار اليومية</h4>
+            <h4>الأذكار</h4>
             <div class="item-card" onclick="showDhkr('subah')"><span>أذكار الصباح</span><span>✨</span></div>
             <div class="item-card" onclick="showDhkr('masa')"><span>أذكار المساء</span><span>🌙</span></div>
+            <div class="item-card" onclick="showDhkr('salah')"><span>أذكار بعد الصلاة</span><span>📿</span></div>
         </div>
+
         <div id="misbaha-sec" class="section">
             <div class="counter" id="count">0</div>
-            <button class="tap-btn" onclick="countUp()">أكبر</button>
-            <button onclick="resetCount()" style="display:block; margin:20px auto; background:none; border:none; color:red; cursor:pointer;">إعادة ضبط</button>
+            <button class="tap-btn" onclick="countUp()">سبّح</button>
+            <button onclick="resetCount()" style="display:block; margin:20px auto; border:none; background:none; color:red; cursor:pointer;">تصفير</button>
         </div>
     </div>
 
@@ -79,38 +78,28 @@
         <button class="nav-btn active" onclick="switchSection('quran-sec', this)">📖<br>القرآن</button>
         <button class="nav-btn" onclick="switchSection('adhkar-sec', this)">✨<br>الأذكار</button>
         <button class="nav-btn" onclick="switchSection('misbaha-sec', this)">📿<br>المسبحة</button>
-        <button class="nav-btn" onclick="handlePayment()" style="color: #fbc02d;">☕<br>ادعمنا</button>
+        <button class="nav-btn" onclick="handlePayment()" style="color: #fbc02d;">☕<br>دعم</button>
     </nav>
 
 <script>
-    // --- إعدادات Pi Network (التشغيل الحقيقي) ---
     const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: false }); // تم التغيير لـ false بناءً على طلبك
+    // تم التغيير لـ false بناءً على طلبك للتطبيق الحقيقي
+    Pi.init({ version: "2.0", sandbox: false });
 
     async function authUser() {
-        const userBadge = document.getElementById('username');
         try {
             const scopes = ['username', 'payments'];
             const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            if (auth && auth.user) {
-                userBadge.innerText = "مرحباً: " + auth.user.username;
-            }
-        } catch (err) {
-            userBadge.innerText = "زائر";
-        }
+            if (auth) document.getElementById('username').innerText = auth.user.username;
+        } catch (e) { document.getElementById('username').innerText = "زائر"; }
     }
     window.onload = authUser;
 
     function onIncompletePaymentFound(payment) { console.log("Incomplete:", payment); }
 
-    // --- وظيفة الدفع (الربط مع Render) ---
+    // --- نظام الدفع المرتبط بـ Render ---
     async function handlePayment() {
-        const paymentData = { 
-            amount: 0.1,
-            memo: "دعم تطبيق نورك",
-            metadata: { orderId: Date.now().toString() }
-        };
-
+        const paymentData = { amount: 0.1, memo: "دعم تطبيق نورك", metadata: { orderId: Date.now().toString() } };
         const paymentCallbacks = {
             onReadyForServerApproval: async (paymentId) => {
                 await fetch("https://YOUR-RENDER-URL.onrender.com/approve", {
@@ -125,68 +114,58 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ paymentId, txid })
                 });
-                openModal("تم الدفع بنجاح 💖");
+                openModal("تم الدفع بنجاح 💖 شكراً لدعمك.");
             },
-            onCancel: () => openModal("تم إلغاء الدفع"),
-            onError: () => openModal("خطأ في الدفع")
+            onCancel: () => openModal("تم إلغاء العملية"),
+            onError: (e) => openModal("خطأ في الدفع")
         };
-        try { await Pi.createPayment(paymentData, paymentCallbacks); } catch (e) { openModal("فشل بدء الدفع"); }
+        try { await Pi.createPayment(paymentData, paymentCallbacks); } catch (e) { openModal("فشل الاتصال بـ Pi"); }
     }
 
-    // --- بقية وظائف التطبيق (القرآن، الأذكار، المسبحة) ---
-    const modal = document.getElementById('infoModal');
-    const modalText = document.getElementById('modalText');
-    function openModal(text) { modalText.innerHTML = text; modal.style.display = 'flex'; }
-    function closeModal() { modal.style.display = 'none'; }
+    // --- وظائف التطبيق الداخلية ---
+    function openModal(t) { document.getElementById('modalText').innerHTML = t; document.getElementById('infoModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+    
+    const adhkarData = { 
+        subah: "أصبحنا وأصبح الملك لله والحمد لله..", 
+        masa: "أمسينا وأمسى الملك لله والحمد لله..",
+        salah: "أستغفر الله (3 مرات)، اللهم أنت السلام.." 
+    };
+    function showDhkr(k) { openModal(adhkarData[k]); }
 
-    const adhkarData = { subah: "سبحان الله وبحمده (100 مرة)", masa: "يا حي يا قيوم برحمتك أستغيث" };
-    function showDhkr(type) { openModal(adhkarData[type]); }
-
-    function switchSection(id, btn) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
-        document.getElementById(id).classList.add('active-section');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function switchSection(s, b) {
+        document.querySelectorAll('.section').forEach(x => x.classList.remove('active-section'));
+        document.getElementById(s).classList.add('active-section');
+        document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
     }
 
-    // بناء فهرس الأجزاء
     const juzList = document.getElementById('juzList');
     for (let i = 1; i <= 30; i++) {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `<span>الجزء ${i}</span> 📖`;
-        div.onclick = () => loadJuz(i);
-        juzList.appendChild(div);
+        let d = document.createElement('div'); d.className = 'item-card'; d.innerHTML = `<span>الجزء ${i}</span> 📖`;
+        d.onclick = () => loadJuz(i); juzList.appendChild(d);
     }
 
-    async function loadJuz(num) {
-        const juzTextEl = document.getElementById('juzText');
+    async function loadJuz(n) {
+        const view = document.getElementById('juzText');
         document.getElementById('juz-index').style.display = 'none';
         document.getElementById('quran-content').style.display = 'block';
-        juzTextEl.innerHTML = "جاري التحميل...";
-        const res = await fetch(`https://api.alquran.cloud/v1/juz/${num}/quran-uthmani`);
+        view.innerHTML = "جاري التحميل...";
+        const res = await fetch(`https://api.alquran.cloud/v1/juz/${n}/quran-uthmani`);
         const data = await res.json();
-        juzTextEl.innerHTML = data.data.ayahs.map(a => a.text + ` <span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
+        view.innerHTML = data.data.ayahs.map(a => a.text + ` <span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
     }
+    function showJuzIndex() { document.getElementById('juz-index').style.display = 'block'; document.getElementById('quran-content').style.display = 'none'; }
 
-    function showJuzIndex() {
-        document.getElementById('juz-index').style.display = 'block';
-        document.getElementById('quran-content').style.display = 'none';
-    }
-
-    let c = parseInt(localStorage.getItem('noork_counter')) || 0;
+    let c = parseInt(localStorage.getItem('count')) || 0;
     document.getElementById('count').innerText = c;
-    function countUp() {
-        c++; document.getElementById('count').innerText = c;
-        localStorage.setItem('noork_counter', c);
-        if (navigator.vibrate) navigator.vibrate(50);
-    }
-    function resetCount() { c = 0; document.getElementById('count').innerText = c; localStorage.setItem('noork_counter', c); }
+    function countUp() { c++; document.getElementById('count').innerText = c; localStorage.setItem('count', c); if(navigator.vibrate) navigator.vibrate(50); }
+    function resetCount() { c = 0; document.getElementById('count').innerText = 0; localStorage.setItem('count', 0); }
 
     function toggleTheme() {
         const b = document.body;
-        const newTheme = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        b.setAttribute('data-theme', newTheme);
+        const t = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        b.setAttribute('data-theme', t);
     }
 </script>
 </body>

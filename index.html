@@ -25,12 +25,12 @@
         .sebha-btn { width: 150px; height: 150px; border-radius: 50%; border: 5px solid var(--accent); background: none; color: var(--accent); font-size: 2rem; font-weight: bold; cursor: pointer; margin: 30px auto; display: block; }
     </style>
 </head>
-<body data-theme="light">
+<body data-theme="dark">
 
     <div class="header">
         <div class="user-info" id="username">تحقق...</div>
         <h2 style="margin:0; color:var(--accent);">نُورك</h2>
-        <button onclick="toggleTheme()" class="btn-tool" id="themeBtn"><i class="fas fa-moon"></i></button>
+        <button onclick="toggleTheme()" class="btn-tool" id="themeBtn"><i class="fas fa-sun"></i></button>
     </div>
 
     <div class="controls-bar" id="readingControls" style="display:none;">
@@ -39,8 +39,7 @@
         <button class="btn-tool" onclick="saveMark()"><i class="fas fa-bookmark"></i></button>
     </div>
 
-    <div class="container" id="mainView">
-        </div>
+    <div id="mainView" class="container"></div>
 
     <nav class="nav-bar">
         <button class="nav-link active" onclick="loadPage('quran', this)"><i class="fas fa-book-quran"></i>القرآن</button>
@@ -51,12 +50,12 @@
 
 <script>
     const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: false });
+    // التعديل المطلوب: تفعيل وضع الساندبوكس للتجربة
+    Pi.init({ version: "2.0", sandbox: true }); 
 
     let fontSize = 22;
     let currentJuz = null;
 
-    // تشغيل الهوية
     async function auth() {
         try {
             const user = await Pi.authenticate(['username', 'payments'], (p) => console.log(p));
@@ -65,7 +64,6 @@
     }
     window.onload = () => { auth(); loadPage('quran', document.querySelector('.nav-link')); };
 
-    // تبديل الصفحات
     function loadPage(type, btn) {
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         btn.classList.add('active');
@@ -78,38 +76,28 @@
                 view.innerHTML += `<div class="item-card" onclick="fetchJuz(${i})"><span>الجزء ${i}</span><i class="fas fa-angle-left"></i></div>`;
             }
         } else if(type === 'azkar') {
-            view.innerHTML = `
-                <div class="item-card" onclick="showText('أذكار الصباح', 'أصبحنا وأصبح الملك لله...')">أذكار الصباح</div>
-                <div class="item-card" onclick="showText('أذكار المساء', 'أمسينا وأمسى الملك لله...')">أذكار المساء</div>
-            `;
+            view.innerHTML = `<div class="item-card" onclick="showText('أذكار الصباح', 'أصبحنا وأصبح الملك لله...')">أذكار الصباح</div>
+                              <div class="item-card" onclick="showText('أذكار المساء', 'أمسينا وأمسى الملك لله...')">أذكار المساء</div>`;
         } else if(type === 'sebha') {
             let c = localStorage.getItem('s_count') || 0;
-            view.innerHTML = `<div style="text-align:center;"><h1 id="s_num" style="font-size:4rem;">${c}</h1><button class="sebha-btn" onclick="press()">سبّح</button><p onclick="res_s()" style="color:red; cursor:pointer;">تصفير</p></div>`;
+            view.innerHTML = `<div style="text-align:center;"><h1 id="s_num" style="font-size:4rem;">${c}</h1><button class="sebha-btn" onclick="press()">سبّح</button></div>`;
         }
     }
 
-    // جلب القرآن من المكتبة الخارجية
     async function fetchJuz(n) {
         currentJuz = n;
         const view = document.getElementById('mainView');
         document.getElementById('readingControls').style.display = 'flex';
-        view.innerHTML = '<p style="text-align:center;">جاري تحميل كلام الله...</p>';
+        view.innerHTML = '<p style="text-align:center;">جاري التحميل من المكتبة الخارجية...</p>';
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/juz/${n}/quran-uthmani`);
             const data = await res.json();
-            let html = `<button onclick="loadPage('quran', document.querySelector('.nav-link'))" style="border:none; background:none; color:var(--accent); cursor:pointer;">🔙 العودة للفهرس</button><div class="quran-text" id="q_body">`;
-            html += data.data.ayahs.map(a => a.text + `<span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
-            html += '</div>';
+            let html = `<div class="quran-text" id="q_body">` + data.data.ayahs.map(a => a.text + `<span class="ayah-num">${a.numberInSurah}</span>`).join(' ') + `</div>`;
             view.innerHTML = html;
             document.getElementById('q_body').style.fontSize = fontSize + 'px';
-        } catch(e) { view.innerHTML = 'خطأ في التحميل، تأكدي من الإنترنت.'; }
+        } catch(e) { view.innerHTML = 'خطأ في الاتصال بالمكتبة.'; }
     }
 
-    function showText(title, txt) {
-        document.getElementById('mainView').innerHTML = `<button onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])" style="border:none; background:none; color:var(--accent); cursor:pointer;">🔙 العودة</button><h3>${title}</h3><div class="quran-text">${txt}</div>`;
-    }
-
-    // السيتنجس
     function toggleTheme() {
         const b = document.body;
         const isDark = b.getAttribute('data-theme') === 'dark';
@@ -118,21 +106,17 @@
     }
 
     function changeFont(v) { fontSize += v; if(document.getElementById('q_body')) document.getElementById('q_body').style.fontSize = fontSize + 'px'; }
+    function saveMark() { localStorage.setItem('bookmark', currentJuz); alert('تم حفظ العلامة عند الجزء ' + currentJuz); }
+    function press() { let s = document.getElementById('s_num'); s.innerText = ++s.innerText; localStorage.setItem('s_count', s.innerText); }
 
-    function saveMark() { localStorage.setItem('bookmark', currentJuz); alert('تم حفظ الجزء ' + currentJuz); }
-
-    function press() { let s = document.getElementById('s_num'); s.innerText = ++s.innerText; localStorage.setItem('s_count', s.innerText); if(navigator.vibrate) navigator.vibrate(50); }
-    function res_s() { document.getElementById('s_num').innerText = 0; localStorage.setItem('s_count', 0); }
-
-    // نظام الدفع المصلح
     async function pay() {
         try {
-            await Pi.createPayment({ amount: 1, memo: "دعم نورك 💖", metadata: {id: Date.now()} }, {
+            await Pi.createPayment({ amount: 1, memo: "دعم نورك", metadata: {id: Date.now()} }, {
                 onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({paymentId: id}) }),
                 onReadyForServerCompletion: (id, txid) => fetch('/api/complete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({paymentId: id, txid}) }),
-                onCancel: () => console.log('Canceled'), onError: (e) => alert('خطأ في الشبكة')
+                onCancel: () => console.log('Canceled'), onError: (e) => alert('خطأ في العملية')
             });
-        } catch(e) { alert('افتح من Pi Browser'); }
+        } catch(e) { alert('يرجى المحاولة من Pi Browser'); }
     }
 </script>
 </body>

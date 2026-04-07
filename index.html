@@ -3,153 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق نورك - Norak</title>
-    <link rel="manifest" href="manifest.json">
+    <title>تطبيق نورك - Noork</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link rel="stylesheet" href="path-to-your-external-quran-library.css">
     <style>
-        :root {
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #ffffff;
-            --highlight: #f39c12;
-        }
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-        }
-        header, footer { padding:10px; text-align:center; background-color:var(--card); }
-        main { padding:10px; }
-        button {
-            padding:10px 15px;
-            margin:5px;
-            background-color: var(--highlight);
-            border:none;
-            border-radius:5px;
-            color:#000;
-            cursor:pointer;
-        }
-        .card {
-            background-color: var(--card);
-            padding:10px;
-            margin:10px 0;
-            border-radius:10px;
-        }
-        .bookmark { float:left; cursor:pointer; color:var(--highlight); }
-        #settings-panel { display:none; background-color:var(--card); padding:10px; border-radius:10px; margin-bottom:10px; }
-        .light-mode {
-            --bg:#ffffff; --card:#f0f0f0; --text:#000000; --highlight:#f39c12;
-        }
+        :root { --bg: #fdfdfd; --text: #222; --primary: #6b38a5; --card: #ffffff; --nav: #f8f9fa; }
+        [data-theme="dark"] { --bg: #121212; --text: #e0e0e0; --primary: #bb86fc; --card: #1e1e1e; --nav: #222; }
+        
+        body { background-color: var(--bg); color: var(--text); font-family: 'Arial', sans-serif; margin: 0; padding-bottom: 70px; transition: 0.3s; }
+        .header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .user-info { font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 15px; }
+        .container { padding: 15px; }
+        .section { display: none; }
+        .active-section { display: block; }
+        
+        /* كروت الفهرس والأذكار */
+        .item-card { background: var(--card); margin: 10px 0; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(0,0,0,0.05); }
+        .content-view { line-height: 2.2; font-size: 1.3rem; text-align: justify; background: var(--card); padding: 20px; border-radius: 15px; }
+
+        /* المسبحة */
+        .misbaha-container { text-align: center; padding: 40px 20px; }
+        .counter { font-size: 5rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
+        .tap-btn { width: 200px; height: 200px; border-radius: 50%; border: 8px solid var(--primary); background: none; color: var(--text); font-size: 1.5rem; cursor: pointer; transition: 0.1s; }
+        .tap-btn:active { transform: scale(0.95); background: var(--primary); color: white; }
+
+        /* الشغال السفلي */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--nav); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.1); }
+        .nav-btn { border: none; background: none; color: var(--text); cursor: pointer; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .nav-btn.active { color: var(--primary); font-weight: bold; }
     </style>
 </head>
-<body>
-<header>
-    <h1>تطبيق نورك</h1>
-    <button id="toggle-light">تغيير الإضاءة</button>
-    <button id="toggle-settings">الإعدادات</button>
-</header>
+<body data-theme="light">
 
-<div id="settings-panel">
-    <h3>الإعدادات</h3>
-    <label>حجم الخط:
-        <input type="range" id="font-size" min="12" max="28" value="16">
-    </label>
-</div>
+    <div class="header">
+        <div class="user-info" id="username">جاري التحميل...</div>
+        <h3 style="margin:0;">تطبيق نُورك</h3>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.3rem; cursor:pointer;">💡</button>
+    </div>
 
-<main>
-    <div id="content">
-        <!-- القرآن كامل مرتبط بالمكتبة الخارجية -->
-        <div id="quran-container"></div>
-
-        <!-- أدعية وأذكار -->
-        <div class="card">
-            <h2>أدعية وأذكار يومية</h2>
-            <div id="azkar-container"></div>
+    <div class="container">
+        <div id="quran-sec" class="section active-section">
+            <div id="juz-index">
+                <h4>فهرس الأجزاء الـ ٣٠</h4>
+                <div id="juzList"></div>
+            </div>
+            <div id="quran-content" style="display:none;">
+                <button onclick="showJuzIndex()" style="margin-bottom:10px;">⬅ رجوع للفهرس</button>
+                <div class="content-view" id="juzText"></div>
+            </div>
         </div>
 
-        <!-- زر الدفع -->
-        <div class="card">
-            <h2>الدفع</h2>
-            <button id="pay-button">ادفع الآن</button>
-            <p id="pay-status"></p>
+        <div id="adhkar-sec" class="section">
+            <h4>الأذكار والروحانيات</h4>
+            <div class="item-card" onclick="alert('سُبْحَانَ اللَّهِ وَبِحَمْدِهِ (١٠٠ مرة)')"><span>أذكار الصباح</span><span>⭐</span></div>
+            <div class="item-card" onclick="alert('أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ')"><span>أذكار المساء</span><span>🌙</span></div>
+            <div class="item-card" onclick="alert('اللهم أنت السلام ومنك السلام')"><span>أذكار بعد الصلاة</span><span>🕌</span></div>
+        </div>
+
+        <div id="misbaha-sec" class="section">
+            <div class="misbaha-container">
+                <div class="counter" id="count">٠</div>
+                <button class="tap-btn" onclick="countUp()">اضغط للتسبيح</button><br><br>
+                <button onclick="resetCount()" style="color:red; background:none; border:none; cursor:pointer;">إعادة ضبط</button>
+            </div>
         </div>
     </div>
-</main>
 
-<footer>&copy; 2026 تطبيق نورك</footer>
+    <nav class="nav-bar">
+        <button class="nav-btn active" onclick="switchSection('quran-sec', this)">📖 القرآن</button>
+        <button class="nav-btn" onclick="switchSection('adhkar-sec', this)">✨ الأذكار</button>
+        <button class="nav-btn" onclick="switchSection('misbaha-sec', this)">📿 المسبحة</button>
+        <button class="nav-btn" onclick="handlePayment()">💳 دعم Pi</button>
+        <button class="nav-btn" onclick="goToBookmark()">🔖 مرجعيتي</button>
+    </nav>
 
-<script src="path-to-your-external-quran-library.js"></script>
-<script>
-    // تغيير الإضاءة
-    const toggleLightBtn = document.getElementById('toggle-light');
-    toggleLightBtn.addEventListener('click', () => { document.body.classList.toggle('light-mode'); });
+    <script>
+        // --- إعدادات Pi Network وسحب اسم المستخدم ---
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: true });
 
-    // فتح وغلق الإعدادات
-    const toggleSettingsBtn = document.getElementById('toggle-settings');
-    const settingsPanel = document.getElementById('settings-panel');
-    toggleSettingsBtn.addEventListener('click', () => {
-        settingsPanel.style.display = settingsPanel.style.display === 'block' ? 'none' : 'block';
-    });
-
-    // تغيير حجم الخط
-    const fontSizeInput = document.getElementById('font-size');
-    fontSizeInput.addEventListener('input', () => {
-        document.body.style.fontSize = fontSizeInput.value + 'px';
-    });
-
-    // تحميل القرآن من المكتبة الخارجية
-    const quranContainer = document.getElementById('quran-container');
-    QuranLibrary.loadAllParts().then(parts => {
-        parts.forEach((part, index) => {
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.id = 'quran-part-' + (index+1);
-            div.innerHTML = `<span class="bookmark" onclick="toggleBookmark(${index+1})">★</span>
-                             <h2>الجزء ${index+1}</h2><p>${part.text}</p>`;
-            quranContainer.appendChild(div);
-        });
-    });
-
-    // تحميل الأذكار
-    const azkarContainer = document.getElementById('azkar-container');
-    AzkarLibrary.loadDaily().then(azkar => {
-        azkar.forEach(z => {
-            const p = document.createElement('p');
-            p.textContent = z;
-            azkarContainer.appendChild(p);
-        });
-    });
-
-    // بوكمارك
-    function toggleBookmark(part) {
-        const el = document.getElementById('quran-part-' + part);
-        el.querySelector('.bookmark').classList.toggle('active');
-        alert('تم التمييز على الجزء ' + part);
-    }
-
-    // تفعيل الدفع عبر Pi
-    const payBtn = document.getElementById('pay-button');
-    const payStatus = document.getElementById('pay-status');
-    payBtn.addEventListener('click', async () => {
-        payStatus.textContent = 'جارٍ معالجة الدفع...';
-        try {
-            const payment = await Pi.createPayment({
-                amount: 1.0, 
-                currency: 'PI',
-                memo: 'تبرع لتطبيق نورك'
-            });
-            if(payment.status === 'success'){
-                payStatus.textContent = 'تم الدفع بنجاح!';
-            } else {
-                payStatus.textContent = 'فشل الدفع، حاول مرة أخرى.';
+        async function authUser() {
+            try {
+                const scopes = ['username'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                document.getElementById('username').innerText = "مرحباً: " + auth.user.username;
+            } catch (err) {
+                document.getElementById('username').innerText = "زائر";
             }
-        } catch(e){
-            console.error(e);
-            payStatus.textContent = 'حدث خطأ أثناء الدفع.';
         }
-    });
-</script>
+        authUser();
+
+        function onIncompletePaymentFound(payment) { /* للتعامل مع المدفوعات المعلقة */ }
+
+        // --- نظام التبديل بين الأقسام ---
+        function switchSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
+            document.getElementById(id).classList.add('active-section');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // --- القرآن الكريم (الربط بالمكتبة) ---
+        const juzList = document.getElementById('juzList');
+        for (let i = 1; i <= 30; i++) {
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `<span>الجزء ${i}</span> <span>📖</span>`;
+            div.onclick = () => loadJuz(i);
+            juzList.appendChild(div);
+        }
+
+        async function loadJuz(num) {
+            document.getElementById('juz-index').style.display = 'none';
+            document.getElementById('quran-content').style.display = 'block';
+            document.getElementById('juzText').innerText = "جاري التحميل من المكتبة...";
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/juz/${num}/quran-uthmani`);
+                const data = await res.json();
+                let txt = data.data.ayahs.map(a => a.text + ` (${a.numberInSurah})`).join(' ');
+                document.getElementById('juzText').innerText = txt;
+                localStorage.setItem('noork_bookmark', num);
+            } catch { document.getElementById('juzText').innerText = "خطأ في الاتصال."; }
+        }
+
+        function showJuzIndex() {
+            document.getElementById('juz-index').style.display = 'block';
+            document.getElementById('quran-content').style.display = 'none';
+        }
+
+        function goToBookmark() {
+            const b = localStorage.getItem('noork_bookmark');
+            if(b) loadJuz(b); else alert("لا يوجد علامة محفوظة.");
+        }
+
+        // --- المسبحة ---
+        let c = 0;
+        function countUp() { c++; document.getElementById('count').innerText = c; }
+        function resetCount() { c = 0; document.getElementById('count').innerText = c; }
+
+        // --- الإضاءة ---
+        function toggleTheme() {
+            const b = document.body;
+            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+
+        // --- دفع Pi ---
+        async function handlePayment() {
+            try {
+                await Pi.createPayment({ amount: 0.1, memo: "دعم تطبيق نورك", metadata: { id: 1 } }, 
+                { onReadyForServerApproval: (id) => {}, onReadyForServerCompletion: (id, tx) => alert("تم الدفع!"), onCancel: (id) => {}, onError: (e) => {} });
+            } catch { alert("افتح التطبيق من Pi Browser"); }
+        }
+    </script>
 </body>
 </html>

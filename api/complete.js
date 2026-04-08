@@ -1,5 +1,7 @@
+import fetch from 'node-fetch';
+
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
     const { paymentId, txid } = req.body;
     const apiKey = process.env.PI_API_KEY;

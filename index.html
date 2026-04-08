@@ -34,9 +34,11 @@
         <i class="fas fa-adjust" onclick="toggleTheme()" style="font-size: 1.3rem; cursor: pointer;"></i>
     </div>
 
-    <div class="controls-bar" id="reading_tools" style="display:none;">
+    <div class="controls-bar" id="reading_tools">
         <button class="btn-tool" onclick="adjustFont(2)"><i class="fas fa-plus"></i></button>
         <button class="btn-tool" onclick="adjustFont(-2)"><i class="fas fa-minus"></i></button>
+        <button class="btn-tool" onclick="saveBookmark()"><i class="fas fa-bookmark"></i></button>
+        <button class="btn-tool" onclick="loadBookmark()"><i class="fas fa-history"></i></button>
     </div>
 
     <div class="container" id="view_area"></div>
@@ -54,7 +56,8 @@
 
     let appState = {
         font: parseInt(localStorage.getItem('noork_font')) || 24,
-        count: parseInt(localStorage.getItem('noork_count')) || 0
+        count: parseInt(localStorage.getItem('noork_count')) || 0,
+        lastJuz: localStorage.getItem('noork_bookmark') || null
     };
 
     const azkarContent = {
@@ -83,7 +86,7 @@
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         btn.classList.add('active');
         const view = document.getElementById('view_area');
-        document.getElementById('reading_tools').style.display = (page === 'quran' || page === 'azkar') ? 'flex' : 'none';
+        document.getElementById('reading_tools').style.display = (page === 'quran') ? 'flex' : 'none';
 
         if(page === 'quran') {
             view.innerHTML = '<h3 style="text-align:center;">فهرس الأجزاء</h3>';
@@ -98,6 +101,7 @@
     async function fetchQuran(juz) {
         const view = document.getElementById('view_area');
         view.innerHTML = '<p style="text-align:center;">جاري التحميل...</p>';
+        appState.currentJuz = juz;
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/juz/${juz}/quran-uthmani`);
             const data = await res.json();
@@ -106,6 +110,18 @@
             html += '</div>';
             view.innerHTML = html;
         } catch(e) { view.innerHTML = 'خطأ في الاتصال.'; }
+    }
+
+    function saveBookmark() {
+        if(appState.currentJuz) {
+            localStorage.setItem('noork_bookmark', appState.currentJuz);
+            alert("تم حفظ الجزء " + appState.currentJuz);
+        }
+    }
+
+    function loadBookmark() {
+        const b = localStorage.getItem('noork_bookmark');
+        if(b) fetchQuran(b); else alert("لا يوجد علامة محفوظة");
     }
 
     function showAzkarList(type) {
@@ -117,7 +133,7 @@
     function pressSebha() { appState.count++; document.getElementById('s_num').innerText = appState.count; localStorage.setItem('noork_count', appState.count); if(navigator.vibrate) navigator.vibrate(40); }
     function resetSebha() { appState.count = 0; document.getElementById('s_num').innerText = 0; localStorage.setItem('noork_count', 0); }
     function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
-    function adjustFont(v) { appState.font += v; localStorage.setItem('noork_font', appState.font); loadPage('azkar', document.querySelectorAll('.nav-link')[1]); }
+    function adjustFont(v) { appState.font += v; localStorage.setItem('noork_font', appState.font); const q = document.getElementById('q_content'); if(q) q.style.fontSize = appState.font + 'px'; }
 
     async function handlePay() {
         try {
@@ -125,7 +141,6 @@
                 amount: 0.1, memo: "دعم تطبيق نورك 💖", metadata: { type: "donation" }
             }, {
                 onReadyForServerApproval: function(paymentId) {
-                    console.log("Approve call started");
                     return fetch('/api/approve', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -133,7 +148,6 @@
                     }).then(res => res.json());
                 },
                 onReadyForServerCompletion: function(paymentId, txid) {
-                    console.log("Complete call started");
                     return fetch('/api/complete', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

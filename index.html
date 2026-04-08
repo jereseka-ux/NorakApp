@@ -1,235 +1,153 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نورك - تطبيق إسلامي</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body { font-family: 'Traditional Arabic', system-ui, sans-serif; }
-    .nav-active { color: #10b981; border-top: 3px solid #10b981; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>تطبيق نُورك - Noork</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #0f0f0f; --card: #1a1a1a; --accent: #bb86fc; --text: #e0e0e0; --sub: #888; }
+        [data-theme="light"] { --bg: #fdfdfd; --card: #ffffff; --accent: #6200ee; --text: #222; --sub: #555; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding-bottom: 80px; transition: 0.3s; }
+        .header { background: var(--card); padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .user-tag { font-size: 0.85rem; color: var(--accent); font-weight: bold; border: 1px solid var(--accent); padding: 4px 10px; border-radius: 15px; }
+        .controls-bar { display: flex; justify-content: space-around; background: var(--card); padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .btn-tool { border: none; background: none; color: var(--accent); font-size: 1.3rem; cursor: pointer; }
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; min-height: 70vh; }
+        .card { background: var(--card); margin-bottom: 10px; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; }
+        .quran-text { line-height: 2.4; text-align: justify; padding: 15px; font-size: 1.5rem; }
+        .ayah-num { color: var(--accent); font-weight: bold; border: 1px solid var(--accent); border-radius: 50%; padding: 2px 6px; font-size: 0.9rem; margin: 0 5px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.3); }
+        .nav-link { flex: 1; border: none; background: none; color: var(--sub); text-align: center; font-size: 0.8rem; cursor: pointer; }
+        .nav-link.active { color: var(--accent); font-weight: bold; }
+        .nav-link i { display: block; font-size: 1.5rem; margin-bottom: 4px; }
+        .sebha-circle { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--accent); margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: bold; cursor: pointer; position: relative; }
+        .back-btn { background: var(--accent); color: var(--bg); border: none; padding: 8px 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; font-weight: bold; }
+    </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+<body data-theme="dark">
 
-  <!-- Header -->
-  <div class="bg-emerald-800 p-4 flex items-center justify-between shadow-lg">
-    <div class="flex items-center gap-3">
-      <i class="fa-solid fa-moon text-3xl text-yellow-300"></i>
-      <div>
-        <h1 class="text-2xl font-bold">نورك</h1>
-        <p id="username-display" class="text-xs text-emerald-200">جاري التحميل...</p>
-      </div>
+    <div class="header">
+        <div class="user-tag" id="user_display">تحقق...</div>
+        <h2 style="margin:0; color:var(--accent);">نُورك</h2>
+        <i class="fas fa-adjust" onclick="toggleTheme()" style="font-size: 1.3rem; cursor: pointer;"></i>
     </div>
-    <button onclick="toggleDarkMode()" class="text-2xl"><i class="fa-solid fa-adjust"></i></button>
-  </div>
 
-  <!-- Content -->
-  <div id="content" class="flex-1 p-4 overflow-auto pb-20"></div>
+    <div class="controls-bar">
+        <button class="btn-tool" onclick="adjustFont(2)"><i class="fas fa-plus"></i></button>
+        <button class="btn-tool" onclick="adjustFont(-2)"><i class="fas fa-minus"></i></button>
+        <button class="btn-tool" onclick="saveBookmark()"><i class="fas fa-bookmark"></i></button>
+    </div>
 
-  <!-- Bottom Navigation -->
-  <div class="fixed bottom-0 left-0 right-0 bg-emerald-900 border-t border-emerald-700 flex justify-around py-2 text-xs">
-    <button onclick="showPage('support')" class="flex flex-col items-center text-emerald-200 hover:text-white">
-      <i class="fa-solid fa-coffee text-2xl"></i> دعم
-    </button>
-    <button onclick="showPage('tasbeeh')" class="flex flex-col items-center text-emerald-200 hover:text-white">
-      <i class="fa-solid fa-fingerprint text-2xl"></i> المسبحة
-    </button>
-    <button onclick="showPage('azkar')" class="flex flex-col items-center text-emerald-200 hover:text-white">
-      <i class="fa-solid fa-pray text-2xl"></i> الأذكار
-    </button>
-    <button onclick="showPage('quran')" class="flex flex-col items-center text-emerald-200 hover:text-white nav-active">
-      <i class="fa-solid fa-book-quran text-2xl"></i> القرآن
-    </button>
-  </div>
+    <div class="container" id="view_area"></div>
 
-  <script>
-    let piUser = null;
+    <nav class="nav-bar">
+        <button class="nav-link" onclick="loadPage('quran', this)"><i class="fas fa-book-quran"></i>القرآن</button>
+        <button class="nav-link" onclick="loadPage('azkar', this)"><i class="fas fa-kaaba"></i>الأذكار</button>
+        <button class="nav-link" onclick="loadPage('sebha', this)"><i class="fas fa-fingerprint"></i>المسبحة</button>
+        <button class="nav-link" onclick="handlePay()" style="color: gold;"><i class="fas fa-heart"></i>دعم</button>
+    </nav>
 
-    // === تهيئة Pi SDK مع سحب الـ Username ===
-    async function initPi() {
-      try {
-        const scopes = ['username', 'payments'];   // مهم: username + payments
+<script>
+    const Pi = window.Pi;
+    Pi.init({ version: "2.0", sandbox: false });
 
-        const onIncompletePaymentFound = (payment) => {
-          console.log("Incomplete payment:", payment);
-          return payment;
-        };
-
-        const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
-        
-        piUser = auth.user;
-        console.log("✅ تم تسجيل الدخول:", piUser);
-
-        // عرض اسم المستخدم في الهيدر
-        document.getElementById('username-display').textContent = `@${piUser.username || 'Pioneer'}`;
-        
-      } catch (err) {
-        console.log("⚠️ Pi SDK جاهز للتجربة (بدون تسجيل دخول كامل)", err);
-        document.getElementById('username-display').textContent = "مرحبا بك في نورك";
-      }
-    }
-
-    // === دفع ٠.٥ Pi ===
-    async function makePayment() {
-      if (!piUser) {
-        alert("يرجى تسجيل الدخول بحساب باي أولاً");
-        return;
-      }
-      try {
-        const payment = await window.Pi.createPayment({
-          amount: 0.5,
-          memo: "دعم تطبيق نورك",
-          metadata: { app: "norak", user: piUser.username, type: "donation" }
-        });
-        alert(`✅ تم إرسال طلب دفع ٠.٥ Pi بنجاح!\nلـ @${piUser.username}`);
-      } catch (err) {
-        alert("تم إلغاء الدفع أو حدث خطأ. حاولي مرة أخرى.");
-      }
-    }
-
-    function toggleDarkMode() {
-      document.documentElement.classList.toggle('dark');
-    }
-
-    let currentPage = 'quran';
-    function showPage(page) {
-      currentPage = page;
-      const content = document.getElementById('content');
-      content.innerHTML = '';
-
-      if (page === 'quran') loadQuran();
-      else if (page === 'azkar') loadAzkar();
-      else if (page === 'tasbeeh') loadTasbeeh();
-      else if (page === 'support') loadSupport();
-    }
-
-    // باقي الدوال (القرآن، الأذكار، المسبحة) كما هي بدون تغيير
-    async function loadQuran() {
-      const content = document.getElementById('content');
-      content.innerHTML = `
-        <h2 class="text-2xl font-bold mb-4 text-emerald-300">القرآن الكريم</h2>
-        <div id="surah-list" class="space-y-3"></div>
-      `;
-
-      try {
-        const res = await fetch('https://api.alquran.cloud/v1/surah');
-        const data = await res.json();
-        const list = document.getElementById('surah-list');
-
-        data.data.surahs.forEach(surah => {
-          const div = document.createElement('div');
-          div.className = "bg-emerald-900 p-4 rounded-2xl cursor-pointer hover:bg-emerald-800 flex justify-between items-center";
-          div.innerHTML = `
-            <div>
-              <span class="text-emerald-400 text-xl">${surah.number}.</span>
-              <span class="text-2xl font-semibold mr-3">${surah.name}</span>
-            </div>
-            <span class="text-xs text-emerald-200">${surah.numberOfAyahs} آية</span>
-          `;
-          div.onclick = () => showSurah(surah.number);
-          list.appendChild(div);
-        });
-      } catch (e) {
-        content.innerHTML += `<p class="text-red-400">خطأ في تحميل القرآن.</p>`;
-      }
-    }
-
-    async function showSurah(num) {
-      const content = document.getElementById('content');
-      content.innerHTML = `<div class="flex justify-between mb-4"><button onclick="showPage('quran')" class="text-emerald-400">← عودة</button><h2 class="text-2xl font-bold">جاري التحميل...</h2></div><div id="ayahs" class="space-y-6"></div>`;
-
-      const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
-      const data = await res.json();
-      const surah = data.data;
-
-      document.querySelector('h2').innerHTML = `سورة ${surah.name}`;
-
-      surah.ayahs.forEach(ayah => {
-        const div = document.createElement('div');
-        div.className = "bg-gray-900 p-5 rounded-3xl border border-emerald-800";
-        div.innerHTML = `
-          <div class="text-right text-2xl leading-relaxed mb-3">${ayah.text}</div>
-          <div class="text-xs text-emerald-400 flex justify-between">
-            <span>﴿${ayah.numberInSurah}﴾</span>
-            <button onclick="bookmarkAyah(${num}, \( {ayah.numberInSurah}, ' \){ayah.text.slice(0,30)}...')" class="text-yellow-400"><i class="fa-solid fa-bookmark"></i></button>
-          </div>
-        `;
-        document.getElementById('ayahs').appendChild(div);
-      });
-    }
-
-    function bookmarkAyah(surahNum, ayahNum, text) {
-      let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-      bookmarks.push({ surahNum, ayahNum, text, date: new Date().toLocaleDateString('ar-EG') });
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-      alert('✅ تم حفظ الآية في المفضلة!');
-    }
-
-    function loadAzkar() {
-      const content = document.getElementById('content');
-      content.innerHTML = `
-        <h2 class="text-2xl font-bold mb-4 text-emerald-300">الأذكار والأدعية</h2>
-        <div class="space-y-6">
-          <div class="bg-emerald-900 p-5 rounded-3xl"><h3 class="font-bold text-xl mb-3">أذكار الصباح</h3><p class="text-xl leading-relaxed">«أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ...» (٣ مرات)</p></div>
-          <div class="bg-emerald-900 p-5 rounded-3xl"><h3 class="font-bold text-xl mb-3">أذكار المساء</h3><p class="text-xl leading-relaxed">«أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ...» (٣ مرات)</p></div>
-          <div class="bg-emerald-900 p-5 rounded-3xl"><h3 class="font-bold text-xl mb-3">دعاء بعد الصلاة</h3><p class="text-xl leading-relaxed">«اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ...»</p></div>
-          <div class="bg-emerald-900 p-5 rounded-3xl"><h3 class="font-bold text-xl mb-3">دعاء النوم</h3><p class="text-xl leading-relaxed">«بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا»</p></div>
-        </div>
-      `;
-    }
-
-    let count = 0;
-    function loadTasbeeh() {
-      const content = document.getElementById('content');
-      content.innerHTML = `
-        <h2 class="text-2xl font-bold mb-6 text-center text-emerald-300">المسبحة الإلكترونية</h2>
-        <div class="flex flex-col items-center">
-          <div id="counter" class="w-48 h-48 bg-emerald-800 rounded-full flex items-center justify-center text-7xl font-bold shadow-inner mb-8">${count}</div>
-          <div class="flex gap-6">
-            <button onclick="increment()" class="bg-emerald-600 hover:bg-emerald-500 w-20 h-20 rounded-2xl text-4xl flex items-center justify-center">+١</button>
-            <button onclick="resetTasbeeh()" class="bg-red-600 hover:bg-red-500 w-20 h-20 rounded-2xl text-4xl flex items-center justify-center">تصفير</button>
-          </div>
-          <div class="mt-8 grid grid-cols-2 gap-4 w-full max-w-xs">
-            <button onclick="quickCount(33)" class="bg-gray-800 py-4 rounded-2xl text-lg">سبحان الله ٣٣</button>
-            <button onclick="quickCount(33)" class="bg-gray-800 py-4 rounded-2xl text-lg">الحمد لله ٣٣</button>
-            <button onclick="quickCount(34)" class="bg-gray-800 py-4 rounded-2xl text-lg">الله أكبر ٣٤</button>
-            <button onclick="quickCount(100)" class="bg-gray-800 py-4 rounded-2xl text-lg">لا إله إلا الله ١٠٠</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function increment() {
-      count++;
-      document.getElementById('counter').textContent = count;
-      if (navigator.vibrate) navigator.vibrate(30);
-    }
-    function resetTasbeeh() { count = 0; document.getElementById('counter').textContent = count; }
-    function quickCount(num) { count = num; document.getElementById('counter').textContent = count; }
-
-    function loadSupport() {
-      const content = document.getElementById('content');
-      content.innerHTML = `
-        <div class="max-w-md mx-auto text-center py-12">
-          <i class="fa-solid fa-coffee text-8xl text-yellow-400 mb-6"></i>
-          <h2 class="text-3xl font-bold mb-2">ادعم نورك</h2>
-          <p class="text-emerald-200 mb-8">٠.٥ Pi فقط في التست نت</p>
-          <button onclick="makePayment()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-2xl py-6 px-16 rounded-3xl font-bold shadow-lg">
-            💰 ادفع الآن
-          </button>
-          <p class="text-xs text-emerald-300 mt-8">شكرًا لدعمك ❤️</p>
-        </div>
-      `;
-    }
-
-    // بدء التطبيق
-    window.onload = () => {
-      initPi();
-      showPage('quran');
+    let appState = {
+        font: parseInt(localStorage.getItem('noork_font')) || 24,
+        count: parseInt(localStorage.getItem('noork_count')) || 0,
+        currentJuz: null
     };
-  </script>
+
+    const azkarContent = {
+        'صباح': ["أصبحنا وأصبح الملك لله والحمد لله", "اللهم بك أصبحنا وبك أمسينا", "رضيت بالله رباً وبالإسلام ديناً"],
+        'مساء': ["أمسينا وأمسى الملك لله", "اللهم بك أمسينا وبك أصبحنا", "يا حي يا قيوم برحمتك أستغيث"],
+        'أدعية': ["اللهم إنك عفو كريم تحب العفو فاعف عنا", "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة", "اللهم اغفر لي ولوالدي"]
+    };
+
+    async function init() {
+        try {
+            const auth = await Pi.authenticate(['username', 'payments'], (p) => {});
+            document.getElementById('user_display').innerText = auth.user.username;
+        } catch(e) { document.getElementById('user_display').innerText = "زائر"; }
+        loadPage('quran', document.querySelectorAll('.nav-link')[0]);
+    }
+
+    function loadPage(page, btn) {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        btn.classList.add('active');
+        const view = document.getElementById('view_area');
+
+        if(page === 'quran') {
+            view.innerHTML = '<h3 style="text-align:center;">فهرس الأجزاء</h3>';
+            for(let i=1; i<=30; i++) {
+                view.innerHTML += `<div class="card" onclick="fetchQuran(${i})"><span>الجزء ${i}</span><i class="fas fa-chevron-left"></i></div>`;
+            }
+        } else if(page === 'azkar') {
+            view.innerHTML = `
+                <div class="card" onclick="showAzkarList('صباح')">أذكار الصباح</div>
+                <div class="card" onclick="showAzkarList('مساء')">أذكار المساء</div>
+                <div class="card" onclick="showAzkarList('أدعية')">أدعية مختارة</div>`;
+        } else if(page === 'sebha') {
+            view.innerHTML = `<div style="text-align:center;"><h1 id="s_num" style="font-size:5rem;">${appState.count}</h1><div class="sebha-circle" onclick="pressSebha()">سبّح</div><button class="back-btn" style="background:red;" onclick="resetSebha()">تصفير</button></div>`;
+        }
+    }
+
+    async function fetchQuran(juz) {
+        const view = document.getElementById('view_area');
+        view.innerHTML = '<p style="text-align:center;">جاري التحميل...</p>';
+        try {
+            const res = await fetch(`https://api.alquran.cloud/v1/juz/${juz}/quran-uthmani`);
+            const data = await res.json();
+            let html = `<button class="back-btn" onclick="loadPage('quran', document.querySelectorAll('.nav-link')[0])">عودة للفهرس</button><div class="quran-text" id="q_content" style="font-size:${appState.font}px">`;
+            html += data.data.ayahs.map(a => a.text + `<span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
+            html += '</div>';
+            view.innerHTML = html;
+        } catch(e) { view.innerHTML = 'خطأ في الاتصال.'; }
+    }
+
+    function showAzkarList(type) {
+        let html = `<button class="back-btn" onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])">عودة</button><h3>أذكار ${type}</h3>`;
+        azkarContent[type].forEach(text => {
+            html += `<div class="card" style="display:block; font-size:${appState.font}px">${text}</div>`;
+        });
+        document.getElementById('view_area').innerHTML = html;
+    }
+
+    function pressSebha() {
+        appState.count++;
+        document.getElementById('s_num').innerText = appState.count;
+        localStorage.setItem('noork_count', appState.count);
+        if(navigator.vibrate) navigator.vibrate(40);
+    }
+
+    function resetSebha() { appState.count = 0; document.getElementById('s_num').innerText = 0; localStorage.setItem('noork_count', 0); }
+
+    function toggleTheme() {
+        const b = document.body;
+        const isDark = b.getAttribute('data-theme') === 'dark';
+        b.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    }
+
+    function adjustFont(v) {
+        appState.font += v;
+        localStorage.setItem('noork_font', appState.font);
+        loadPage('azkar', document.querySelectorAll('.nav-link')[1]); // تحديث العرض
+    }
+
+    async function handlePay() {
+        try {
+            await Pi.createPayment({
+                amount: 0.1, memo: "دعم تطبيق نورك 💖", metadata: {id: Date.now()}
+            }, {
+                onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({paymentId: id}) }),
+                onReadyForServerCompletion: (id, txid) => fetch('/api/complete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({paymentId: id, txid}) }),
+                onCancel: () => {}, onError: (e) => alert(e)
+            });
+        } catch(e) { alert('افتح من Pi Browser'); }
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>

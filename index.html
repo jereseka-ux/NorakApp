@@ -57,13 +57,7 @@
     let appState = {
         font: parseInt(localStorage.getItem('noork_font')) || 24,
         count: parseInt(localStorage.getItem('noork_count')) || 0,
-        lastJuz: localStorage.getItem('noork_bookmark') || null
-    };
-
-    const azkarContent = {
-        'صباح': ["أصبحنا وأصبح الملك لله والحمد لله", "اللهم بك أصبحنا وبك أمسينا", "رضيت بالله رباً وبالإسلام ديناً"],
-        'مساء': ["أمسينا وأمسى الملك لله", "اللهم بك أمسينا وبك أصبحنا", "يا حي يا قيوم برحمتك أستغيث"],
-        'أدعية': ["اللهم إنك عفو كريم تحب العفو فاعف عنا", "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة", "اللهم اغفر لي ولوالدي"]
+        currentJuz: null
     };
 
     async function init() {
@@ -116,18 +110,12 @@
         if(appState.currentJuz) {
             localStorage.setItem('noork_bookmark', appState.currentJuz);
             alert("تم حفظ الجزء " + appState.currentJuz);
-        }
+        } else { alert("افتح جزءاً أولاً لحفظه"); }
     }
 
     function loadBookmark() {
         const b = localStorage.getItem('noork_bookmark');
         if(b) fetchQuran(b); else alert("لا يوجد علامة محفوظة");
-    }
-
-    function showAzkarList(type) {
-        let html = `<button class="back-btn" onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])">عودة</button><h3>أذكار ${type}</h3>`;
-        azkarContent[type].forEach(text => html += `<div class="card" style="display:block; font-size:${appState.font}px">${text}</div>`);
-        document.getElementById('view_area').innerHTML = html;
     }
 
     function pressSebha() { appState.count++; document.getElementById('s_num').innerText = appState.count; localStorage.setItem('noork_count', appState.count); if(navigator.vibrate) navigator.vibrate(40); }
@@ -155,11 +143,10 @@
                     }).then(res => res.json());
                 },
                 onCancel: (id) => console.log("Cancelled", id),
-                onError: (error) => alert("حدث خطأ: " + error.message)
+                onError: (error) => alert("خطأ: " + error.message)
             });
         } catch(e) { alert("افتح من Pi Browser"); }
     }
-
     window.onload = init;
 </script>
 </body>

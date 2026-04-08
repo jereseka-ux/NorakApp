@@ -60,6 +60,12 @@
         currentJuz: null
     };
 
+    const azkarData = {
+        'صباح': ["أصبحنا وأصبح الملك لله", "يا حي يا قيوم برحمتك أستغيث", "اللهم بك أصبحنا وبك أمسينا"],
+        'مساء': ["أمسينا وأمسى الملك لله", "اللهم ما أمسى بي من نعمة", "اللهم بك أمسينا وبك أصبحنا"],
+        'أدعية': ["اللهم إنك عفو تحب العفو فاعف عنا", "ربنا آتنا في الدنيا حسنة", "اللهم اغفر لي ولوالدي"]
+    };
+
     async function init() {
         try {
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
@@ -88,8 +94,14 @@
         } else if(page === 'azkar') {
             view.innerHTML = `<div class="card" onclick="showAzkarList('صباح')">أذكار الصباح</div><div class="card" onclick="showAzkarList('مساء')">أذكار المساء</div><div class="card" onclick="showAzkarList('أدعية')">أدعية مختارة</div>`;
         } else if(page === 'sebha') {
-            view.innerHTML = `<div style="text-align:center;"><h1 id="s_num" style="font-size:5rem;">${appState.count}</h1><div class="sebha-circle" onclick="pressSebha()">سبّح</div><button class="back-btn" style="background:red;" onclick="resetSebha()">تصفير العداد</button></div>`;
+            view.innerHTML = `<div style="text-align:center;"><h1 id="s_num" style="font-size:5rem;">${appState.count}</h1><div class="sebha-circle" onclick="pressSebha()">سبّح</div><button class="back-btn" style="background:red;" onclick="resetSebha()">تصفير</button></div>`;
         }
+    }
+
+    function showAzkarList(type) {
+        let html = `<button class="back-btn" onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])">عودة</button><h3>${type}</h3>`;
+        azkarData[type].forEach(txt => html += `<div class="card" style="display:block; font-size:${appState.font}px">${txt}</div>`);
+        document.getElementById('view_area').innerHTML = html;
     }
 
     async function fetchQuran(juz) {
@@ -110,12 +122,12 @@
         if(appState.currentJuz) {
             localStorage.setItem('noork_bookmark', appState.currentJuz);
             alert("تم حفظ الجزء " + appState.currentJuz);
-        } else { alert("افتح جزءاً أولاً لحفظه"); }
+        }
     }
 
     function loadBookmark() {
         const b = localStorage.getItem('noork_bookmark');
-        if(b) fetchQuran(b); else alert("لا يوجد علامة محفوظة");
+        if(b) fetchQuran(b); else alert("لا توجد علامة");
     }
 
     function pressSebha() { appState.count++; document.getElementById('s_num').innerText = appState.count; localStorage.setItem('noork_count', appState.count); if(navigator.vibrate) navigator.vibrate(40); }
@@ -125,23 +137,9 @@
 
     async function handlePay() {
         try {
-            await Pi.createPayment({
-                amount: 0.1, memo: "دعم تطبيق نورك 💖", metadata: { type: "donation" }
-            }, {
-                onReadyForServerApproval: function(paymentId) {
-                    return fetch('/api/approve', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId })
-                    }).then(res => res.json());
-                },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    return fetch('/api/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId, txid })
-                    }).then(res => res.json());
-                },
+            await Pi.createPayment({ amount: 0.1, memo: "دعم تطبيق نورك 💖", metadata: { type: "donation" } }, {
+                onReadyForServerApproval: (paymentId) => fetch('/api/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentId }) }).then(r => r.json()),
+                onReadyForServerCompletion: (paymentId, txid) => fetch('/api/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentId, txid }) }).then(r => r.json()),
                 onCancel: (id) => console.log("Cancelled", id),
                 onError: (error) => alert("خطأ: " + error.message)
             });

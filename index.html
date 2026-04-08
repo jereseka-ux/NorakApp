@@ -34,10 +34,9 @@
         <i class="fas fa-adjust" onclick="toggleTheme()" style="font-size: 1.3rem; cursor: pointer;"></i>
     </div>
 
-    <div class="controls-bar" id="reading_tools">
+    <div class="controls-bar" id="reading_tools" style="display:none;">
         <button class="btn-tool" onclick="adjustFont(2)"><i class="fas fa-plus"></i></button>
         <button class="btn-tool" onclick="adjustFont(-2)"><i class="fas fa-minus"></i></button>
-        <button class="btn-tool" onclick="saveBookmark()"><i class="fas fa-bookmark"></i></button>
     </div>
 
     <div class="container" id="view_area"></div>
@@ -66,14 +65,12 @@
 
     async function init() {
         try {
-            // إضافة التعامل مع الدفع الناقص هنا هو السر
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
             document.getElementById('user_display').innerText = auth.user.username;
         } catch(e) { document.getElementById('user_display').innerText = "زائر"; }
         loadPage('quran', document.querySelectorAll('.nav-link')[0]);
     }
 
-    // وظيفة معالجة الدفع اللي مكملش (مهمة جداً)
     async function onIncompletePayment(payment) {
         return fetch('/api/complete', {
             method: 'POST',
@@ -86,18 +83,13 @@
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         btn.classList.add('active');
         const view = document.getElementById('view_area');
-        document.getElementById('reading_tools').style.display = (page === 'quran') ? 'flex' : 'none';
+        document.getElementById('reading_tools').style.display = (page === 'quran' || page === 'azkar') ? 'flex' : 'none';
 
         if(page === 'quran') {
             view.innerHTML = '<h3 style="text-align:center;">فهرس الأجزاء</h3>';
-            for(let i=1; i<=30; i++) {
-                view.innerHTML += `<div class="card" onclick="fetchQuran(${i})"><span>الجزء ${i}</span><i class="fas fa-chevron-left"></i></div>`;
-            }
+            for(let i=1; i<=30; i++) view.innerHTML += `<div class="card" onclick="fetchQuran(${i})"><span>الجزء ${i}</span><i class="fas fa-chevron-left"></i></div>`;
         } else if(page === 'azkar') {
-            view.innerHTML = `
-                <div class="card" onclick="showAzkarList('صباح')">أذكار الصباح</div>
-                <div class="card" onclick="showAzkarList('مساء')">أذكار المساء</div>
-                <div class="card" onclick="showAzkarList('أدعية')">أدعية مختارة</div>`;
+            view.innerHTML = `<div class="card" onclick="showAzkarList('صباح')">أذكار الصباح</div><div class="card" onclick="showAzkarList('مساء')">أذكار المساء</div><div class="card" onclick="showAzkarList('أدعية')">أدعية مختارة</div>`;
         } else if(page === 'sebha') {
             view.innerHTML = `<div style="text-align:center;"><h1 id="s_num" style="font-size:5rem;">${appState.count}</h1><div class="sebha-circle" onclick="pressSebha()">سبّح</div><button class="back-btn" style="background:red;" onclick="resetSebha()">تصفير العداد</button></div>`;
         }
@@ -118,61 +110,40 @@
 
     function showAzkarList(type) {
         let html = `<button class="back-btn" onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])">عودة</button><h3>أذكار ${type}</h3>`;
-        azkarContent[type].forEach(text => {
-            html += `<div class="card" style="display:block; font-size:${appState.font}px">${text}</div>`;
-        });
+        azkarContent[type].forEach(text => html += `<div class="card" style="display:block; font-size:${appState.font}px">${text}</div>`);
         document.getElementById('view_area').innerHTML = html;
     }
 
-    function pressSebha() {
-        appState.count++;
-        document.getElementById('s_num').innerText = appState.count;
-        localStorage.setItem('noork_count', appState.count);
-        if(navigator.vibrate) navigator.vibrate(40);
-    }
-
+    function pressSebha() { appState.count++; document.getElementById('s_num').innerText = appState.count; localStorage.setItem('noork_count', appState.count); if(navigator.vibrate) navigator.vibrate(40); }
     function resetSebha() { appState.count = 0; document.getElementById('s_num').innerText = 0; localStorage.setItem('noork_count', 0); }
-
-    function toggleTheme() {
-        const b = document.body;
-        const isDark = b.getAttribute('data-theme') === 'dark';
-        b.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    }
-
-    function adjustFont(v) {
-        appState.font += v;
-        localStorage.setItem('noork_font', appState.font);
-        const q = document.getElementById('q_content');
-        if(q) q.style.fontSize = appState.font + 'px';
-    }
+    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+    function adjustFont(v) { appState.font += v; localStorage.setItem('noork_font', appState.font); loadPage('azkar', document.querySelectorAll('.nav-link')[1]); }
 
     async function handlePay() {
         try {
-            const payment = await Pi.createPayment({
-                amount: 0.1,
-                memo: "دعم تطبيق نورك 💖",
-                metadata: { type: "donation" }
+            await Pi.createPayment({
+                amount: 0.1, memo: "دعم تطبيق نورك 💖", metadata: { type: "donation" }
             }, {
-                onReadyForServerApproval: (paymentId) => {
+                onReadyForServerApproval: function(paymentId) {
+                    console.log("Approve call started");
                     return fetch('/api/approve', {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId })
-                    });
+                    }).then(res => res.json());
                 },
-                onReadyForServerCompletion: (paymentId, txid) => {
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    console.log("Complete call started");
                     return fetch('/api/complete', {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId, txid })
-                    });
+                    }).then(res => res.json());
                 },
-                onCancel: (paymentId) => { console.log("Cancelled", paymentId); },
-                onError: (error, paymentId) => { alert("Error: " + error.message); }
+                onCancel: (id) => console.log("Cancelled", id),
+                onError: (error) => alert("حدث خطأ: " + error.message)
             });
-        } catch(e) {
-            alert("يرجى المحاولة من داخل Pi Browser");
-        }
+        } catch(e) { alert("افتح من Pi Browser"); }
     }
 
     window.onload = init;

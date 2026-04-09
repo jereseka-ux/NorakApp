@@ -16,13 +16,15 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error("Pi API Error:", data);
+            // السطر ده حيخلينا نشوف الغلط بالظبط في Vercel Logs
+            console.error("خطأ من شبكة باي:", JSON.stringify(data));
             return res.status(response.status).json(data);
         }
 
+        console.log("تمت الموافقة بنجاح!");
         return res.status(200).json(data);
     } catch (error) {
-        console.error("Server Error:", error);
+        console.error("عطل فني في السيرفر:", error.message);
         return res.status(500).json({ error: error.message });
     }
 }

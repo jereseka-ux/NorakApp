@@ -197,6 +197,7 @@
 
 <script>
     const Pi = window.Pi;
+    // تم الإبقاء على تهيئة Pi كما هي تماماً لضمان عدم حدوث تعارض
     Pi.init({ version: "2.0", sandbox: false });
 
     let appState = {
@@ -239,18 +240,20 @@
         ]
     };
 
+    // دالة الدخول المعدلة لكشف الأخطاء
     async function init() {
         try {
-            // محاولة توثيق الحساب لربط اسم المستخدم وتفعيل الدفع
+            // محاولة التوثيق وطلب الصلاحيات
             const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
             if (auth && auth.user) {
                 document.getElementById('user_display').innerText = auth.user.username;
             } else {
-                document.getElementById('user_display').innerText = "زائر";
+                document.getElementById('user_display').innerText = "خطأ في البيانات";
             }
         } catch(e) {
-            console.error(e);
-            document.getElementById('user_display').innerText = "زائر";
+            // في حال فشل الاتصال، سنعرض نوع الخطأ لنعرف المشكلة
+            console.error("Pi SDK Error:", e);
+            document.getElementById('user_display').innerText = "خطأ: " + (e.message || "فشل الاتصال");
         }
         loadPage('quran', document.querySelectorAll('.nav-link')[0]);
     }
@@ -271,7 +274,6 @@
         document.getElementById('reading_tools').style.display = (page === 'quran') ? 'flex' : 'none';
 
         if(page === 'quran') {
-            // التعديل المطلوب: تغيير "الفهرس المبارك" إلى "الفهرس"
             view.innerHTML = '<h3 class="category-title">الفهرس</h3>';
             for(let i=1; i<=30; i++) {
                 view.innerHTML += `<div class="card" onclick="fetchQuran(${i})">
@@ -376,7 +378,6 @@
 
     async function handlePay() {
         try {
-            // محاولة إجراء الدفع
             await Pi.createPayment({
                 amount: 0.1,
                 memo: "دعم تطبيق نُورك لتطوير المحتوى الإسلامي 💖",
@@ -393,10 +394,10 @@
                     body: JSON.stringify({ paymentId, txid })
                 }).then(r => r.json()),
                 onCancel: (id) => console.log("Cancelled", id),
-                onError: (error) => alert("حدث خطأ: " + error.message)
+                onError: (error) => alert("حدث خطأ في العملية: " + error.message)
             });
         } catch(e) {
-            alert("تأكد من تسجيل الدخول وفتح التطبيق من Pi Browser.");
+            alert("يرجى التأكد من فتح التطبيق عبر Pi Browser.");
         }
     }
 

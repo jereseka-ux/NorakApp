@@ -3,84 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>نُورك - Norak App</title>
+    <title>نُورك Pro - Norak Islamic App</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --p: #bb86fc; --bg: #0d0d0d; --c: #1a1a1a; --t: #f0f0f0; }
-        body { background: var(--bg); color: var(--t); font-family: sans-serif; margin: 0; padding-bottom: 70px; }
-        .h { background: var(--c); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--p); position: sticky; top: 0; z-index: 9; }
-        .user { font-size: 0.7rem; border: 1px solid var(--p); padding: 2px 8px; border-radius: 10px; }
-        .main { padding: 15px; }
-        .card { background: var(--c); padding: 18px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #333; }
-        .q-view { line-height: 2.2; font-size: 1.3rem; text-align: justify; background: var(--c); padding: 15px; border-radius: 15px; }
-        .nav { position: fixed; bottom: 0; width: 100%; background: var(--c); display: flex; padding: 10px 0; border-top: 1px solid #333; }
-        .n-btn { flex: 1; border: none; background: none; color: #888; font-size: 0.8rem; cursor: pointer; }
-        .n-btn.active { color: var(--p); font-weight: bold; }
-        .n-btn i { display: block; font-size: 1.4rem; margin-bottom: 3px; }
-        .sb { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--p); margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 3rem; cursor: pointer; box-shadow: 0 0 15px var(--p); }
+        :root { --p: #bb86fc; --bg: #0d0d0d; --c: #1a1a1a; --t: #f0f0f0; --gold: #ffcc00; }
+        body { background: var(--bg); color: var(--t); font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; transition: 0.3s; }
+        .h { background: var(--c); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--p); position: sticky; top: 0; z-index: 100; }
+        .user-info { font-size: 0.75rem; color: var(--p); border: 1px solid var(--p); padding: 3px 10px; border-radius: 20px; }
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .card { background: var(--c); padding: 18px; border-radius: 15px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .quran-view { line-height: 2.2; text-align: justify; background: var(--c); padding: 20px; border-radius: 20px; box-shadow: inset 0 0 10px #000; }
+        .controls { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-sm { background: var(--p); color: #000; border: none; padding: 5px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: var(--c); display: flex; padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
+        .n-btn { flex: 1; border: none; background: none; color: #888; text-align: center; font-size: 0.8rem; cursor: pointer; }
+        .n-btn.active { color: var(--p); }
+        .n-btn i { display: block; font-size: 1.5rem; margin-bottom: 4px; }
+        .sebha-btn { width: 180px; height: 180px; border-radius: 50%; border: 8px solid var(--p); margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: none; color: var(--t); cursor: pointer; box-shadow: 0 0 20px var(--p); }
     </style>
 </head>
 <body>
     <div class="h">
-        <div id="u" class="user">جاري التحقق...</div>
-        <h3 style="margin:0">نُورك</h3>
-        <i class="fas fa-moon" style="color:var(--p)"></i>
+        <div id="u_name" class="user-info">جاري التحقق...</div>
+        <h3 style="margin:0; color:var(--p)">نُورك</h3>
+        <i class="fas fa-adjust" onclick="toggleT()" style="cursor:pointer; font-size:1.3rem;"></i>
     </div>
-    <div id="app" class="main"></div>
+
+    <div class="container" id="content"></div>
+
     <nav class="nav">
-        <button class="n-btn active" onclick="sh('q')"><i class="fas fa-quran"></i>القرآن</button>
-        <button class="n-btn" onclick="sh('a')"><i class="fas fa-hands-praying"></i>الأذكار</button>
-        <button class="n-btn" onclick="sh('s')"><i class="fas fa-fingerprint"></i>المسبحة</button>
-        <button class="n-btn" onclick="pay()" style="color:#ffcc00"><i class="fas fa-heart"></i>دعم</button>
+        <button class="n-btn" onclick="show('q')"><i class="fas fa-quran"></i>القرآن</button>
+        <button class="n-btn" onclick="show('a')"><i class="fas fa-hands-praying"></i>الأذكار</button>
+        <button class="n-btn" onclick="show('s')"><i class="fas fa-fingerprint"></i>المسبحة</button>
+        <button class="n-btn" onclick="handlePayment()" style="color:var(--gold)"><i class="fas fa-heart"></i>دعم</button>
     </nav>
+
 <script>
     const Pi = window.Pi;
-    let ct = parseInt(localStorage.getItem('nk_c')) || 0;
-    async function init() {
+    let fSize = 22;
+    let count = parseInt(localStorage.getItem('nk_count')) || 0;
+    const azkar = {
+        "أذكار الصباح": ["أصبحنا وأصبح الملك لله", "رضيت بالله رباً وبالإسلام ديناً", "يا حي يا قيوم برحمتك أستغيث"],
+        "أدعية نبوية": ["اللهم إنك عفو تحب العفو فاعف عني", "يا مقلب القلوب ثبت قلبي على دينك", "ربنا آتنا في الدنيا حسنة"]
+    };
+
+    async function initPi() {
         try {
             await Pi.init({ version: "2.0", sandbox: false });
-            const a = await Pi.authenticate(['username', 'payments'], (p)=>{});
-            document.getElementById('u').innerText = a.user.username;
-        } catch(e) { document.getElementById('u').innerText = "زائر"; }
-        sh('q');
+            const auth = await Pi.authenticate(['username', 'payments'], (p)=>{});
+            document.getElementById('u_name').innerText = auth.user.username;
+        } catch(e) { document.getElementById('u_name').innerText = "زائر"; }
+        show('q');
     }
-    function sh(p) {
-        document.querySelectorAll('.n-btn').forEach((b,i)=>b.classList.toggle('active', ['q','a','s'].indexOf(p)===i));
-        const v = document.getElementById('app');
+
+    function show(p) {
+        const v = document.getElementById('content');
         if(p==='q') {
-            v.innerHTML = '<h4>أجزاء القرآن الكريم</h4>';
-            for(let i=1; i<=30; i++) v.innerHTML += `<div class="card" onclick="getJ(${i})">الجزء ${i} <i class="fas fa-angle-left"></i></div>`;
+            v.innerHTML = '<h3>القرآن الكريم</h3>';
+            let last = localStorage.getItem('last_juz');
+            if(last) v.innerHTML += `<div class="card" onclick="loadJ(${last})" style="border: 1px solid var(--gold)"><span>استكمال القراءة (جزء ${last})</span><i class="fas fa-bookmark" style="color:var(--gold)"></i></div>`;
+            for(let i=1; i<=30; i++) v.innerHTML += `<div class="card" onclick="loadJ(${i})">الجزء ${i} <i class="fas fa-angle-left"></i></div>`;
         } else if(p==='a') {
-            v.innerHTML = '<h4>الأذكار اليومية</h4><div class="card">أذكار الصباح</div><div class="card">أذكار المساء</div>';
+            v.innerHTML = '<h3>الأذكار والأدعية</h3>';
+            Object.keys(azkar).forEach(cat => {
+                v.innerHTML += `<div class="card" onclick="viewA('${cat}')">${cat} <i class="fas fa-book-open"></i></div>`;
+            });
         } else if(p==='s') {
-            v.innerHTML = `<div style="text-align:center;"><div class="sb" onclick="tp()">${ct}</div><button onclick="rs()" style="color:var(--p); background:none; border:none; margin-top:10px;">إعادة تصفير</button></div>`;
+            v.innerHTML = `<div style="text-align:center;"><div class="sebha-btn" onclick="tap()">${count}</div><button class="btn-sm" onclick="resetS()">تصفير</button></div>`;
         }
     }
-    async function getJ(n) {
-        const v = document.getElementById('app');
-        v.innerHTML = '<p>جاري تحميل الآيات...</p>';
+
+    async function loadJ(n) {
+        const v = document.getElementById('content');
+        v.innerHTML = '<p>جاري التحميل...</p>';
+        localStorage.setItem('last_juz', n);
         try {
-            const r = await fetch(`https://api.alquran.cloud/v1/juz/${n}/quran-uthmani`);
-            const d = await r.json();
-            let t = `<button class="card" onclick="sh('q')" style="width:100%">عودة للفهرس</button><div class="q-view">`;
-            d.data.ayahs.forEach(a => { t += a.text + ` <span style="color:var(--p)">(${a.numberInSurah})</span> `; });
-            v.innerHTML = t + '</div>';
+            const res = await fetch(`https://api.alquran.cloud/v1/juz/${n}/quran-uthmani`);
+            const d = await res.json();
+            let h = `<div class="controls"><button class="btn-sm" onclick="chF(2)">A+</button><button class="btn-sm" onclick="chF(-2)">A-</button><button class="btn-sm" onclick="show('q')">عودة</button></div>`;
+            h += `<div class="quran-view" id="qText" style="font-size:${fSize}px">`;
+            d.data.ayahs.forEach(a => { h += a.text + ` <span style="color:var(--p)">(${a.numberInSurah})</span> `; });
+            v.innerHTML = h + '</div>';
             window.scrollTo(0,0);
-        } catch(e) { v.innerHTML = 'حدث خطأ في الشبكة'; }
+        } catch(e) { v.innerHTML = 'خطأ في الشبكة'; }
     }
-    function tp() { ct++; document.querySelector('.sb').innerText = ct; localStorage.setItem('nk_c', ct); }
-    function rs() { ct = 0; document.querySelector('.sb').innerText = 0; localStorage.setItem('nk_c', 0); }
-    async function pay() {
+
+    function chF(s) { fSize += s; document.getElementById('qText').style.fontSize = fSize + 'px'; }
+    function viewA(c) {
+        let h = `<button class="btn-sm" onclick="show('a')">عودة</button><h3>${c}</h3>`;
+        azkar[c].forEach(txt => { h += `<div class="card" style="display:block; text-align:center;">${txt}</div>`; });
+        document.getElementById('content').innerHTML = h;
+    }
+
+    function tap() { count++; document.querySelector('.sebha-btn').innerText = count; localStorage.setItem('nk_count', count); }
+    function resetS() { count = 0; document.querySelector('.sebha-btn').innerText = 0; localStorage.setItem('nk_count', 0); }
+
+    async function handlePayment() {
         try {
             await Pi.createPayment({ amount: 0.1, memo: "دعم نُورك", metadata: {app: "norak"} }, 
             { onReadyForServerApproval: (id) => console.log(id), 
-              onReadyForServerCompletion: (id, tx) => alert("تقبل الله منك!"),
+              onReadyForServerCompletion: (id, tx) => alert("تم الدعم بنجاح!"),
               onCancel: (id) => {}, onError: (e) => alert(e.message)
             });
         } catch(e) { alert("افتح من Pi Browser"); }
     }
-    window.onload = init;
+
+    function toggleT() { document.body.style.filter = document.body.style.filter === 'invert(1)' ? 'invert(0)' : 'invert(1)'; }
+    window.onload = initPi;
 </script>
 </body>
 </html>

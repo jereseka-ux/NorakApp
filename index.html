@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>تطبيق نُورك - Norak v2.0</title>
+    <title>تطبيق نُورك - Norak v2.1</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -87,6 +87,14 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .card:hover { border-color: var(--accent); }
+        .daily-zikr {
+            background: linear-gradient(45deg, var(--card), #2a1a3a);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px dashed var(--accent);
+            text-align: center;
+        }
         .quran-text { 
             line-height: 2.6; 
             text-align: justify; 
@@ -159,12 +167,20 @@
             padding-right: 10px;
             margin: 20px 0;
         }
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--sub);
+            cursor: pointer;
+            font-size: 1rem;
+            float: left;
+        }
     </style>
 </head>
 <body data-theme="dark">
 
 <div class="header">
-    <div class="user-tag" id="user_display">جاري الفحص...</div>
+    <div class="user-tag" id="user_display">جاري التحقق...</div>
     <h2 style="margin:0; color:var(--accent); letter-spacing: 1px;">نُورك</h2>
     <i class="fas fa-moon" id="theme_toggle" onclick="toggleTheme()" style="font-size: 1.5rem; cursor: pointer; color: var(--accent);"></i>
 </div>
@@ -192,10 +208,10 @@ Pi.init({ version: "2.0", sandbox: false });
 let appState = {
     font: parseInt(localStorage.getItem('noork_font')) || 24,
     count: parseInt(localStorage.getItem('noork_count')) || 0,
-    currentJuz: null
+    currentJuz: null,
+    theme: localStorage.getItem('noork_theme') || 'dark'
 };
 
-// مكتبة غنية جداً بالأذكار والأدعية
 const azkarData = {
     'أذكار الصباح': [
         "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له",
@@ -222,25 +238,24 @@ const azkarData = {
         "اللهم إني أسألك الهدى والتقى والعفاف والغنى",
         "يا مقلب القلوب ثبت قلبي على دينك",
         "اللهم اغفر لي ولوالدي وللمؤمنين والمؤمنات"
-    ],
-    'أذكار النوم': [
-        "باسمك اللهم أموت وأحيا",
-        "اللهم قني عذابك يوم تبعث عبادك",
-        "الحمد لله الذي أطعمنا وسقانا وكفانا وآوانا"
     ]
 };
 
 async function init() {
+    // تطبيق الثيم المفضل
+    document.body.setAttribute('data-theme', appState.theme);
+    document.getElementById('theme_toggle').className = appState.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
     try {
         const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
-        document.getElementById('user_display').innerText = auth.user.username;
+        // تعديل 2: سحب اسم المستخدم بشكل تفاعلي
+        document.getElementById('user_display').innerText = "مرحباً، " + auth.user.username;
     } catch(e) {
-        document.getElementById('user_display').innerText = "زائر";
+        document.getElementById('user_display').innerText = "زائر نُورك";
     }
     loadPage('quran', document.querySelectorAll('.nav-link')[0]);
 }
 
-// الكود الأصلي والموافق عليه للدفعات غير المكتملة
 async function onIncompletePayment(payment) {
     return fetch('/api/complete', {
         method: 'POST',
@@ -257,7 +272,14 @@ function loadPage(page, btn) {
     document.getElementById('reading_tools').style.display = (page === 'quran') ? 'flex' : 'none';
 
     if(page === 'quran') {
-        view.innerHTML = '<h3 class="category-title">الفهرس المبارك</h3>';
+        // تعديل 1: تغيير "الفهرس المبارك" إلى "الفهرس"
+        let randomZikr = azkarData['أدعية قرآنية'][Math.floor(Math.random() * azkarData['أدعية قرآنية'].length)];
+        view.innerHTML = `
+            <div class="daily-zikr">
+                <small style="color:var(--accent)">ذكر اليوم</small>
+                <p style="margin:5px 0 0 0; font-style:italic;">"${randomZikr}"</p>
+            </div>
+            <h3 class="category-title">الفهرس</h3>`;
         for(let i=1; i<=30; i++) {
             view.innerHTML += `<div class="card" onclick="fetchQuran(${i})">
                 <span><i class="fas fa-star" style="margin-left:10px; color:var(--accent)"></i> الجزء ${i}</span>
@@ -288,9 +310,18 @@ function showAzkarList(type) {
     let html = `<button class="back-btn" onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])">← عودة للمكتبة</button>
                 <h3 class="category-title">${type}</h3>`;
     azkarData[type].forEach(txt => {
-        html += `<div class="card" style="display:block; font-size:${appState.font}px; line-height:1.6; text-align:center;">${txt}</div>`;
+        html += `<div class="card" style="display:block; font-size:${appState.font}px; line-height:1.6; text-align:center;">
+                    ${txt}
+                    <hr style="opacity:0.1; margin:10px 0;">
+                    <button class="copy-btn" onclick="copyText('${txt}')"><i class="fas fa-copy"></i> نسخ</button>
+                </div>`;
     });
     document.getElementById('view_area').innerHTML = html;
+}
+
+function copyText(t) {
+    navigator.clipboard.writeText(t);
+    alert("تم نسخ الذكر");
 }
 
 async function fetchQuran(juz) {
@@ -342,6 +373,8 @@ function toggleTheme() {
     const current = document.body.getAttribute('data-theme');
     const target = current === 'dark' ? 'light' : 'dark';
     document.body.setAttribute('data-theme', target);
+    appState.theme = target;
+    localStorage.setItem('noork_theme', target);
     document.getElementById('theme_toggle').className = target === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
 
@@ -352,13 +385,12 @@ function adjustFont(v) {
     localStorage.setItem('noork_font', appState.font);
     const q = document.getElementById('q_content');
     if(q) q.style.fontSize = appState.font + 'px';
-    // تحديث الخط في الأذكار أيضاً لو مفتوحة
     document.querySelectorAll('.card').forEach(c => {
         if(c.style.display === 'block') c.style.fontSize = appState.font + 'px';
     });
 }
 
-// زرار الدفع الأصلي بكل روابط السيرفر المعتمدة
+// تعديل 3: تفعيل زر الدفع بالربط مع الـ Backend
 async function handlePay() {
     try {
         await Pi.createPayment({

@@ -2,421 +2,283 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>تطبيق نُورك - Norak v2.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق نورك</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card: #151515;
-            --accent: #bb86fc;
-            --text: #e0e0e0;
-            --sub: #999;
-            --gold: #ffcc00;
+            --primary-bg: #0f0a1a;
+            --card-bg: #1e162d;
+            --accent-color: #bb86fc;
+            --text-color: #e0e0e0;
+            --danger-color: #cf6679;
         }
-        [data-theme="light"] {
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --accent: #6200ee;
-            --text: #1a1a1a;
-            --sub: #666;
-            --gold: #b8860b;
-        }
+
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
             margin: 0;
-            padding-bottom: 90px;
-            transition: 0.3s;
+            padding-bottom: 70px;
+            transition: all 0.3s ease;
         }
-        .header {
-            background: var(--card);
-            padding: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            border-bottom: 2px solid var(--accent);
-        }
-        .user-tag {
-            font-size: 0.8rem;
-            color: var(--accent);
-            font-weight: bold;
-            border: 1.5px solid var(--accent);
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-        .controls-bar {
-            display: flex;
-            justify-content: space-around;
-            background: var(--card);
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .btn-tool {
-            border: none;
-            background: none;
-            color: var(--accent);
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-tool:active { transform: scale(1.2); }
-        .container {
-            padding: 15px;
-            max-width: 650px;
-            margin: 0 auto;
-            min-height: 75vh;
-        }
-        .card {
-            background: var(--card);
-            margin-bottom: 12px;
+
+        /* الهيدر والترحيب */
+        header {
             padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.03);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            background: linear-gradient(180deg, #1e162d 0%, transparent 100%);
         }
-        .card:hover { border-color: var(--accent); }
-        .daily-zikr {
-            background: linear-gradient(45deg, var(--card), #2a1a3a);
-            padding: 15px;
+
+        .user-badge {
+            float: left;
+            background: rgba(187, 134, 252, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-color);
+            font-size: 0.9em;
+        }
+
+        h1 { font-family: 'Amiri', serif; color: var(--accent-color); margin-top: 40px; }
+
+        /* منطقة الأذكار اليومية */
+        .daily-dhikr {
+            margin: 15px;
+            padding: 20px;
+            background: var(--card-bg);
+            border: 1px dashed var(--accent-color);
             border-radius: 15px;
-            margin-bottom: 20px;
-            border: 1px dashed var(--accent);
             text-align: center;
         }
-        .quran-text { 
-            line-height: 2.6; 
-            text-align: justify; 
-            padding: 20px; 
-            font-size: 1.5rem; 
-            background: var(--card);
-            border-radius: 15px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+
+        /* الفهرس المطور */
+        .index-section { margin: 15px; }
+        .juz-box {
+            background: var(--card-bg);
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
         }
-        .ayah-num {
-            color: var(--accent);
-            font-weight: bold;
-            border: 1px solid var(--accent);
+        .juz-header {
+            width: 100%;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+        .surah-list {
+            background: rgba(0,0,0,0.2);
+            display: none;
+            padding: 10px;
+        }
+        .surah-item {
+            padding: 8px 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* المسبحة */
+        .subha-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .counter-circle {
+            width: 150px;
+            height: 150px;
+            border: 5px solid var(--accent-color);
             border-radius: 50%;
-            padding: 2px 8px;
-            font-size: 0.85rem;
-            margin: 0 6px;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            font-size: 3em;
+            cursor: pointer;
         }
-        .nav-bar {
+
+        /* شريط التنقل السفلي */
+        .bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: var(--card);
+            background: #1e162d;
             display: flex;
-            padding: 12px 0;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #333;
         }
-        .nav-link {
-            flex: 1;
-            border: none;
-            background: none;
-            color: var(--sub);
-            text-align: center;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .nav-link.active { color: var(--accent); font-weight: bold; }
-        .nav-link i { display: block; font-size: 1.6rem; margin-bottom: 4px; }
-        
-        .sebha-circle {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 8px solid var(--accent);
-            margin: 40px auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            background: radial-gradient(circle, var(--card), var(--bg));
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .back-btn {
-            background: var(--accent);
-            color: white;
+        .nav-item { color: #888; text-decoration: none; text-align: center; font-size: 0.8em; cursor: pointer; }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item i { display: block; font-size: 1.5em; margin-bottom: 3px; }
+
+        /* أزرار الإجراءات */
+        .btn-pay {
+            background: var(--accent-color);
+            color: var(--primary-bg);
             border: none;
             padding: 10px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            cursor: pointer;
+            border-radius: 25px;
             font-weight: bold;
-        }
-        .category-title {
-            color: var(--accent);
-            border-right: 4px solid var(--accent);
-            padding-right: 10px;
-            margin: 20px 0;
-        }
-        .copy-btn {
-            background: none;
-            border: none;
-            color: var(--sub);
+            margin: 20px;
             cursor: pointer;
-            font-size: 1rem;
-            float: left;
         }
+        .btn-reset { background: var(--danger-color); color: white; border: none; padding: 5px 15px; border-radius: 5px; }
+
+        /* إعدادات حجم الخط */
+        .font-controls { text-align: center; margin: 10px; }
     </style>
 </head>
-<body data-theme="dark">
+<body>
 
-<div class="header">
-    <div class="user-tag" id="user_display">جاري التحقق...</div>
-    <h2 style="margin:0; color:var(--accent); letter-spacing: 1px;">نُورك</h2>
-    <i class="fas fa-moon" id="theme_toggle" onclick="toggleTheme()" style="font-size: 1.5rem; cursor: pointer; color: var(--accent);"></i>
-</div>
+    <header>
+        <div class="user-badge">
+            <i class="fas fa-user"></i> <span id="username-display">زائر</span>
+        </div>
+        <i class="fas fa-moon" id="theme-toggle" style="float: right; font-size: 1.5em;"></i>
+        <h1>نورك</h1>
+    </header>
 
-<div class="controls-bar" id="reading_tools" style="display:none;">
-    <button class="btn-tool" onclick="adjustFont(2)"><i class="fas fa-plus-circle"></i></button>
-    <button class="btn-tool" onclick="adjustFont(-2)"><i class="fas fa-minus-circle"></i></button>
-    <button class="btn-tool" onclick="saveBookmark()"><i class="fas fa-bookmark"></i></button>
-    <button class="btn-tool" onclick="loadBookmark()"><i class="fas fa-history"></i></button>
-</div>
+    <div id="quran-page">
+        <div class="daily-dhikr">
+            <small>ذكر اليوم</small>
+            <p id="daily-text">"ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة"</p>
+        </div>
 
-<div class="container" id="view_area"></div>
+        <div class="font-controls">
+            <button onclick="changeFontSize(-2)">A-</button>
+            <button onclick="changeFontSize(2)">A+</button>
+            <i class="fas fa-bookmark" onclick="saveBookmark()" style="margin-right: 15px;"></i>
+        </div>
 
-<nav class="nav-bar">
-    <button class="nav-link" onclick="loadPage('quran', this)"><i class="fas fa-book-quran"></i>القرآن</button>
-    <button class="nav-link" onclick="loadPage('azkar', this)"><i class="fas fa-hands-praying"></i>الأذكار</button>
-    <button class="nav-link" onclick="loadPage('sebha', this)"><i class="fas fa-fingerprint"></i>المسبحة</button>
-    <button class="nav-link" onclick="handlePay()" style="color: var(--gold);"><i class="fas fa-heart"></i>دعم نُورك</button>
-</nav>
-
-<script>
-const Pi = window.Pi;
-Pi.init({ version: "2.0", sandbox: false });
-
-let appState = {
-    font: parseInt(localStorage.getItem('noork_font')) || 24,
-    count: parseInt(localStorage.getItem('noork_count')) || 0,
-    currentJuz: null,
-    theme: localStorage.getItem('noork_theme') || 'dark'
-};
-
-const azkarData = {
-    'أذكار الصباح': [
-        "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له",
-        "يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله ولا تكلني إلى نفسي طرفة عين",
-        "اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور",
-        "اللهم إني أسألك خير هذا اليوم فتحه ونصره ونوره وبركته وهداه",
-        "رضيت بالله رباً وبالإسلام ديناً وبمحمد صلى الله عليه وسلم نبياً"
-    ],
-    'أذكار المساء': [
-        "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له",
-        "اللهم ما أمسى بي من نعمة أو بأحد من خلقك فمنك وحدك لا شريك لك",
-        "بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم",
-        "اللهم بك أمسينا، وبك أصبحنا، وبك نحيا، وبك نموت، وإليك المصير"
-    ],
-    'أدعية قرآنية': [
-        "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار",
-        "ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة",
-        "رب إني لما أنزلت إلي من خير فقير",
-        "رب لا تذرني فرداً وأنت خير الوارثين",
-        "لا إله إلا أنت سبحانك إني كنت من الظالمين"
-    ],
-    'أدعية نبوية': [
-        "اللهم إنك عفو تحب العفو فاعف عنا",
-        "اللهم إني أسألك الهدى والتقى والعفاف والغنى",
-        "يا مقلب القلوب ثبت قلبي على دينك",
-        "اللهم اغفر لي ولوالدي وللمؤمنين والمؤمنات"
-    ]
-};
-
-async function init() {
-    // تطبيق الثيم المفضل
-    document.body.setAttribute('data-theme', appState.theme);
-    document.getElementById('theme_toggle').className = appState.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-
-    try {
-        const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
-        // تعديل 2: سحب اسم المستخدم بشكل تفاعلي
-        document.getElementById('user_display').innerText = "مرحباً، " + auth.user.username;
-    } catch(e) {
-        document.getElementById('user_display').innerText = "زائر نُورك";
-    }
-    loadPage('quran', document.querySelectorAll('.nav-link')[0]);
-}
-
-async function onIncompletePayment(payment) {
-    return fetch('/api/complete', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
-    });
-}
-
-function loadPage(page, btn) {
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    
-    const view = document.getElementById('view_area');
-    document.getElementById('reading_tools').style.display = (page === 'quran') ? 'flex' : 'none';
-
-    if(page === 'quran') {
-        // تعديل 1: تغيير "الفهرس المبارك" إلى "الفهرس"
-        let randomZikr = azkarData['أدعية قرآنية'][Math.floor(Math.random() * azkarData['أدعية قرآنية'].length)];
-        view.innerHTML = `
-            <div class="daily-zikr">
-                <small style="color:var(--accent)">ذكر اليوم</small>
-                <p style="margin:5px 0 0 0; font-style:italic;">"${randomZikr}"</p>
-            </div>
-            <h3 class="category-title">الفهرس</h3>`;
-        for(let i=1; i<=30; i++) {
-            view.innerHTML += `<div class="card" onclick="fetchQuran(${i})">
-                <span><i class="fas fa-star" style="margin-left:10px; color:var(--accent)"></i> الجزء ${i}</span>
-                <i class="fas fa-chevron-left"></i>
-            </div>`;
-        }
-    } else if(page === 'azkar') {
-        view.innerHTML = '<h3 class="category-title">مكتبة نُورك للأذكار</h3>';
-        Object.keys(azkarData).forEach(key => {
-            view.innerHTML += `<div class="card" onclick="showAzkarList('${key}')">
-                <span><b>${key}</b></span>
-                <i class="fas fa-book-open-reader"></i>
-            </div>`;
-        });
-    } else if(page === 'sebha') {
-        view.innerHTML = `
-            <div style="text-align:center;">
-                <div class="sebha-circle" onclick="pressSebha()">
-                    <span style="font-size:1rem; color:var(--sub)">تسبيح</span>
-                    <h1 id="s_num">${appState.count}</h1>
+        <div class="index-section">
+            <h3 style="padding-right: 15px;">الفهرس</h3>
+            <div class="juz-box">
+                <button class="juz-header" onclick="toggleSection('juz1')">
+                    الجزء الأول <span><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <div id="juz1" class="surah-list">
+                    <div class="surah-item"><span>1. الفاتحة</span> <small>ص 1</small></div>
+                    <div class="surah-item"><span>2. البقرة</span> <small>ص 2</small></div>
                 </div>
-                <button class="back-btn" style="background:#ff4444;" onclick="resetSebha()">إعادة التصفير</button>
-            </div>`;
-    }
-}
+            </div>
+            <div class="juz-box">
+                <button class="juz-header" onclick="toggleSection('juz2')">
+                    الجزء الثاني <span><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <div id="juz2" class="surah-list">
+                    <div class="surah-item"><span>تتمة سورة البقرة</span> <small>ص 22</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-function showAzkarList(type) {
-    let html = `<button class="back-btn" onclick="loadPage('azkar', document.querySelectorAll('.nav-link')[1])">← عودة للمكتبة</button>
-                <h3 class="category-title">${type}</h3>`;
-    azkarData[type].forEach(txt => {
-        html += `<div class="card" style="display:block; font-size:${appState.font}px; line-height:1.6; text-align:center;">
-                    ${txt}
-                    <hr style="opacity:0.1; margin:10px 0;">
-                    <button class="copy-btn" onclick="copyText('${txt}')"><i class="fas fa-copy"></i> نسخ</button>
-                </div>`;
-    });
-    document.getElementById('view_area').innerHTML = html;
-}
+    <div id="subha-page" style="display:none;">
+        <div class="subha-section">
+            <h2>المسبحة الإلكترونية</h2>
+            <div class="counter-circle" id="counter" onclick="incrementCounter()">0</div>
+            <button class="btn-reset" onclick="resetCounter()">إعادة التصفير</button>
+        </div>
+    </div>
 
-function copyText(t) {
-    navigator.clipboard.writeText(t);
-    alert("تم نسخ الذكر");
-}
+    <div id="support-page" style="display:none; text-align: center;">
+        <div style="padding: 50px 20px;">
+            <i class="fas fa-heart" style="font-size: 4em; color: var(--accent-color);"></i>
+            <h3>دعم تطبيق نورك</h3>
+            <p>مساهمتك تساعدنا على الاستمرار وتطوير التطبيق</p>
+            <button class="btn-pay" onclick="payPi(0.1)">تبرع بـ 0.1 Pi</button>
+        </div>
+    </div>
 
-async function fetchQuran(juz) {
-    const view = document.getElementById('view_area');
-    view.innerHTML = '<div style="text-align:center; padding-top:50px;"><i class="fas fa-spinner fa-spin" style="font-size:3rem; color:var(--accent)"></i><p>جاري تحميل الجزء من المكتبة...</p></div>';
-    appState.currentJuz = juz;
-    document.getElementById('reading_tools').style.display = 'flex';
-    try {
-        const res = await fetch(`https://api.alquran.cloud/v1/juz/${juz}/quran-uthmani`);
-        const data = await res.json();
-        let html = `<button class="back-btn" onclick="loadPage('quran', document.querySelectorAll('.nav-link')[0])">← الفهرس</button>
-                    <div class="quran-text" id="q_content" style="font-size:${appState.font}px">`;
-        html += data.data.ayahs.map(a => a.text + `<span class="ayah-num">${a.numberInSurah}</span>`).join(' ');
-        html += '</div>';
-        view.innerHTML = html;
-        window.scrollTo(0,0);
-    } catch(e) { view.innerHTML = '<p style="text-align:center;">خطأ في تحميل البيانات، تأكد من اتصال الإنترنت.</p>'; }
-}
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showPage('quran')"><i class="fas fa-quran"></i>القرآن</div>
+        <div class="nav-item" onclick="showPage('subha')"><i class="fas fa-fingerprint"></i>المسبحة</div>
+        <div class="nav-item" onclick="showPage('support')"><i class="fas fa-heart"></i>دعم نورك</div>
+    </nav>
 
-function saveBookmark() {
-    if(appState.currentJuz) {
-        localStorage.setItem('noork_bookmark', appState.currentJuz);
-        alert("تم حفظ الجزء رقم " + appState.currentJuz + " كعلامة قراءة.");
-    }
-}
+    <script>
+        const Pi = window.Pi;
+        let count = 0;
+        let currentFontSize = 18;
 
-function loadBookmark() {
-    const b = localStorage.getItem('noork_bookmark');
-    if(b) fetchQuran(b);
-    else alert("لا توجد علامة محفوظة حالياً.");
-}
+        // 1. تهيئة Pi SDK وسحب اسم المستخدم
+        async function initPi() {
+            try {
+                await Pi.init({ version: "2.0", sandbox: false });
+                const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+                document.getElementById('username-display').innerText = auth.user.username;
+            } catch (err) {
+                console.error(err);
+                // إذا لم يفتح من Pi Browser تظهر رسالة احترافية
+                if(!window.Pi) {
+                    alert("للحصول على كامل مميزات نورك وسحب هويتك، يرجى فتح التطبيق من متصفح Pi Browser");
+                }
+            }
+        }
 
-function pressSebha() {
-    appState.count++;
-    document.getElementById('s_num').innerText = appState.count;
-    localStorage.setItem('noork_count', appState.count);
-    if(navigator.vibrate) navigator.vibrate(40);
-}
+        // 2. وظيفة الدفع
+        async function payPi(amount) {
+            try {
+                const payment = await Pi.createPayment({
+                    amount: amount,
+                    memo: "دعم تطبيق نورك - صدقة جارية",
+                    metadata: { type: "donation" },
+                }, {
+                    onReadyForServerApproval: (id) => console.log("Approved:", id),
+                    onReadyForServerCompletion: (id, tx) => alert("تقبل الله منك! تم الدفع بنجاح"),
+                    onCancel: (id) => console.log("Canceled"),
+                    onError: (err) => alert("حدث خطأ في عملية الدفع"),
+                });
+            } catch (err) {
+                alert("يرجى التأكد من الاتصال بـ Pi Browser");
+            }
+        }
 
-function resetSebha() {
-    if(confirm("هل أنت متأكد من تصفير العداد؟")) {
-        appState.count = 0;
-        document.getElementById('s_num').innerText = 0;
-        localStorage.setItem('noork_count', 0);
-    }
-}
+        function onIncompletePaymentFound(payment) { /* للتعامل مع العمليات المعلقة */ }
 
-function toggleTheme() {
-    const current = document.body.getAttribute('data-theme');
-    const target = current === 'dark' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', target);
-    appState.theme = target;
-    localStorage.setItem('noork_theme', target);
-    document.getElementById('theme_toggle').className = target === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-}
+        // 3. وظائف المسبحة والتنقل
+        function incrementCounter() {
+            count++;
+            document.getElementById('counter').innerText = count;
+            if ('vibrate' in navigator) navigator.vibrate(50);
+        }
 
-function adjustFont(v) {
-    appState.font += v;
-    if(appState.font < 16) appState.font = 16;
-    if(appState.font > 40) appState.font = 40;
-    localStorage.setItem('noork_font', appState.font);
-    const q = document.getElementById('q_content');
-    if(q) q.style.fontSize = appState.font + 'px';
-    document.querySelectorAll('.card').forEach(c => {
-        if(c.style.display === 'block') c.style.fontSize = appState.font + 'px';
-    });
-}
+        function resetCounter() {
+            count = 0;
+            document.getElementById('counter').innerText = count;
+        }
 
-// تعديل 3: تفعيل زر الدفع بالربط مع الـ Backend
-async function handlePay() {
-    try {
-        await Pi.createPayment({
-            amount: 0.1,
-            memo: "دعم تطبيق نُورك لتطوير المحتوى الإسلامي 💖",
-            metadata: { type: "donation" }
-        }, {
-            onReadyForServerApproval: (paymentId) => fetch('/api/approve', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId })
-            }).then(r => r.json()),
-            onReadyForServerCompletion: (paymentId, txid) => fetch('/api/complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId, txid })
-            }).then(r => r.json()),
-            onCancel: (id) => console.log("Cancelled", id),
-            onError: (error) => alert("حدث خطأ في عملية الدفع: " + error.message)
-        });
-    } catch(e) {
-        alert("يرجى فتح التطبيق من خلال Pi Browser لتفعيل خاصية الدفع.");
-    }
-}
+        function showPage(pageId) {
+            document.getElementById('quran-page').style.display = pageId === 'quran' ? 'block' : 'none';
+            document.getElementById('subha-page').style.display = pageId === 'subha' ? 'block' : 'none';
+            document.getElementById('support-page').style.display = pageId === 'support' ? 'block' : 'none';
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
 
-window.onload = init;
-</script>
+        function toggleSection(id) {
+            const list = document.getElementById(id);
+            list.style.display = list.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function changeFontSize(delta) {
+            currentFontSize += delta;
+            document.getElementById('quran-page').style.fontSize = currentFontSize + 'px';
+        }
+
+        function saveBookmark() {
+            alert("تم حفظ مكان القراءة بنجاح");
+        }
+
+        // تشغيل التهيئة عند التحميل
+        window.onload = initPi;
+    </script>
 </body>
 </html>

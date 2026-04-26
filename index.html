@@ -4,8 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>تطبيق نُورك - Norak v2.0</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+    <!-- شيلنا التحميل الإجباري -->
+    <!-- <script src="https://sdk.minepi.com/pi-sdk.js"></script> -->
+
+    <script>
+        // تحميل Pi SDK بشكل آمن
+        (function(){
+            const script = document.createElement("script");
+            script.src = "https://sdk.minepi.com/pi-sdk.js";
+            script.async = true;
+            script.onload = () => console.log("Pi SDK Loaded");
+            script.onerror = () => console.log("Pi SDK Failed");
+            document.head.appendChild(script);
+        })();
+    </script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         :root {
             --bg: #0a0a0a;
@@ -64,9 +80,7 @@
             color: var(--accent);
             font-size: 1.4rem;
             cursor: pointer;
-            transition: 0.2s;
         }
-        .btn-tool:active { transform: scale(1.2); }
         .container {
             padding: 15px;
             max-width: 650px;
@@ -78,33 +92,9 @@
             margin-bottom: 12px;
             padding: 20px;
             border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.03);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            transition: 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .card:hover { border-color: var(--accent); }
-        .quran-text { 
-            line-height: 2.6; 
-            text-align: justify; 
-            padding: 20px; 
-            font-size: 1.5rem; 
-            background: var(--card);
-            border-radius: 15px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-        .ayah-num {
-            color: var(--accent);
-            font-weight: bold;
-            border: 1px solid var(--accent);
-            border-radius: 50%;
-            padding: 2px 8px;
-            font-size: 0.85rem;
-            margin: 0 6px;
-            display: inline-block;
         }
         .nav-bar {
             position: fixed;
@@ -113,7 +103,6 @@
             background: var(--card);
             display: flex;
             padding: 12px 0;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
         }
         .nav-link {
             flex: 1;
@@ -121,30 +110,20 @@
             background: none;
             color: var(--sub);
             text-align: center;
-            font-size: 0.85rem;
             cursor: pointer;
         }
-        .nav-link.active { color: var(--accent); font-weight: bold; }
-        .nav-link i { display: block; font-size: 1.6rem; margin-bottom: 4px; }
-        
-        .sebha-circle {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 8px solid var(--accent);
-            margin: 40px auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            background: radial-gradient(circle, var(--card), var(--bg));
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .back-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding:
+        .nav-link.active { color: var(--accent); }
+    </style>
+</head>
+
+<body data-theme="dark">
+
+<div class="header">
+    <div class="user-tag" id="user_display">جاري الفحص...</div>
+    <h2 style="margin:0; color:var(--accent);">نُورك</h2>
+</div>
+
+<div class="container" id="view_area"></div>
+
+<nav class="nav-bar">
+    <button class="nav-link" onclick

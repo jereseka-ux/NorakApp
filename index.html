@@ -1,4 +1,5 @@
-<!DOCTYPE html> <html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -124,7 +125,8 @@
             cursor: pointer;
         }
        .nav-link.active { color: var(--accent); font-weight: bold; }
-       .nav-link i { display: block; font-size: 1.6rem; margin-bottom: 4px; }.sebha-circle {
+       .nav-link i { display: block; font-size: 1.6rem; margin-bottom: 4px; }
+       .sebha-circle {
         width: 200px;
         height: 200px;
         border-radius: 50%;
@@ -157,23 +159,32 @@
         margin: 20px 0;
     }
 </style>
-
 </head>
-<body data-theme="dark"> <div class="header">
-    <div class="user-tag" id="user_display">جاري الفحص...</div>
+<body data-theme="dark">
+
+<div class="header">
+    <div class="user-tag" id="user_display">جاري المصادقة...</div>
     <h2 style="margin:0; color:var(--accent); letter-spacing: 1px;">نُورك</h2>
     <i class="fas fa-moon" id="theme_toggle" onclick="toggleTheme()" style="font-size: 1.5rem; cursor: pointer; color: var(--accent);"></i>
-</div> <div class="controls-bar" id="reading_tools" style="display:none;">
+</div>
+
+<div class="controls-bar" id="reading_tools" style="display:none;">
     <button class="btn-tool" onclick="adjustFont(2)"><i class="fas fa-plus-circle"></i></button>
     <button class="btn-tool" onclick="adjustFont(-2)"><i class="fas fa-minus-circle"></i></button>
     <button class="btn-tool" onclick="saveBookmark()"><i class="fas fa-bookmark"></i></button>
     <button class="btn-tool" onclick="loadBookmark()"><i class="fas fa-history"></i></button>
-</div> <div class="container" id="view_area"></div> <nav class="nav-bar">
+</div>
+
+<div class="container" id="view_area"></div>
+
+<nav class="nav-bar">
     <button class="nav-link" onclick="loadPage('quran', this)"><i class="fas fa-book-quran"></i>القرآن</button>
     <button class="nav-link" onclick="loadPage('azkar', this)"><i class="fas fa-hands-praying"></i>الأذكار</button>
     <button class="nav-link" onclick="loadPage('sebha', this)"><i class="fas fa-fingerprint"></i>المسبحة</button>
     <button class="nav-link" onclick="handlePay()" style="color: var(--gold);"><i class="fas fa-heart"></i>دعم نُورك</button>
-</nav> <script>
+</nav>
+
+<script>
 const Pi = window.Pi;
 Pi.init({ version: "2.0", sandbox: true });
 
@@ -183,7 +194,7 @@ let appState = {
     currentJuz: null
 };
 
-// مكتبة غنية جداً بالأذكار والأدعية
+// مكتبة الأذكار والأدعية
 const azkarData = {
     'أذكار الصباح': [
         "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له",
@@ -220,23 +231,28 @@ const azkarData = {
 
 const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
-async function init() {
-    try {
-        const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
-        document.getElementById('user_display').innerText = auth.user.username;
-    } catch(e) {
-        document.getElementById('user_display').innerText = "زائر";
-    }
-    loadPage('quran', document.querySelectorAll('.nav-link')[0]);
-}
-
-// الكود الأصلي والموافق عليه للدفعات غير المكتملة
+// دالة إكمال الدفعات المعلقة (Incomplete)
 async function onIncompletePayment(payment) {
     return fetch('/api/complete', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
     });
+}
+
+// دالة البداية - سحب اسم المستخدم
+async function init() {
+    try {
+        const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
+        // التعديل هنا: سحب اسم المستخدم من الكائن auth
+        if (auth && auth.user) {
+            document.getElementById('user_display').innerText = auth.user.username;
+        }
+    } catch(e) {
+        console.error("Auth Error:", e);
+        document.getElementById('user_display').innerText = "زائر";
+    }
+    loadPage('quran', document.querySelectorAll('.nav-link')[0]);
 }
 
 function loadPage(page, btn) {
@@ -283,13 +299,13 @@ function showAzkarList(type) {
     document.getElementById('view_area').innerHTML = html;
 }
 
-async function fetchQuran(juz) {
+async function fetchQuran(surahNum) {
     const view = document.getElementById('view_area');
     view.innerHTML = '<div style="text-align:center; padding-top:50px;"><i class="fas fa-spinner fa-spin" style="font-size:3rem; color:var(--accent)"></i><p>جاري تحميل السورة من المكتبة...</p></div>';
-    appState.currentJuz = juz;
+    appState.currentJuz = surahNum;
     document.getElementById('reading_tools').style.display = 'flex';
     try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${juz}/quran-uthmani`);
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/quran-uthmani`);
         const data = await res.json();
         let html = `<button class="back-btn" onclick="loadPage('quran', document.querySelectorAll('.nav-link')[0])">← الفهرس</button>
                     <div class="quran-text" id="q_content" style="font-size:${appState.font}px">`;
@@ -342,13 +358,12 @@ function adjustFont(v) {
     localStorage.setItem('noork_font', appState.font);
     const q = document.getElementById('q_content');
     if(q) q.style.fontSize = appState.font + 'px';
-    // تحديث الخط في الأذكار أيضاً لو مفتوحة
     document.querySelectorAll('.card').forEach(c => {
         if(c.style.display === 'block') c.style.fontSize = appState.font + 'px';
     });
 }
 
-// زرار الدفع الأصلي بكل روابط السيرفر المعتمدة
+// تفعيل زرار الدفع والربط مع الـ API
 async function handlePay() {
     try {
         await Pi.createPayment({
@@ -356,18 +371,25 @@ async function handlePay() {
             memo: "دعم تطبيق نُورك لتطوير المحتوى الإسلامي 💖",
             metadata: { type: "donation" }
         }, {
-            onReadyForServerApproval: (paymentId) => fetch('/api/approve', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId })
-            }).then(r => r.json()),
-            onReadyForServerCompletion: (paymentId, txid) => fetch('/api/complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId, txid })
-            }).then(r => r.json()),
-            onCancel: (id) => console.log("Cancelled", id),
-            onError: (error) => alert("حدث خطأ في عملية الدفع: " + error.message)
+            onReadyForServerApproval: (paymentId) => {
+                return fetch('/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId })
+                }).then(r => r.json());
+            },
+            onReadyForServerCompletion: (paymentId, txid) => {
+                return fetch('/api/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId, txid })
+                }).then(r => r.json());
+            },
+            onCancel: (id) => console.log("Payment Cancelled", id),
+            onError: (error) => {
+                console.error("Payment Error:", error);
+                alert("حدث خطأ في الدفع: " + (error.message || "فشلت العملية"));
+            }
         });
     } catch(e) {
         alert("يرجى فتح التطبيق من خلال Pi Browser لتفعيل خاصية الدفع.");
@@ -375,5 +397,6 @@ async function handlePay() {
 }
 
 window.onload = init;
-</script> </body>
+</script>
+</body>
 </html>
